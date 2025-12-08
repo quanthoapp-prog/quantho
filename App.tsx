@@ -10,7 +10,7 @@ import AuthView from './components/AuthView';
 import GoalsView from './components/GoalsView';
 import { Transaction, Client, FixedDebt, TabId, Stats, UserSettings, AtecoCode } from './types';
 import { LIMITE_FORFETTARIO, INITIAL_TRANSACTIONS, INITIAL_CLIENTS, INITIAL_FIXED_DEBTS, DEFAULT_SETTINGS, INITIAL_ATECO_CODES } from './constants';
-import { ATECO_SEED_DATA } from './data/ateco_codes';
+
 
 const App: React.FC = () => {
     // Auth State
@@ -613,29 +613,7 @@ const App: React.FC = () => {
     };
 
     // ATECO SEEDING
-    const handleSeedAteco = async () => {
-        if (!userId) return;
-
-        const payload = ATECO_SEED_DATA.map(a => ({
-            user_id: userId,
-            id: a.code,
-            code: a.code,
-            description: a.description,
-            coefficient: a.coefficient
-        }));
-
-        const { error } = await supabase.from('ateco_codes').upsert(payload, { onConflict: 'id' });
-
-        if (!error) {
-            // Refresh local state
-            const { data } = await supabase.from('ateco_codes').select('*');
-            if (data) setAtecoCodes(data as AtecoCode[]);
-            alert("Database ATECO caricato con successo!");
-        } else {
-            console.error(error);
-            alert('Errore caricamento ATECO');
-        }
-    };
+    // ATECO SEEDING REMOVED - NOW HANDLED LOCALLY VIA AUTOCOMPLETE
 
     // SHOW AUTH VIEW IF NOT LOGGED IN
     if (!user) {
@@ -832,7 +810,7 @@ const App: React.FC = () => {
                         userEmail={user}
                         onLogout={handleLogout}
                         onExportData={exportAllData}
-                        onSeedAteco={handleSeedAteco}
+
                     />
                 )}
             </main>

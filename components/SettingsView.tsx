@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { UserSettings, AtecoCode, Transaction } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Calculator, Save } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Calculator, Save, Search } from 'lucide-react';
 import { formatCurrency } from '../constants';
+import { ATECO_SEED_DATA } from '../data/ateco_codes';
 
 interface SettingsViewProps {
     settings: UserSettings;
@@ -9,7 +10,7 @@ interface SettingsViewProps {
     atecoCodes: AtecoCode[];
     onAddAtecoCode: (code: AtecoCode) => void;
     onDeleteAtecoCode: (id: string) => void;
-    onSeedAteco: () => void;
+
     currentYear: number;
     transactions: Transaction[];
     userEmail: string | null;
@@ -20,11 +21,17 @@ interface SettingsViewProps {
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
 const SettingsView: React.FC<SettingsViewProps> = ({
-    settings, onUpdateSettings, atecoCodes, onAddAtecoCode, onDeleteAtecoCode, onSeedAteco,
+    settings, onUpdateSettings, atecoCodes, onAddAtecoCode, onDeleteAtecoCode,
     currentYear, transactions, userEmail, onLogout, onExportData
 }) => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
-    const [newAteco, setNewAteco] = useState({ code: '', description: '', coefficient: '' });
+    const [newAteco, setNewAteco] = useState<Partial<AtecoCode>>({
+        code: '',
+        description: '',
+        coefficient: '' as any
+    });
+    const [suggestions, setSuggestions] = useState<typeof ATECO_SEED_DATA>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     // Handle Opening Balance
     const currentOpeningBalance = settings.openingHistory[currentYear] || 0;
@@ -57,16 +64,43 @@ const SettingsView: React.FC<SettingsViewProps> = ({
         handleOpeningBalanceChange(previousYearStats.balance);
     };
 
+    const handleSearchAteco = (value: string) => {
+        setNewAteco({ ...newAteco, description: value });
+        if (value.length > 2) {
+            const lowerValue = value.toLowerCase();
+            const filtered = ATECO_SEED_DATA.filter(item =>
+                item.description.toLowerCase().includes(lowerValue) ||
+                item.code.includes(value)
+            );
+            setSuggestions(filtered);
+            setShowSuggestions(true);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const selectVariation = (item: typeof ATECO_SEED_DATA[0]) => {
+        setNewAteco({
+            code: item.code,
+            description: item.description,
+            coefficient: (item.coefficient * 100).toString() as any // Convert back for input
+        });
+        setShowSuggestions(false);
+    };
+
     const handleAddAteco = () => {
         if (newAteco.code && newAteco.coefficient) {
-            const coeff = parseFloat(newAteco.coefficient) / 100;
+            const coeff = parseFloat(newAteco.coefficient as string) / 100;
             onAddAtecoCode({
                 id: Date.now().toString(),
                 code: newAteco.code,
-                description: newAteco.description,
+                description: newAteco.description || '',
                 coefficient: coeff
             });
-            setNewAteco({ code: '', description: '', coefficient: '' });
+            setNewAteco({ code: '', description: '', coefficient: '' as any });
+            setSuggestions([]);
+            setShowSuggestions(false);
         }
     };
 
@@ -287,20 +321,10 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     const renderAtecoSection = () => (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h3 className="font-semibold text-lg text-gray-800">Codici ATECO e Coefficienti</h3>
-                        <p className="text-sm text-gray-500 mt-1">Gestisci i tuoi codici attività e coefficienti di redditività.</p>
-                    </div>
-                    <button
-                        onClick={onSeedAteco}
-                        className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 border border-blue-100 transition-colors"
-                    >
-                        <Download size={16} /> Carica Standard
-                    </button>
+                <div className="mb-6">
+                    <h3 className="font-semibold text-lg text-gray-800">Codici ATECO e Coefficienti</h3>
+                    <p className="text-sm text-gray-500 mt-1">Gestisci i tuoi codici attività. Quando inserisci una nuova entrata, potrai scegliere quale codice applicare.</p>
                 </div>
-
-                <p className="text-sm text-gray-500 mb-4">Quando inserisci una nuova entrata, potrai scegliere quale di questi codici applicare.</p>
 
                 <div className="overflow-x-auto mb-6 border rounded-lg">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -346,15 +370,39 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                                 onChange={(e) => setNewAteco({ ...newAteco, code: e.target.value })}
                             />
                         </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Descrizione</label>
-                            <input
-                                type="text"
-                                placeholder="Es. Consulenza"
-                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
-                                value={newAteco.description}
-                                onChange={(e) => setNewAteco({ ...newAteco, description: e.target.value })}
-                            />
+                        <div className="md:col-span-2 relative">
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Descrizione (Cerca...)</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Es. Consulenza o 62.02"
+                                    className="w-full border rounded-lg px-3 py-2 pl-9 text-sm text-gray-900 bg-white"
+                                    value={newAteco.description}
+                                    onChange={(e) => handleSearchAteco(e.target.value)}
+                                    onFocus={() => { if (newAteco.description && newAteco.description.length > 2) setShowSuggestions(true) }}
+                                />
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                            </div>
+
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                    {suggestions.map((suggestion) => (
+                                        <button
+                                            key={suggestion.code}
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex flex-col border-b border-gray-50 last:border-0"
+                                            onClick={() => selectVariation(suggestion)}
+                                        >
+                                            <span className="font-medium text-gray-900">{suggestion.code}</span>
+                                            <span className="text-gray-600 text-xs truncate">{suggestion.description}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {showSuggestions && suggestions.length === 0 && newAteco.description && newAteco.description.length > 2 && (
+                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 text-sm text-gray-500 text-center">
+                                    Nessun codice trovato
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-gray-500 mb-1">Coefficiente (%)</label>
