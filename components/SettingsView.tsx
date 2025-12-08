@@ -1,0 +1,541 @@
+import React, { useState, useMemo } from 'react';
+import { UserSettings, AtecoCode, Transaction } from '../types';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote } from 'lucide-react';
+import { formatCurrency } from '../constants';
+
+interface SettingsViewProps {
+    settings: UserSettings;
+    onUpdateSettings: (s: UserSettings) => void;
+    atecoCodes: AtecoCode[];
+    onAddAtecoCode: (code: AtecoCode) => void;
+    onDeleteAtecoCode: (id: string) => void;
+    currentYear: number;
+    transactions: Transaction[];
+    userEmail: string | null;
+    onLogout: () => void;
+    onExportData: () => void;
+}
+
+type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
+
+const SettingsView: React.FC<SettingsViewProps> = ({
+    settings, onUpdateSettings, atecoCodes, onAddAtecoCode, onDeleteAtecoCode,
+    currentYear, transactions, userEmail, onLogout, onExportData
+}) => {
+    const [activeTab, setActiveTab] = useState<SettingsTab>('account');
+    const [newAteco, setNewAteco] = useState({ code: '', description: '', coefficient: '' });
+
+    // Handle Opening Balance
+    const currentOpeningBalance = settings.openingHistory[currentYear] || 0;
+
+    const handleOpeningBalanceChange = (amount: number) => {
+        onUpdateSettings({
+            ...settings,
+            openingHistory: {
+                ...settings.openingHistory,
+                [currentYear]: amount
+            }
+        });
+    };
+
+    // Calculate Previous Year Closing Balance
+    const previousYear = currentYear - 1;
+    const previousYearStats = useMemo(() => {
+        const prevTrans = transactions.filter(t => new Date(t.date).getFullYear() === previousYear);
+        const prevIncome = prevTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const prevExpenses = prevTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const prevOpening = settings.openingHistory[previousYear] || 0;
+
+        return {
+            balance: prevOpening + prevIncome - prevExpenses,
+            hasData: prevTrans.length > 0 || prevOpening > 0
+        };
+    }, [transactions, previousYear, settings.openingHistory]);
+
+    const handleImportPreviousBalance = () => {
+        handleOpeningBalanceChange(previousYearStats.balance);
+    };
+
+    const handleAddAteco = () => {
+        if (newAteco.code && newAteco.coefficient) {
+            const coeff = parseFloat(newAteco.coefficient) / 100;
+            onAddAtecoCode({
+                id: Date.now().toString(),
+                code: newAteco.code,
+                description: newAteco.description,
+                coefficient: coeff
+            });
+            setNewAteco({ code: '', description: '', coefficient: '' });
+        }
+    };
+
+    const handleDeleteAteco = (id: string) => {
+        if (atecoCodes.length > 1) {
+            onDeleteAtecoCode(id);
+        } else {
+            alert("Devi mantenere almeno un codice ATECO.");
+        }
+    };
+
+    const renderAccountSection = () => (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
+                    <User className="text-blue-600" size={20} />
+                    Profilo Utente
+                </h3>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Email</label>
+                            <div className="font-semibold text-gray-900">{userEmail}</div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Tipo Licenza</label>
+                            <div className="font-semibold text-green-600 flex items-center gap-1">
+                                Free Plan
+                                <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full ml-2">ATTIVO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t flex flex-col sm:flex-row gap-3">
+                        <button className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                            Reset Password
+                        </button>
+                        <button className="flex-1 border border-blue-200 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                            <a href="mailto:support@quantho.app" className="flex items-center justify-center gap-2">
+                                <Mail size={16} /> Contatta Assistenza
+                            </a>
+                        </button>
+                    </div>
+
+                    <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                            onClick={onExportData}
+                            className="w-full bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Download size={16} /> Scarica Backup Dati
+                        </button>
+
+                        <button
+                            onClick={onLogout}
+                            className="w-full bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <LogOut size={16} /> Disconnetti Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderFiscalSection = () => (
+        <div className="space-y-6">
+            {/* Saldo Iniziale / Liquidità */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <h3 className="font-semibold text-lg mb-4 text-green-700 flex items-center gap-2">
+                    <Wallet size={20} />
+                    Saldo Iniziale Anno {currentYear}
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-1">Saldo al 1° Gennaio {currentYear} (€)</label>
+                        <p className="text-xs text-gray-500 mb-2">Inserisci manualmente la liquidità disponibile all'inizio dell'anno.</p>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={currentOpeningBalance || ''}
+                            onChange={(e) => handleOpeningBalanceChange(parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                            className="w-full border rounded-lg px-3 py-2 text-lg font-semibold text-gray-900 focus:ring-2 focus:ring-green-500 focus:outline-none bg-white"
+                        />
+                    </div>
+
+                    {/* Import Box */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-center">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Riporto Automatico da {previousYear}</h4>
+                        {previousYearStats.hasData ? (
+                            <div>
+                                <p className="text-xs text-gray-600 mb-3">
+                                    Saldo calcolato al 31/12/{previousYear}: <span className="font-bold text-green-700">{formatCurrency(previousYearStats.balance)}</span>
+                                </p>
+                                <button
+                                    onClick={handleImportPreviousBalance}
+                                    className="w-full flex items-center justify-center gap-2 bg-white border border-green-600 text-green-700 hover:bg-green-50 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+                                >
+                                    <Download size={16} /> Importa Saldo {previousYear}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-start gap-2 text-xs text-gray-500">
+                                <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                                Nessun dato o saldo trovato per l'anno {previousYear}.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Regime Fiscale */}
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 className="font-semibold text-lg mb-4 text-blue-800">Regime Sostitutivo (Flat Tax)</h3>
+                    <div className="space-y-4">
+                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                                type="radio"
+                                name="taxRate"
+                                checked={settings.taxRateType === '5%'}
+                                onChange={() => onUpdateSettings({ ...settings, taxRateType: '5%' })}
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500"
+                            />
+                            <div className="ml-3">
+                                <span className="block font-medium text-gray-900">Start-up (5%)</span>
+                                <span className="block text-sm text-gray-500">Per i primi 5 anni di attività</span>
+                            </div>
+                        </label>
+
+                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                                type="radio"
+                                name="taxRate"
+                                checked={settings.taxRateType === '15%'}
+                                onChange={() => onUpdateSettings({ ...settings, taxRateType: '15%' })}
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500"
+                            />
+                            <div className="ml-3">
+                                <span className="block font-medium text-gray-900">Standard (15%)</span>
+                                <span className="block text-sm text-gray-500">Aliquota ordinaria forfettaria</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {/* Gestione INPS */}
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 className="font-semibold text-lg mb-4 text-purple-800">Cassa Previdenziale (INPS)</h3>
+                    <div className="space-y-4">
+                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                                type="radio"
+                                name="inpsType"
+                                checked={settings.inpsType === 'separata'}
+                                onChange={() => onUpdateSettings({ ...settings, inpsType: 'separata' })}
+                                className="h-5 w-5 text-purple-600 focus:ring-purple-500"
+                            />
+                            <div className="ml-3">
+                                <span className="block font-medium text-gray-900">Gestione Separata</span>
+                                <span className="block text-sm text-gray-500">Liberi professionisti senza cassa (26,07% / 26,23%)</span>
+                            </div>
+                        </label>
+
+                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                                type="radio"
+                                name="inpsType"
+                                checked={settings.inpsType === 'artigiani'}
+                                onChange={() => onUpdateSettings({ ...settings, inpsType: 'artigiani' })}
+                                className="h-5 w-5 text-purple-600 focus:ring-purple-500"
+                            />
+                            <div className="ml-3">
+                                <span className="block font-medium text-gray-900">Artigiani e Commercianti</span>
+                                <span className="block text-sm text-gray-500">Quota fissa + eccedenza sul minimale</span>
+                            </div>
+                        </label>
+
+                        {settings.inpsType === 'artigiani' && (
+                            <div className="mt-4 p-4 bg-purple-50 rounded-lg text-sm space-y-3 border border-purple-100 animate-in fade-in slide-in-from-top-2">
+                                <div>
+                                    <label className="block text-gray-700 font-medium mb-1">Reddito Minimale (€)</label>
+                                    <input
+                                        type="number"
+                                        value={settings.artigianiFixedIncome}
+                                        onChange={(e) => onUpdateSettings({ ...settings, artigianiFixedIncome: parseFloat(e.target.value) || 0 })}
+                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-700 font-medium mb-1">Contributo Fisso Annuo (€)</label>
+                                    <input
+                                        type="number"
+                                        value={settings.artigianiFixedCost}
+                                        onChange={(e) => onUpdateSettings({ ...settings, artigianiFixedCost: parseFloat(e.target.value) || 0 })}
+                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-700 font-medium mb-1">Aliquota Eccedenza (%)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={settings.artigianiExceedRate * 100}
+                                        onChange={(e) => onUpdateSettings({ ...settings, artigianiExceedRate: (parseFloat(e.target.value) || 0) / 100 })}
+                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderAtecoSection = () => (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <h3 className="font-semibold text-lg mb-4 text-gray-800">Codici ATECO e Coefficienti</h3>
+                <p className="text-sm text-gray-500 mb-4">Aggiungi qui i tuoi codici attività. Quando inserisci una nuova entrata, potrai scegliere quale codice applicare.</p>
+
+                <div className="overflow-x-auto mb-6 border rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Codice</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrizione</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Coeff. (%)</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {atecoCodes.map(ateco => (
+                                <tr key={ateco.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 font-medium text-gray-900">{ateco.code}</td>
+                                    <td className="px-4 py-3 text-gray-600">{ateco.description}</td>
+                                    <td className="px-4 py-3 text-blue-600 font-bold">{(ateco.coefficient * 100).toFixed(0)}%</td>
+                                    <td className="px-4 py-3 text-right">
+                                        <button
+                                            onClick={() => handleDeleteAteco(ateco.id)}
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-full transition-colors"
+                                            title="Elimina"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Aggiungi nuovo codice</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Codice ATECO</label>
+                            <input
+                                type="text"
+                                placeholder="Es. 62.02.00"
+                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+                                value={newAteco.code}
+                                onChange={(e) => setNewAteco({ ...newAteco, code: e.target.value })}
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Descrizione</label>
+                            <input
+                                type="text"
+                                placeholder="Es. Consulenza"
+                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+                                value={newAteco.description}
+                                onChange={(e) => setNewAteco({ ...newAteco, description: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Coefficiente (%)</label>
+                            <input
+                                type="number"
+                                placeholder="Es. 78"
+                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+                                value={newAteco.coefficient}
+                                onChange={(e) => setNewAteco({ ...newAteco, coefficient: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleAddAteco}
+                        disabled={!newAteco.code || !newAteco.coefficient}
+                        className="mt-4 flex items-center justify-center gap-2 w-full md:w-auto bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <PlusCircle size={16} /> Aggiungi Codice
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderGuideSection = () => (
+        <div className="space-y-8">
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 prose prose-blue max-w-none">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Benvenuto in Quantho</h3>
+                <p className="text-gray-600 mb-8">
+                    Quantho è l'applicazione professionale progettata per semplificare la gestione finanziaria del Regime Forfettario.
+                    Monitora tasse, fatturato e liquidità reale in un unico posto sicuro.
+                </p>
+
+                <div className="space-y-8">
+                    {/* DASHBOARD */}
+                    <div className="bg-blue-50 p-5 rounded-lg border border-blue-100">
+                        <h4 className="flex items-center gap-2 text-lg font-bold text-blue-800 mb-3">
+                            <FileText size={22} /> Dashboard
+                        </h4>
+                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                            <li><strong>Fatturato Annuo:</strong> Il totale delle fatture emesse nell'anno corrente. Include la barra di avanzamento verso il limite degli 85.000€.</li>
+                            <li><strong>Spese Totali (Cassa):</strong> Tutte le uscite reali dal conto corrente (Spese Business + Personali + Tasse pagate).</li>
+                            <li><strong>Liquidità di Cassa:</strong> I soldi effettivamente disponibili. Calcolato come: <em>Saldo Iniziale Anno + Entrate - Uscite Totali</em>.</li>
+                            <li><strong>Fatturato di Pareggio:</strong> Un calcolo avanzato che ti dice quanto devi fatturare quest'anno per coprire esattamente le spese stimate e i debiti fissi, considerando anche le tasse che dovrai pagare su quel fatturato (Gross-up).</li>
+                        </ul>
+                    </div>
+
+                    {/* TRANSAZIONI */}
+                    <div className="bg-green-50 p-5 rounded-lg border border-green-100">
+                        <h4 className="flex items-center gap-2 text-lg font-bold text-green-800 mb-3">
+                            <TrendingUp size={22} /> Gestione Transazioni
+                        </h4>
+                        <div className="text-sm text-gray-700 space-y-3">
+                            <p>Registra ogni movimento finanziario per tenere aggiornata la dashboard.</p>
+                            <ul className="space-y-2 list-disc list-inside">
+                                <li><strong>Entrate:</strong> Associa sempre il <em>Codice ATECO</em> corretto. Il sistema usa il coefficiente di redditività di quel codice per calcolare le tasse in modo preciso.</li>
+                                <li><strong>Uscite - Tipologia:</strong> È fondamentale categorizzare bene le uscite:
+                                    <ul className="list-disc list-inside ml-4 mt-1 text-gray-600">
+                                        <li><em>Business / Personale:</em> Impattano solo sulla cassa (liquidità).</li>
+                                        <li><em>F24 Tasse:</em> Pagamento dell'imposta sostitutiva (non deducibile).</li>
+                                        <li><em>F24 INPS:</em> Pagamento dei contributi previdenziali. <strong>Importante:</strong> Quantho deduce automaticamente questi importi dal reddito imponibile per il calcolo delle tasse, facendoti risparmiare sulla stima fiscale.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* DEBITI FISSI */}
+                    <div className="bg-purple-50 p-5 rounded-lg border border-purple-100">
+                        <h4 className="flex items-center gap-2 text-lg font-bold text-purple-800 mb-3">
+                            <Wallet size={22} /> Debiti Fissi & Abbonamenti
+                        </h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                            Inserisci qui le spese ricorrenti (Affitto, Mutuo, Software, Rate Auto).
+                        </p>
+                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                            <li><strong>Previsione Automatica:</strong> Il sistema proietta questi costi su tutto l'anno per calcolare il <em>Reddito Disponibile</em> reale.</li>
+                            <li><strong>Sicurezza Storica:</strong> I debiti iniziati negli anni passati non possono essere cancellati per non alterare i bilanci storici, ma possono essere <em>Sospesi</em> se estinti.</li>
+                        </ul>
+                    </div>
+
+                    {/* IMPOSTAZIONI */}
+                    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                        <h4 className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-3">
+                            <Settings size={22} /> Configurazione
+                        </h4>
+                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                            <li><strong>Profilo Fiscale:</strong> Scegli tra Aliquota Start-up (5%) o Ordinaria (15%).</li>
+                            <li><strong>Cassa INPS:</strong> Supporto per Gestione Separata (aliquota fissa) e Artigiani/Commercianti (fissale + eccedenza).</li>
+                            <li><strong>Saldo Iniziale:</strong> Fondamentale per la correttezza della "Liquidità". A inizio anno, usa il tasto "Importa Saldo" per riportare la giacenza dell'anno precedente.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {/* PRIVACY SECTION */}
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+                <h3 className="flex items-center gap-2 text-xl font-bold text-blue-900 mb-4">
+                    <Shield size={24} /> Privacy e Sicurezza Dati
+                </h3>
+                <div className="text-sm text-gray-600 space-y-4">
+                    <p>
+                        La sicurezza dei tuoi dati finanziari è la nostra priorità assoluta.
+                        Ecco come proteggiamo le tue informazioni in Quantho:
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className="flex gap-3">
+                            <Lock className="text-green-600 flex-shrink-0" size={20} />
+                            <div>
+                                <h5 className="font-bold text-gray-800">Crittografia End-to-End</h5>
+                                <p>I dati sensibili vengono trasmessi utilizzando protocolli sicuri (HTTPS/SSL) e archiviati in database criptati.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <User className="text-blue-600 flex-shrink-0" size={20} />
+                            <div>
+                                <h5 className="font-bold text-gray-800">Accesso Esclusivo</h5>
+                                <p>I tuoi dati sono accessibili esclusivamente tramite le tue credenziali. Nessun altro utente può visualizzare le tue transazioni.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Banknote className="text-purple-600 flex-shrink-0" size={20} />
+                            <div>
+                                <h5 className="font-bold text-gray-800">Nessun Collegamento Bancario</h5>
+                                <p>Quantho opera in modalità "Offline-First" per i dati bancari. Non ci colleghiamo direttamente ai tuoi conti correnti bancari, garantendo un isolamento totale dai tuoi asset reali.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Download className="text-gray-600 flex-shrink-0" size={20} />
+                            <div>
+                                <h5 className="font-bold text-gray-800">Proprietà dei Dati</h5>
+                                <p>I dati inseriti rimangono di tua esclusiva proprietà. Puoi esportarli o richiedere la cancellazione completa dell'account in qualsiasi momento contattando l'assistenza.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-xs border border-blue-100">
+                        <strong>Nota Legale:</strong> Quantho è uno strumento di supporto gestionale e previsionale.
+                        Non sostituisce il parere del tuo commercialista né ha valore legale ai fini della dichiarazione dei redditi.
+                        L'utente è responsabile della correttezza dei dati inseriti.
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
+            {/* Sidebar Navigation */}
+            <div className="md:w-64 flex-shrink-0">
+                <nav className="space-y-1">
+                    {[
+                        { id: 'account', label: 'Profilo & Account', icon: User },
+                        { id: 'fiscal', label: 'Config. Fiscale', icon: Wallet },
+                        { id: 'ateco', label: 'Codici ATECO', icon: FileText },
+                        { id: 'guide', label: 'Guida Quantho', icon: BookOpen },
+                    ].map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id as SettingsTab)}
+                            className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeTab === item.id
+                                ? 'bg-blue-50 text-blue-700 border border-blue-100 shadow-sm'
+                                : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                                }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <item.icon size={18} />
+                                {item.label}
+                            </div>
+                            {activeTab === item.id && <ChevronRight size={16} />}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    {activeTab === 'account' && 'Gestione Account'}
+                    {activeTab === 'fiscal' && `Impostazioni Fiscali ${currentYear}`}
+                    {activeTab === 'ateco' && 'Gestione Codici ATECO'}
+                    {activeTab === 'guide' && 'Guida Utente'}
+                </h2>
+
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    {activeTab === 'account' && renderAccountSection()}
+                    {activeTab === 'fiscal' && renderFiscalSection()}
+                    {activeTab === 'ateco' && renderAtecoSection()}
+                    {activeTab === 'guide' && renderGuideSection()}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SettingsView;
