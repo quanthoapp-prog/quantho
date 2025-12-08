@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save } from 'lucide-react';
-import { Transaction, Client, AtecoCode } from '../types';
+import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save, Plus } from 'lucide-react';
+import TagInput from './TagInput';
+import { Transaction, Client, AtecoCode, UserSettings } from '../types';
 import { formatCurrency } from '../constants';
 
 interface TransactionsViewProps {
@@ -13,17 +14,20 @@ interface TransactionsViewProps {
     onDeleteTransaction: (id: number) => void;
     startAdding?: boolean;
     onAddStarted?: () => void;
+    settings: UserSettings;
+    onUpdateSettings: (s: UserSettings) => void;
 }
 
 const TransactionsView: React.FC<TransactionsViewProps> = ({
     currentYear, transactions, clients, atecoCodes,
     onAddTransaction, onUpdateTransaction, onDeleteTransaction,
-    startAdding, onAddStarted
+    startAdding, onAddStarted, settings, onUpdateSettings
 }) => {
+    // ... existing state ...
     const [showAddTransaction, setShowAddTransaction] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    // Auto open modal if prop is passed
+    // ... useEffects ...
     useEffect(() => {
         if (startAdding) {
             setShowAddTransaction(true);
@@ -53,13 +57,34 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
         atecoCodeId: '',
     });
 
-    // Set default ATECO code when opening form (only for new transactions)
+    // ... ateco effect ...
     useEffect(() => {
         if (!editingId && !newTransaction.atecoCodeId && atecoCodes.length > 0) {
             setNewTransaction(prev => ({ ...prev, atecoCodeId: atecoCodes[0].id }));
         }
     }, [atecoCodes, editingId, newTransaction.atecoCodeId]);
 
+
+    // Tag Helpers
+    const handleSaveTag = (tag: string) => {
+        const saved = settings.savedTags || [];
+        if (!saved.includes(tag)) {
+            onUpdateSettings({
+                ...settings,
+                savedTags: [...saved, tag].sort()
+            });
+        }
+    };
+
+    const handleDeleteTag = (tag: string) => {
+        const saved = settings.savedTags || [];
+        onUpdateSettings({
+            ...settings,
+            savedTags: saved.filter(t => t !== tag)
+        });
+    };
+
+    // ... handleSave ... (unchanged logic mostly)
     const handleSave = () => {
         if (newTransaction.amount && newTransaction.description) {
             const transactionData = {
@@ -68,7 +93,6 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                 category: newTransaction.category,
                 amount: parseFloat(newTransaction.amount),
                 description: newTransaction.description,
-                // Handle empty strings for optional fields to avoid FK constraint errors
                 client: newTransaction.type === 'income' ? (newTransaction.client || null) : null,
                 tags: newTransaction.tags || null,
                 atecoCodeId: (newTransaction.type === 'income' && newTransaction.atecoCodeId) ? newTransaction.atecoCodeId : null
@@ -84,8 +108,10 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
         }
     };
 
+    // ... handleEdit, resetForm ... (unchanged)
     const handleEdit = (t: Transaction) => {
         setEditingId(t.id);
+        const code = t.atecoCodeId || (atecoCodes.length > 0 ? atecoCodes[0].id : '');
         setNewTransaction({
             date: t.date,
             type: t.type,
@@ -94,21 +120,23 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
             description: t.description,
             client: t.client || '',
             tags: t.tags || '',
-            atecoCodeId: t.atecoCodeId || atecoCodes[0]?.id || ''
+            atecoCodeId: code
         });
         setShowAddTransaction(true);
     };
 
     const resetForm = () => {
+        const defaultCode = atecoCodes.length > 0 ? atecoCodes[0].id : '';
         setNewTransaction({
             date: new Date().toISOString().split('T')[0],
             type: 'income', category: 'business', amount: '', description: '', client: '', tags: '',
-            atecoCodeId: atecoCodes[0]?.id || ''
+            atecoCodeId: defaultCode
         });
         setEditingId(null);
         setShowAddTransaction(false);
     };
 
+    // ... helpers ...
     const sortedTransactions = transactions
         .filter(t => new Date(t.date).getFullYear() === currentYear)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -144,6 +172,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                 <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-200 animate-in fade-in slide-in-from-top-4">
                     <h3 className="text-lg font-bold mb-4 text-blue-700">{editingId ? 'Modifica transazione' : 'Aggiungi transazione'}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* FIRST ROW: Date, Type, Amount */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
                             <input type="date" value={newTransaction.date} onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })} className={inputBaseClass} />
@@ -163,11 +192,14 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                             <label className="block text-sm font-medium text-gray-700 mb-1">Importo (€)</label>
                             <input type="number" step="0.01" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} className={inputBaseClass} placeholder="0.00" />
                         </div>
+
+                        {/* SECOND ROW: Description (Full) */}
                         <div className="md:col-span-3">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
                             <input type="text" value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} className={inputBaseClass} placeholder="Es: Fattura cliente X" />
                         </div>
 
+                        {/* THIRD ROW: Context Specific */}
                         {newTransaction.type === 'expense' ? (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia Uscita</label>
@@ -208,9 +240,16 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                             </>
                         )}
 
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (opzionale)</label>
-                            <input type="text" value={newTransaction.tags} onChange={(e) => setNewTransaction({ ...newTransaction, tags: e.target.value })} className={inputBaseClass} placeholder="marketing, affitto, ecc" />
+                        {/* TAG INPUT REPLACEMENT */}
+                        <div className="md:col-span-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Tag (es. software, affitto, marketing)</label>
+                            <TagInput
+                                value={newTransaction.tags}
+                                onChange={(val) => setNewTransaction({ ...newTransaction, tags: val })}
+                                savedTags={settings.savedTags}
+                                onSaveTag={handleSaveTag}
+                                onDeleteTag={handleDeleteTag}
+                            />
                         </div>
                     </div>
                     <div className="flex gap-2 mt-6">

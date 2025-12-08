@@ -16,6 +16,7 @@ export interface UserSettings {
     artigianiExceedRate: number;  // Aliquota sull'eccedenza (es. 24%)
     annualGoal: number; // Obiettivo di fatturato annuo
     expenseGoals: { [tag: string]: number }; // Obiettivi di spesa per tag
+    savedTags?: string[]; // Tag salvati per autocomplete
 }
 
 export interface Transaction {

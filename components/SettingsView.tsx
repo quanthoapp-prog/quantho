@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { UserSettings, AtecoCode, Transaction } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Calculator, Save } from 'lucide-react';
 import { formatCurrency } from '../constants';
 
 interface SettingsViewProps {
     settings: UserSettings;
-    onUpdateSettings: (s: UserSettings) => void;
+    onUpdateSettings: (settings: UserSettings) => void;
     atecoCodes: AtecoCode[];
     onAddAtecoCode: (code: AtecoCode) => void;
     onDeleteAtecoCode: (id: string) => void;
+    onSeedAteco: () => void;
     currentYear: number;
     transactions: Transaction[];
     userEmail: string | null;
@@ -19,7 +20,7 @@ interface SettingsViewProps {
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
 const SettingsView: React.FC<SettingsViewProps> = ({
-    settings, onUpdateSettings, atecoCodes, onAddAtecoCode, onDeleteAtecoCode,
+    settings, onUpdateSettings, atecoCodes, onAddAtecoCode, onDeleteAtecoCode, onSeedAteco,
     currentYear, transactions, userEmail, onLogout, onExportData
 }) => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
