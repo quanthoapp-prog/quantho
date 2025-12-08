@@ -287,8 +287,20 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     const renderAtecoSection = () => (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h3 className="font-semibold text-lg mb-4 text-gray-800">Codici ATECO e Coefficienti</h3>
-                <p className="text-sm text-gray-500 mb-4">Aggiungi qui i tuoi codici attività. Quando inserisci una nuova entrata, potrai scegliere quale codice applicare.</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 className="font-semibold text-lg text-gray-800">Codici ATECO e Coefficienti</h3>
+                        <p className="text-sm text-gray-500 mt-1">Gestisci i tuoi codici attività e coefficienti di redditività.</p>
+                    </div>
+                    <button
+                        onClick={onSeedAteco}
+                        className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 border border-blue-100 transition-colors"
+                    >
+                        <Download size={16} /> Carica Standard
+                    </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-4">Quando inserisci una nuova entrata, potrai scegliere quale di questi codici applicare.</p>
 
                 <div className="overflow-x-auto mb-6 border rounded-lg">
                     <table className="min-w-full divide-y divide-gray-200">
