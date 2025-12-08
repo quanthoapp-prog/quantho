@@ -36,8 +36,38 @@ const App: React.FC = () => {
     }, []);
 
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+    const [activeTab, setActiveTabState] = useState<TabId>('dashboard');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // HISTORY API HANDLER FOR MOBILE BACK GESTURE
+    // 1. Listen for popstate (Back button)
+    useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            if (event.state && event.state.tab) {
+                setActiveTabState(event.state.tab);
+            } else {
+                // If no state (e.g. initial load or back to start), default to dashboard
+                setActiveTabState('dashboard');
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        // Replace initial state so we have a base to go back to if needed, 
+        // or just ensure current state is marked.
+        window.history.replaceState({ tab: 'dashboard' }, '');
+
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    // 2. Custom setter that pushes history
+    const setActiveTab = (tab: TabId) => {
+        setActiveTabState(tab);
+        // Only push if different from current state to avoid duplicate stacking
+        if (history.state?.tab !== tab) {
+            window.history.pushState({ tab }, '');
+        }
+    };
 
     // State to trigger "Add Transaction" modal from Dashboard shortcut
     const [startAddingTransaction, setStartAddingTransaction] = useState(false);
