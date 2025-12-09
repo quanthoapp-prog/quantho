@@ -49,6 +49,7 @@ export interface FixedDebt {
     type: 'debt' | 'subscription';
     startMonth: number;
     startYear: number;
+    paymentMode: 'auto' | 'manual'; // auto = automatic transaction creation, manual = user registers payment
 }
 
 export interface Stats {

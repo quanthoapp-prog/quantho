@@ -129,7 +129,8 @@ const App: React.FC = () => {
                     isSuspended: d.is_suspended,
                     type: d.type,
                     startMonth: d.start_month,
-                    startYear: d.start_year
+                    startYear: d.start_year,
+                    paymentMode: d.payment_mode || 'manual'
                 }));
                 setFixedDebts(mappedDebts);
             }
@@ -162,7 +163,12 @@ const App: React.FC = () => {
             }
         };
 
-        fetchData();
+        const loadData = async () => {
+            await fetchData();
+            await checkAndCreateAutomaticPayments();
+        };
+
+        loadData();
     }, [user]);
 
     // Helpers to manage data
@@ -578,7 +584,8 @@ const App: React.FC = () => {
             is_suspended: debt.isSuspended,
             type: debt.type,
             start_month: debt.startMonth,
-            start_year: debt.startYear
+            start_year: debt.startYear,
+            payment_mode: debt.paymentMode || 'manual'
         };
 
         const { data, error } = await supabase.from('fixed_debts').insert(payload).select().single();
@@ -594,7 +601,8 @@ const App: React.FC = () => {
                 isSuspended: data.is_suspended,
                 type: data.type,
                 startMonth: data.start_month,
-                startYear: data.start_year
+                startYear: data.start_year,
+                paymentMode: data.payment_mode || 'manual'
             };
             setFixedDebts([...fixedDebts, newDebt]);
         }
@@ -609,7 +617,8 @@ const App: React.FC = () => {
             is_suspended: debt.isSuspended,
             type: debt.type,
             start_month: debt.startMonth,
-            start_year: debt.startYear
+            start_year: debt.startYear,
+            payment_mode: debt.paymentMode || 'manual'
         };
 
         const { error } = await supabase.from('fixed_debts').update(payload).eq('id', debt.id);
@@ -625,6 +634,82 @@ const App: React.FC = () => {
             setFixedDebts(fixedDebts.filter(d => d.id !== id));
         }
     };
+
+    // FIXED DEBTS PAYMENT AUTOMATION
+    const checkAndCreateAutomaticPayments = async () => {
+        if (!userId) return;
+
+        const today = new Date();
+        const currentDay = today.getDate();
+        const currentMonth = today.getMonth() + 1; // 1-12
+        const currentYear = today.getFullYear();
+
+        for (const debt of fixedDebts) {
+            // Skip if suspended or manual mode
+            if (debt.isSuspended || debt.paymentMode !== 'auto') continue;
+
+            // Skip if not yet started
+            if (debt.startYear > currentYear ||
+                (debt.startYear === currentYear && debt.startMonth > currentMonth)) {
+                continue;
+            }
+
+            // Check if we should create payment for this month
+            if (currentDay >= debt.debitDay) {
+                // Check if payment already exists for this month
+                const paymentTag = `debito-fisso-${debt.id}-${currentYear}-${currentMonth}`;
+
+                const { data: existingPayments } = await supabase
+                    .from('transactions')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .ilike('tags', `%${paymentTag}%`)
+                    .limit(1);
+
+                // If no payment exists, create it
+                if (!existingPayments || existingPayments.length === 0) {
+                    const paymentDate = new Date(currentYear, currentMonth - 1, debt.debitDay);
+                    const formattedDate = paymentDate.toISOString().split('T')[0];
+
+                    await addTransaction({
+                        date: formattedDate,
+                        type: 'expense',
+                        category: 'personal',
+                        amount: debt.installment,
+                        description: `Rata ${debt.name} - ${currentMonth}/${currentYear}`,
+                        client: '',
+                        tags: paymentTag,
+                        atecoCodeId: null,
+                        status: 'active'
+                    });
+                }
+            }
+        }
+    };
+
+    const registerManualPayment = async (debtId: number) => {
+        const debt = fixedDebts.find(d => d.id === debtId);
+        if (!debt) return;
+
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        const paymentTag = `debito-fisso-${debt.id}-${currentYear}-${currentMonth}`;
+
+        // Create transaction with today's date
+        await addTransaction({
+            date: today.toISOString().split('T')[0],
+            type: 'expense',
+            category: 'personal',
+            amount: debt.installment,
+            description: `Rata ${debt.name} - ${currentMonth}/${currentYear}`,
+            client: '',
+            tags: paymentTag,
+            atecoCodeId: null,
+            status: 'active'
+        });
+    };
+
 
     // ATECO SEEDING
     // ATECO SEEDING REMOVED - NOW HANDLED LOCALLY VIA AUTOCOMPLETE
@@ -801,6 +886,7 @@ const App: React.FC = () => {
                         onAddDebt={addFixedDebt}
                         onUpdateDebt={updateFixedDebt}
                         onDeleteDebt={deleteFixedDebt}
+                        onRegisterPayment={registerManualPayment}
                     />
                 )}
                 {activeTab === 'goals' && (

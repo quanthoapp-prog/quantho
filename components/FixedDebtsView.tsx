@@ -9,15 +9,17 @@ interface FixedDebtsViewProps {
     onAddDebt: (debt: Omit<FixedDebt, 'id'>) => void;
     onUpdateDebt: (debt: FixedDebt) => void;
     onDeleteDebt: (id: number) => void;
+    onRegisterPayment: (debtId: number) => void;
 }
 
 const initialDebtState: Omit<FixedDebt, 'id'> = {
     name: '', totalDue: 0, installment: 0, debitDay: 1, isSuspended: false, type: 'debt',
     startMonth: new Date().getMonth() + 1,
     startYear: new Date().getFullYear(),
+    paymentMode: 'manual',
 };
 
-const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear, onAddDebt, onUpdateDebt, onDeleteDebt }) => {
+const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear, onAddDebt, onUpdateDebt, onDeleteDebt, onRegisterPayment }) => {
     // Form state handles strings for inputs to allow empty states during typing
     const [debtToEdit, setDebtToEdit] = useState<(Omit<FixedDebt, 'id'> & { id?: number, totalDueStr?: string, installmentStr?: string }) | null>(null);
 
@@ -59,7 +61,8 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
             startMonth: Number(debtToEdit.startMonth),
             startYear: Number(debtToEdit.startYear),
             isSuspended: debtToEdit.isSuspended,
-            type: debtToEdit.type
+            type: debtToEdit.type,
+            paymentMode: debtToEdit.paymentMode || 'manual'
         };
 
         if (debtToEdit.id) {
@@ -121,6 +124,33 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Rata Mensile (€)</label>
                             <input type="number" step="0.01" value={debtToEdit.installmentStr} onChange={(e) => setDebtToEdit({ ...debtToEdit, installmentStr: e.target.value })} className={inputBaseClass} placeholder="0.00" />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Modalità Pagamento</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="paymentMode"
+                                        value="manual"
+                                        checked={debtToEdit.paymentMode === 'manual'}
+                                        onChange={(e) => setDebtToEdit({ ...debtToEdit, paymentMode: e.target.value as 'auto' | 'manual' })}
+                                        className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-700">Manuale - Registra quando paghi</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="paymentMode"
+                                        value="auto"
+                                        checked={debtToEdit.paymentMode === 'auto'}
+                                        onChange={(e) => setDebtToEdit({ ...debtToEdit, paymentMode: e.target.value as 'auto' | 'manual' })}
+                                        className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-700">Automatico - Crea transazione auto</span>
+                                </label>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Giorno Addebito</label>
@@ -235,7 +265,18 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 </div>
                             </div>
 
-                            <div className="mt-4 pt-4 border-t">
+                            <div className="mt-4 pt-4 border-t space-y-2">
+                                <button
+                                    onClick={() => onRegisterPayment(debt.id)}
+                                    disabled={debt.paymentMode === 'auto'}
+                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                        }`}
+                                    title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
+                                >
+                                    <Repeat size={16} />Registra Pagamento
+                                </button>
                                 <button onClick={() => toggleSuspension(debt.id)} className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'}`}>
                                     {debt.isSuspended ? <><CheckCircle size={16} />Riattiva</> : <><PauseCircle size={16} />Sospendi</>}
                                 </button>
@@ -246,6 +287,18 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Informative Legend */}
+            <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    ℹ️ Modalità Pagamento
+                </h3>
+                <div className="text-xs text-blue-800 space-y-1">
+                    <p><strong>• Automatico:</strong> Il sistema crea automaticamente una transazione il giorno dell'addebito impostato.</p>
+                    <p><strong>• Manuale:</strong> Usa il pulsante "Registra Pagamento" quando effettui il pagamento per creare la transazione.</p>
+                </div>
             </div>
         </div>
     );
