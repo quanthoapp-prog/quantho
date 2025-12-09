@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ChevronsRight, Mail, Lock, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { ChevronsRight, Mail, Lock, ArrowRight, Loader2, CheckCircle, Info } from 'lucide-react';
 
 interface AuthViewProps {
     onLogin: (email: string) => void;
@@ -13,6 +13,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,8 +39,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                     password,
                 });
                 if (error) throw error;
-                // Auto login often happens on signup, but check email confirmation setting.
-                onLogin(email);
+                setRegistrationSuccess(true);
             }
         } catch (err: any) {
             setError(err.message || 'Si è verificato un errore durante l\'autenticazione.');
@@ -47,6 +47,38 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             setIsLoading(false);
         }
     };
+
+    if (registrationSuccess) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+                <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+                    <div className="flex justify-center items-center gap-3 mb-6">
+                        <div className="bg-green-600 text-white p-3 rounded-2xl shadow-lg">
+                            <Mail size={40} strokeWidth={3} />
+                        </div>
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Controlla la tua email</h2>
+                    <p className="text-gray-600 mb-8">
+                        Abbiamo inviato un link di conferma a <strong>{email}</strong>.<br />
+                        Clicca sul link per attivare il tuo account e iniziare a usare Quantho.
+                    </p>
+
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mx-4">
+                        <div className="flex items-center gap-3 text-left text-sm text-gray-600 mb-4">
+                            <Info size={20} className="text-blue-500 flex-shrink-0" />
+                            <p>Se non trovi l'email, controlla nella cartella <strong>Spam</strong> o <strong>Posta Indesiderata</strong>.</p>
+                        </div>
+                        <button
+                            onClick={() => { setRegistrationSuccess(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                        >
+                            Torna al Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
