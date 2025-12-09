@@ -247,21 +247,25 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 </div>
                             </div>
 
-                            <div className="mt-4 border-t pt-4 space-y-2">
-                                <div>
-                                    <div className="text-sm text-gray-500">Totale Dovuto</div>
-                                    <div className="font-medium text-gray-900">{formatCurrency(debt.totalDue)}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500">Residuo Stimato</div>
-                                    <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        {formatCurrency(remainingBalance)}
+                            <div className="mt-4 border-t pt-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <div className="text-xs sm:text-sm text-gray-500">Totale Dovuto</div>
+                                        <div className="font-medium text-gray-900 text-sm sm:text-base">{formatCurrency(debt.totalDue)}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs sm:text-sm text-gray-500">Residuo Stimato</div>
+                                        <div className={`font-bold text-lg sm:text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {formatCurrency(remainingBalance)}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                    <Calendar size={12} className="text-gray-400" />
-                                    Addebito: Giorno <span className="font-medium text-gray-800">{debt.debitDay}</span>
-                                    {remainingBalance > 0 && debt.totalDue > 0 && ` (${Math.ceil(remainingBalance / debt.installment)} rate)`}
+                                <div className="text-xs text-gray-500 flex items-center gap-1 mt-3">
+                                    <Calendar size={12} className="text-gray-400 flex-shrink-0" />
+                                    <span className="break-words">
+                                        Addebito: Giorno <span className="font-medium text-gray-800">{debt.debitDay}</span>
+                                        {remainingBalance > 0 && debt.totalDue > 0 && ` (${Math.ceil(remainingBalance / debt.installment)} rate)`}
+                                    </span>
                                 </div>
                             </div>
 
@@ -269,16 +273,21 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 <button
                                     onClick={() => onRegisterPayment(debt.id)}
                                     disabled={debt.paymentMode === 'auto'}
-                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                    className={`w-full py-2.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                         }`}
                                     title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
                                 >
-                                    <Repeat size={16} />Registra Pagamento
+                                    <Repeat size={16} className="flex-shrink-0" />
+                                    <span className="truncate">Registra Pagamento</span>
                                 </button>
-                                <button onClick={() => toggleSuspension(debt.id)} className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'}`}>
-                                    {debt.isSuspended ? <><CheckCircle size={16} />Riattiva</> : <><PauseCircle size={16} />Sospendi</>}
+                                <button
+                                    onClick={() => toggleSuspension(debt.id)}
+                                    className={`w-full py-2.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                        }`}
+                                >
+                                    {debt.isSuspended ? <><CheckCircle size={16} className="flex-shrink-0" />Riattiva</> : <><PauseCircle size={16} className="flex-shrink-0" />Sospendi</>}
                                 </button>
                                 {debt.isSuspended && isHistoricalDebt && (
                                     <p className="text-[10px] text-center text-gray-400 mt-1">Sospeso dal calcolo corrente</p>
