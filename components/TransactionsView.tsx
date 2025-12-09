@@ -246,7 +246,10 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                             <TagInput
                                 value={newTransaction.tags}
                                 onChange={(val) => setNewTransaction({ ...newTransaction, tags: val })}
-                                savedTags={settings.savedTags}
+                                savedTags={Array.from(new Set([
+                                    ...(settings.savedTags || []),
+                                    ...transactions.flatMap(t => t.tags ? t.tags.split(',').map(tag => tag.trim()) : [])
+                                ])).sort()}
                                 onSaveTag={handleSaveTag}
                                 onDeleteTag={handleDeleteTag}
                             />
