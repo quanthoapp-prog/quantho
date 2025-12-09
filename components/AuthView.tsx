@@ -42,7 +42,10 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 setRegistrationSuccess(true);
             }
         } catch (err: any) {
-            if (err.message && err.message.includes("User already registered")) {
+            console.log("Signup Error Full Object:", err);
+            console.log("Signup Error Message:", err.message);
+
+            if (err.message && (err.message.includes("User already registered") || err.message.includes("already has been registered"))) {
                 setError('Mail già registrata');
             } else {
                 setError(err.message || 'Si è verificato un errore durante l\'autenticazione.');
