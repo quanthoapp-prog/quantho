@@ -139,8 +139,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                             Reset Password
                         </button>
                         <button className="flex-1 border border-blue-200 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
-                            <a href="mailto:support@quantho.app" className="flex items-center justify-center gap-2">
-                                <Mail size={16} /> Contatta Assistenza
+                            <a href="mailto:quanthoapp@gmail.com" className="flex items-center justify-center gap-2">
+                                <Mail size={16} /> Assistenza e Miglioramenti
                             </a>
                         </button>
                     </div>
