@@ -9,7 +9,7 @@ import SettingsView from './components/SettingsView';
 import AuthView from './components/AuthView';
 import GoalsView from './components/GoalsView';
 import { Transaction, Client, FixedDebt, TabId, Stats, UserSettings, AtecoCode } from './types';
-import { LIMITE_FORFETTARIO, INITIAL_TRANSACTIONS, INITIAL_CLIENTS, INITIAL_FIXED_DEBTS, DEFAULT_SETTINGS, INITIAL_ATECO_CODES } from './constants';
+import { LIMITE_FORFETTARIO, INITIAL_TRANSACTIONS, INITIAL_CLIENTS, INITIAL_FIXED_DEBTS, DEFAULT_SETTINGS, INITIAL_ATECO_CODES, isTransactionActive } from './constants';
 
 
 const App: React.FC = () => {
@@ -109,7 +109,8 @@ const App: React.FC = () => {
                     description: t.description,
                     client: t.client,
                     tags: t.tags,
-                    atecoCodeId: t.ateco_code_id
+                    atecoCodeId: t.ateco_code_id,
+                    status: t.status || 'active'
                 }));
                 setTransactions(mappedTransactions);
             }
@@ -175,7 +176,8 @@ const App: React.FC = () => {
             description: t.description,
             client: t.client || null,
             tags: t.tags || null,
-            ateco_code_id: t.atecoCodeId || null
+            ateco_code_id: t.atecoCodeId || null,
+            status: t.status || 'active'
         };
 
         const { data, error } = await supabase.from('transactions').insert(payload).select().single();
@@ -191,7 +193,8 @@ const App: React.FC = () => {
                 description: data.description,
                 client: data.client, // Stored as string in schema currently
                 tags: data.tags,
-                atecoCodeId: data.ateco_code_id
+                atecoCodeId: data.ateco_code_id,
+                status: data.status || 'active'
             };
             setTransactions([...transactions, newTransaction]);
         } else {
@@ -208,7 +211,8 @@ const App: React.FC = () => {
             description: updatedTransaction.description,
             client: updatedTransaction.client || null,
             tags: updatedTransaction.tags || null,
-            ateco_code_id: updatedTransaction.atecoCodeId || null
+            ateco_code_id: updatedTransaction.atecoCodeId || null,
+            status: updatedTransaction.status || 'active'
         };
 
         const { error } = await supabase.from('transactions').update(payload).eq('id', updatedTransaction.id);
@@ -336,11 +340,20 @@ const App: React.FC = () => {
         // 2. Filter Transactions
         const yearTransactions = transactions.filter(t => new Date(t.date).getFullYear() === currentYear);
 
-        // 3. Gross Income Calculation
+        // Separate active and scheduled transactions
+        const activeTransactions = yearTransactions.filter(t => isTransactionActive(t));
+        const scheduledTransactions = yearTransactions.filter(t => !isTransactionActive(t) && t.status === 'scheduled');
+
+        // Calculate scheduled expenses total
+        const scheduledExpenses = scheduledTransactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        // 3. Gross Income Calculation (only active transactions)
         let income = 0;
         let grossTaxableIncome = 0; // Fatturato * Coeff (without deducting INPS yet)
 
-        yearTransactions
+        activeTransactions
             .filter(t => t.type === 'income')
             .forEach(t => {
                 income += t.amount;
@@ -350,17 +363,17 @@ const App: React.FC = () => {
                 grossTaxableIncome += t.amount * coefficient;
             });
 
-        // 4. Calculate Expenses & Outflows
+        // 4. Calculate Expenses & Outflows (only active transactions)
         // REAL EXPENSES = Everything that leaves the bank account (Business + Personal + Taxes + INPS)
-        const allExpenses = yearTransactions
+        const allExpenses = activeTransactions
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0);
 
-        const taxesPaid = yearTransactions
+        const taxesPaid = activeTransactions
             .filter(t => t.type === 'expense' && (t.category === 'tax' || t.category === 'inps'))
             .reduce((sum, t) => sum + t.amount, 0);
 
-        const inpsPaid = yearTransactions
+        const inpsPaid = activeTransactions
             .filter(t => t.type === 'expense' && t.category === 'inps')
             .reduce((sum, t) => sum + t.amount, 0);
 
@@ -526,7 +539,8 @@ const App: React.FC = () => {
             monthlyNetIncome,
             taxEfficiencyPer1000,
             goalPercentage,
-            gapToGoal
+            gapToGoal,
+            scheduledExpenses // New field for upcoming expenses
         };
     }, [transactions, fixedDebts, currentYear, settings, atecoCodes]);
 

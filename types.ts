@@ -29,6 +29,7 @@ export interface Transaction {
     client: string;
     tags: string;
     atecoCodeId?: string;
+    status?: 'active' | 'scheduled'; // 'scheduled' for future transactions
 }
 
 export interface Client {
@@ -74,6 +75,7 @@ export interface Stats {
     // Goal
     goalPercentage: number; // % raggiunta dell'obiettivo utente
     gapToGoal: number; // Quanto manca
+    scheduledExpenses: number; // Total of future/scheduled expenses
 }
 
 export type TabId = 'dashboard' | 'transactions' | 'fixedDebts' | 'clients' | 'settings' | 'goals';

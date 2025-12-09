@@ -87,6 +87,14 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
     // ... handleSave ... (unchanged logic mostly)
     const handleSave = () => {
         if (newTransaction.amount && newTransaction.description) {
+            // Determine status based on date
+            const transactionDate = new Date(newTransaction.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            transactionDate.setHours(0, 0, 0, 0);
+
+            const status: 'active' | 'scheduled' = transactionDate > today ? 'scheduled' : 'active';
+
             const transactionData = {
                 date: newTransaction.date,
                 type: newTransaction.type,
@@ -95,7 +103,8 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                 description: newTransaction.description,
                 client: newTransaction.type === 'income' ? (newTransaction.client || null) : null,
                 tags: newTransaction.tags || null,
-                atecoCodeId: (newTransaction.type === 'income' && newTransaction.atecoCodeId) ? newTransaction.atecoCodeId : null
+                atecoCodeId: (newTransaction.type === 'income' && newTransaction.atecoCodeId) ? newTransaction.atecoCodeId : null,
+                status
             };
 
             if (editingId) {
@@ -293,7 +302,14 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    {getCategoryBadge(t.category)}
+                                    <div className="flex flex-col gap-1">
+                                        {getCategoryBadge(t.category)}
+                                        {t.status === 'scheduled' && (
+                                            <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium inline-block">
+                                                📅 Programmata
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold text-right ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                                     {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}

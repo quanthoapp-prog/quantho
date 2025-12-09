@@ -102,7 +102,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ stats, currentYear, trans
                         <TrendingDown size={24} />
                     </div>
                     <div className="text-3xl font-bold">{formatCurrency(stats.realExpenses)}</div>
-                    <div className="text-sm text-red-100 mt-1">Uscite Business, Personali, F24</div>
+                    <div className="text-sm text-red-100 mt-1">
+                        {stats.scheduledExpenses > 0
+                            ? `Spese prossime: ${formatCurrency(stats.scheduledExpenses)}`
+                            : 'Uscite Business, Personali, F24'
+                        }
+                    </div>
                 </div>
 
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">

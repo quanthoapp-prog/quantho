@@ -55,3 +55,20 @@ export const INITIAL_FIXED_DEBTS = [
     { id: 202, name: 'Abbonamento CRM', totalDue: 0, installment: 49.99, debitDay: 15, isSuspended: false, type: 'subscription', startMonth: 3, startYear: 2024 },
     { id: 203, name: 'Prestito Auto', totalDue: 12000, installment: 250, debitDay: 28, isSuspended: true, type: 'debt', startMonth: 1, startYear: 2023 },
 ] as const;
+
+// Helper function to determine if a transaction should be counted in stats
+export const isTransactionActive = (transaction: { date: string; status?: 'active' | 'scheduled' }): boolean => {
+    // If no status field, assume active (backward compatibility)
+    if (!transaction.status || transaction.status === 'active') return true;
+
+    // If scheduled, check if date has arrived
+    if (transaction.status === 'scheduled') {
+        const transactionDate = new Date(transaction.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        transactionDate.setHours(0, 0, 0, 0);
+        return transactionDate <= today;
+    }
+
+    return true;
+};
