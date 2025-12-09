@@ -817,8 +817,8 @@ const App: React.FC = () => {
 
             <footer className="mt-auto bg-white border-t py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-400">
-                    <p className="hidden sm:block">Quantho - Regime Forfettario Italiano</p>
-                    <p className="sm:hidden text-xs">Quantho</p>
+                    <p className="hidden sm:block">Quantho v1.0 - Regime Forfettario Italiano</p>
+                    <p className="sm:hidden text-xs">Quantho v1.0</p>
                     <p className="text-xs mt-1">Non costituisce consulenza fiscale professionale.</p>
                 </div>
             </footer>
