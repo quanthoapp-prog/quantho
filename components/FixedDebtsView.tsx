@@ -125,7 +125,7 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                             <label className="block text-sm font-medium text-gray-700 mb-1">Rata Mensile (€)</label>
                             <input type="number" step="0.01" value={debtToEdit.installmentStr} onChange={(e) => setDebtToEdit({ ...debtToEdit, installmentStr: e.target.value })} className={inputBaseClass} placeholder="0.00" />
                         </div>
-                        <div className="col-span-2">
+                        <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Modalità Pagamento</label>
                             <div className="flex gap-4">
                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -200,33 +200,28 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                     const isHistoricalDebt = isHistorical(debt.startYear);
 
                     return (
-                        <div key={debt.id} className={`bg-white rounded-xl shadow-lg p-4 sm:p-6 border ${debt.isSuspended ? 'border-yellow-300 opacity-70' : 'border-gray-100'} transition-all`}>
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="font-bold text-gray-900 text-base sm:text-lg flex items-center gap-2 flex-wrap">
-                                        <span className="break-words">{debt.name}</span>
+                        <div key={debt.id} className={`bg-white rounded-xl shadow-lg p-6 border ${debt.isSuspended ? 'border-yellow-300 opacity-70' : 'border-gray-100 hover:border-blue-400'} transition-all`}>
+                            <div className="flex justify-between items-start gap-3">
+                                <div className="overflow-hidden flex-1">
+                                    <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2 mb-1">
+                                        <span className="truncate">{debt.name}</span>
                                         {debt.isSuspended && (
-                                            <span title="Sospeso">
-                                                <PauseCircle className="text-yellow-500 flex-shrink-0" size={18} />
-                                            </span>
+                                            <PauseCircle className="text-yellow-500 flex-shrink-0" size={18} />
                                         )}
                                         {isHistoricalDebt && (
-                                            <span title={`Debito storico (iniziato nel ${debt.startYear})`}>
-                                                <Calendar className="text-gray-400 flex-shrink-0" size={16} />
-                                            </span>
+                                            <Calendar className="text-gray-400 flex-shrink-0" size={16} title={`Debito storico (iniziato nel ${debt.startYear})`} />
                                         )}
                                     </h3>
-                                    <div className="text-xs sm:text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                    <div className="text-sm text-gray-600 flex items-center gap-1">
                                         <Repeat size={14} className="text-blue-500 flex-shrink-0" />
                                         <span className="font-semibold">{formatCurrency(debt.installment)}</span>
-                                        <span className="ml-1">/ Mese</span>
+                                        <span>/ Mese</span>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-shrink-0">
                                     <button onClick={() => openEditDebt(debt)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
                                         <Pencil size={16} />
                                     </button>
-
                                     {isHistoricalDebt ? (
                                         <button
                                             onClick={() => alert(`Non puoi eliminare questo debito perché è iniziato nel ${debt.startYear} (anno precedente). Se l'hai estinto o vuoi interromperlo, usa il tasto 'Sospendi'. Eliminandolo altereresti i bilanci degli anni passati.`)}
@@ -248,24 +243,22 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                             </div>
 
                             <div className="mt-4 border-t pt-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <div className="text-xs sm:text-sm text-gray-500">Totale Dovuto</div>
-                                        <div className="font-medium text-gray-900 text-sm sm:text-base">{formatCurrency(debt.totalDue)}</div>
+                                        <div className="text-sm text-gray-500">Totale Dovuto</div>
+                                        <div className="font-medium text-gray-900">{formatCurrency(debt.totalDue)}</div>
                                     </div>
                                     <div>
-                                        <div className="text-xs sm:text-sm text-gray-500">Residuo Stimato</div>
-                                        <div className={`font-bold text-lg sm:text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                        <div className="text-sm text-gray-500">Residuo</div>
+                                        <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                             {formatCurrency(remainingBalance)}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1 mt-3">
-                                    <Calendar size={12} className="text-gray-400 flex-shrink-0" />
-                                    <span className="break-words">
-                                        Addebito: Giorno <span className="font-medium text-gray-800">{debt.debitDay}</span>
-                                        {remainingBalance > 0 && debt.totalDue > 0 && ` (${Math.ceil(remainingBalance / debt.installment)} rate)`}
-                                    </span>
+                                <div className="text-xs text-gray-500 mt-3 truncate">
+                                    <Calendar size={12} className="inline text-gray-400 mr-1" />
+                                    Giorno {debt.debitDay}
+                                    {remainingBalance > 0 && debt.totalDue > 0 && ` • ${Math.ceil(remainingBalance / debt.installment)} rate`}
                                 </div>
                             </div>
 
@@ -273,18 +266,18 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 <button
                                     onClick={() => onRegisterPayment(debt.id)}
                                     disabled={debt.paymentMode === 'auto'}
-                                    className={`w-full py-2.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                         }`}
                                     title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
                                 >
                                     <Repeat size={16} className="flex-shrink-0" />
-                                    <span className="truncate">Registra Pagamento</span>
+                                    Registra Pagamento
                                 </button>
                                 <button
                                     onClick={() => toggleSuspension(debt.id)}
-                                    className={`w-full py-2.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                                         }`}
                                 >
                                     {debt.isSuspended ? <><CheckCircle size={16} className="flex-shrink-0" />Riattiva</> : <><PauseCircle size={16} className="flex-shrink-0" />Sospendi</>}
