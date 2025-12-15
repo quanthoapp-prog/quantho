@@ -1,40 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save, Plus } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save } from 'lucide-react';
 import TagInput from './TagInput';
-import { Transaction, Client, AtecoCode, UserSettings } from '../types';
+import { Transaction } from '../types';
 import { formatCurrency } from '../constants';
+import { useFinance } from '../context/FinanceContext';
 
-interface TransactionsViewProps {
-    currentYear: number;
-    transactions: Transaction[];
-    clients: Client[];
-    atecoCodes: AtecoCode[];
-    onAddTransaction: (t: Omit<Transaction, 'id'>) => void;
-    onUpdateTransaction: (t: Transaction) => void;
-    onDeleteTransaction: (id: number) => void;
-    startAdding?: boolean;
-    onAddStarted?: () => void;
-    settings: UserSettings;
-    onUpdateSettings: (s: UserSettings) => void;
-}
+const TransactionsView: React.FC = () => {
+    const {
+        currentYear,
+        transactions,
+        clients,
+        atecoCodes,
+        addTransaction,
+        updateTransaction,
+        deleteTransaction,
+        settings,
+        updateSettings
+    } = useFinance();
 
-const TransactionsView: React.FC<TransactionsViewProps> = ({
-    currentYear, transactions, clients, atecoCodes,
-    onAddTransaction, onUpdateTransaction, onDeleteTransaction,
-    startAdding, onAddStarted, settings, onUpdateSettings
-}) => {
-    // ... existing state ...
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [showAddTransaction, setShowAddTransaction] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    // ... useEffects ...
+    // Initial check for startAdding state from navigation
     useEffect(() => {
-        if (startAdding) {
+        if (location.state?.startAdding) {
             setShowAddTransaction(true);
             setEditingId(null);
-            if (onAddStarted) onAddStarted();
+            // Clear the state so it doesn't trigger again on refresh/re-nav
+            navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [startAdding, onAddStarted]);
+    }, [location.state, navigate, location.pathname]);
 
     // Local state for form
     const [newTransaction, setNewTransaction] = useState<{
@@ -57,7 +56,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
         atecoCodeId: '',
     });
 
-    // ... ateco effect ...
+    // Default Ateco Code Effect
     useEffect(() => {
         if (!editingId && !newTransaction.atecoCodeId && atecoCodes.length > 0) {
             setNewTransaction(prev => ({ ...prev, atecoCodeId: atecoCodes[0].id }));
@@ -69,7 +68,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
     const handleSaveTag = (tag: string) => {
         const saved = settings.savedTags || [];
         if (!saved.includes(tag)) {
-            onUpdateSettings({
+            updateSettings({
                 ...settings,
                 savedTags: [...saved, tag].sort()
             });
@@ -78,14 +77,14 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
 
     const handleDeleteTag = (tag: string) => {
         const saved = settings.savedTags || [];
-        onUpdateSettings({
+        updateSettings({
             ...settings,
             savedTags: saved.filter(t => t !== tag)
         });
     };
 
-    // ... handleSave ... (unchanged logic mostly)
-    const handleSave = () => {
+    // Save Logic
+    const handleSave = async () => {
         if (newTransaction.amount && newTransaction.description) {
             // Determine status based on date
             const transactionDate = new Date(newTransaction.date);
@@ -95,7 +94,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
 
             const status: 'active' | 'scheduled' = transactionDate > today ? 'scheduled' : 'active';
 
-            const transactionData = {
+            const transactionData: any = {
                 date: newTransaction.date,
                 type: newTransaction.type,
                 category: newTransaction.category,
@@ -107,17 +106,20 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                 status
             };
 
-            if (editingId) {
-                onUpdateTransaction({ ...transactionData, id: editingId });
-            } else {
-                onAddTransaction(transactionData);
+            try {
+                if (editingId) {
+                    await updateTransaction({ ...transactionData, id: editingId });
+                } else {
+                    await addTransaction(transactionData);
+                }
+                resetForm();
+            } catch (error) {
+                console.error("Failed to save transaction", error);
+                alert("Errore durante il salvataggio della transazione.");
             }
-
-            resetForm();
         }
     };
 
-    // ... handleEdit, resetForm ... (unchanged)
     const handleEdit = (t: Transaction) => {
         setEditingId(t.id);
         const code = t.atecoCodeId || (atecoCodes.length > 0 ? atecoCodes[0].id : '');
@@ -134,6 +136,17 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
         setShowAddTransaction(true);
     };
 
+    const handleDelete = async (id: number) => {
+        if (confirm("Sei sicuro di voler eliminare questa transazione?")) {
+            try {
+                await deleteTransaction(id);
+            } catch (error) {
+                console.error(error);
+                alert("Errore durante l'eliminazione.");
+            }
+        }
+    };
+
     const resetForm = () => {
         const defaultCode = atecoCodes.length > 0 ? atecoCodes[0].id : '';
         setNewTransaction({
@@ -145,7 +158,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
         setShowAddTransaction(false);
     };
 
-    // ... helpers ...
+    // View Helpers
     const sortedTransactions = transactions
         .filter(t => new Date(t.date).getFullYear() === currentYear)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -319,7 +332,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({
                                         <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
                                             <Pencil size={16} />
                                         </button>
-                                        <button onClick={() => onDeleteTransaction(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
+                                        <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>

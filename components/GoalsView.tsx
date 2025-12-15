@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Target, Trophy, TrendingUp, AlertTriangle, Calculator } from 'lucide-react';
-import { UserSettings, Stats, Transaction } from '../types';
-import { formatCurrency, LIMITE_FORFETTARIO } from '../constants';
+import { Target, Trophy, AlertTriangle } from 'lucide-react';
+import { useFinance } from '../context/FinanceContext';
+import { formatCurrency } from '../constants';
 
-interface GoalsViewProps {
-    settings: UserSettings;
-    onUpdateSettings: (s: UserSettings) => void;
-    stats: Stats;
-    currentYear: number;
-    transactions: Transaction[];
-}
-
-const GoalsView: React.FC<GoalsViewProps> = ({ settings, onUpdateSettings, stats, currentYear, transactions }) => {
+const GoalsView: React.FC = () => {
+    const { settings, updateSettings, stats, currentYear, transactions } = useFinance();
     const [tempGoal, setTempGoal] = useState(settings.annualGoal);
 
     useEffect(() => {
@@ -19,7 +12,7 @@ const GoalsView: React.FC<GoalsViewProps> = ({ settings, onUpdateSettings, stats
     }, [settings.annualGoal]);
 
     const handleSaveGoal = () => {
-        onUpdateSettings({
+        updateSettings({
             ...settings,
             annualGoal: tempGoal
         });
@@ -29,7 +22,7 @@ const GoalsView: React.FC<GoalsViewProps> = ({ settings, onUpdateSettings, stats
         const newExpenseGoals = { ...settings.expenseGoals, [tag]: limit };
         if (limit === 0) delete newExpenseGoals[tag]; // Remove if 0
 
-        onUpdateSettings({
+        updateSettings({
             ...settings,
             expenseGoals: newExpenseGoals
         });

@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
 import { PlusCircle, Users } from 'lucide-react';
-import { Client, Transaction } from '../types';
 import { formatCurrency } from '../constants';
+import { useFinance } from '../context/FinanceContext';
 
-interface ClientsViewProps {
-    currentYear: number;
-    transactions: Transaction[];
-    clients: Client[];
-    onAddClient: (client: Omit<Client, 'id'>) => void;
-}
-
-const ClientsView: React.FC<ClientsViewProps> = ({ currentYear, transactions, clients, onAddClient }) => {
+const ClientsView: React.FC = () => {
+    const { clients, transactions, currentYear, addClient } = useFinance();
     const [showAddClient, setShowAddClient] = useState(false);
     const [newClient, setNewClient] = useState({ name: '', email: '', phone: '' });
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (newClient.name) {
-            onAddClient(newClient);
-            setNewClient({ name: '', email: '', phone: '' });
-            setShowAddClient(false);
+            try {
+                await addClient(newClient);
+                setNewClient({ name: '', email: '', phone: '' });
+                setShowAddClient(false);
+            } catch (error) {
+                console.error(error);
+                alert("Errore durante l'aggiunta del cliente.");
+            }
         }
     };
 
@@ -39,15 +38,15 @@ const ClientsView: React.FC<ClientsViewProps> = ({ currentYear, transactions, cl
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                            <input type="text" value={newClient.name} onChange={(e) => setNewClient({...newClient, name: e.target.value})} className={inputBaseClass} />
+                            <input type="text" value={newClient.name} onChange={(e) => setNewClient({ ...newClient, name: e.target.value })} className={inputBaseClass} />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" value={newClient.email} onChange={(e) => setNewClient({...newClient, email: e.target.value})} className={inputBaseClass} />
+                            <input type="email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })} className={inputBaseClass} />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
-                            <input type="tel" value={newClient.phone} onChange={(e) => setNewClient({...newClient, phone: e.target.value})} className={inputBaseClass} />
+                            <input type="tel" value={newClient.phone} onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })} className={inputBaseClass} />
                         </div>
                     </div>
                     <div className="flex gap-2 mt-6">
@@ -62,7 +61,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ currentYear, transactions, cl
                     const clientIncome = transactions
                         .filter(t => t.type === 'income' && t.client === client.name && new Date(t.date).getFullYear() === currentYear)
                         .reduce((sum, t) => sum + t.amount, 0);
-                    
+
                     return (
                         <div key={client.id} className="bg-white rounded-xl shadow-lg p-6 border hover:border-blue-400 transition-colors">
                             <div className="flex items-start gap-4">

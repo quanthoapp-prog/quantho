@@ -1,18 +1,13 @@
 import React, { useMemo } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Coins, Target, Tag, PlusCircle, BarChart3, History, Trophy } from 'lucide-react';
-import { Stats, Transaction, UserSettings } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy } from 'lucide-react';
+import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, LIMITE_FORFETTARIO } from '../constants';
 
-interface DashboardViewProps {
-    stats: Stats;
-    currentYear: number;
-    transactions: Transaction[];
-    onNewTransactionClick: () => void;
-    onSetGoalsClick: () => void;
-    settings: UserSettings;
-}
+const DashboardView: React.FC = () => {
+    const { stats, currentYear, transactions, settings } = useFinance();
+    const navigate = useNavigate();
 
-const DashboardView: React.FC<DashboardViewProps> = ({ stats, currentYear, transactions, onNewTransactionClick, onSetGoalsClick, settings }) => {
     const taxPaymentPercentage = stats.totalTaxEstimate > 0 ? (stats.taxesPaid / stats.totalTaxEstimate) * 100 : 0;
 
     // Filter and sort transactions for the current year
@@ -56,14 +51,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({ stats, currentYear, trans
             {/* TOP ACTIONS */}
             <div className="flex gap-3 justify-end">
                 <button
-                    onClick={onSetGoalsClick}
+                    onClick={() => navigate('/goals')}
                     className="flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm border hover:bg-gray-50 transition-colors text-sm"
                 >
                     <Target size={18} />
                     Imposta Obiettivi
                 </button>
                 <button
-                    onClick={onNewTransactionClick}
+                    onClick={() => navigate('/transactions', { state: { startAdding: true } })}
                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow hover:bg-blue-700 transition-colors text-sm"
                 >
                     <PlusCircle size={18} />
@@ -167,7 +162,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ stats, currentYear, trans
                                 <div className="text-xs text-violet-700 mt-2">Mancano {formatCurrency(stats.gapToGoal)}</div>
                             </div>
                         ) : (
-                            <div className="text-sm text-violet-600 mt-1 cursor-pointer hover:underline" onClick={onSetGoalsClick}>
+                            <div className="text-sm text-violet-600 mt-1 cursor-pointer hover:underline" onClick={() => navigate('/goals')}>
                                 Imposta un obiettivo per iniziare!
                             </div>
                         )}

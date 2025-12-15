@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import { PlusCircle, Save, Repeat, Pencil, Trash2, Calendar, PauseCircle, CheckCircle, Lock, AlertTriangle } from 'lucide-react';
 import { FixedDebt } from '../types';
 import { formatCurrency, getMonthsElapsed } from '../constants';
-
-interface FixedDebtsViewProps {
-    fixedDebts: FixedDebt[];
-    currentYear: number;
-    onAddDebt: (debt: Omit<FixedDebt, 'id'>) => void;
-    onUpdateDebt: (debt: FixedDebt) => void;
-    onDeleteDebt: (id: number) => void;
-    onRegisterPayment: (debtId: number) => void;
-}
+import { useFinance } from '../context/FinanceContext';
 
 const initialDebtState: Omit<FixedDebt, 'id'> = {
     name: '', totalDue: 0, installment: 0, debitDay: 1, isSuspended: false, type: 'debt',
@@ -19,7 +11,16 @@ const initialDebtState: Omit<FixedDebt, 'id'> = {
     paymentMode: 'manual',
 };
 
-const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear, onAddDebt, onUpdateDebt, onDeleteDebt, onRegisterPayment }) => {
+const FixedDebtsView: React.FC = () => {
+    const {
+        fixedDebts,
+        currentYear,
+        addFixedDebt,
+        updateFixedDebt,
+        deleteFixedDebt,
+        registerDebtPayment
+    } = useFinance();
+
     // Form state handles strings for inputs to allow empty states during typing
     const [debtToEdit, setDebtToEdit] = useState<(Omit<FixedDebt, 'id'> & { id?: number, totalDueStr?: string, installmentStr?: string }) | null>(null);
 
@@ -44,7 +45,7 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
         });
     };
 
-    const saveDebt = () => {
+    const saveDebt = async () => {
         if (!debtToEdit || !debtToEdit.name) return;
 
         const totalDue = parseFloat(debtToEdit.totalDueStr || '0');
@@ -52,8 +53,8 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
 
         if (isNaN(totalDue) || isNaN(installment)) return;
 
-        const debtToSave: FixedDebt = {
-            id: debtToEdit.id || Date.now(),
+        const debtToSave: any = {
+            id: debtToEdit.id || undefined,
             name: debtToEdit.name,
             totalDue: totalDue,
             installment: installment,
@@ -65,20 +66,44 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
             paymentMode: debtToEdit.paymentMode || 'manual'
         };
 
-        if (debtToEdit.id) {
-            onUpdateDebt(debtToSave);
-        } else {
-            onAddDebt(debtToSave);
+        try {
+            if (debtToEdit.id) {
+                await updateFixedDebt({ ...debtToSave, id: debtToEdit.id });
+            } else {
+                await addFixedDebt(debtToSave);
+            }
+            setDebtToEdit(null);
+        } catch (error) {
+            console.error(error);
+            alert("Errore durante il salvataggio.");
         }
-        setDebtToEdit(null);
     };
 
-    const deleteDebt = (id: number) => onDeleteDebt(id);
+    const deleteDebt = async (id: number) => {
+        if (confirm("Sei sicuro di voler eliminare questo debito?")) {
+            try {
+                await deleteFixedDebt(id);
+            } catch (error) {
+                console.error(error);
+                alert("Errore durante l'eliminazione.");
+            }
+        }
+    };
 
-    const toggleSuspension = (id: number) => {
+    const toggleSuspension = async (id: number) => {
         const debt = fixedDebts.find(d => d.id === id);
         if (debt) {
-            onUpdateDebt({ ...debt, isSuspended: !debt.isSuspended });
+            await updateFixedDebt({ ...debt, isSuspended: !debt.isSuspended });
+        }
+    };
+
+    const handleRegisterPayment = async (id: number) => {
+        try {
+            await registerDebtPayment(id);
+            alert("Pagamento registrato con successo!");
+        } catch (error) {
+            console.error(error);
+            alert("Errore durante la registrazione del pagamento.");
         }
     };
 
@@ -162,7 +187,7 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 value={debtToEdit.startMonth}
                                 onChange={(e) => setDebtToEdit({ ...debtToEdit, startMonth: parseInt(e.target.value) })}
                                 className={inputBaseClass}
-                                disabled={debtToEdit.id && isHistorical(debtToEdit.startYear)} // Lock start date for history
+                                disabled={!!debtToEdit.id && isHistorical(debtToEdit.startYear)} // Lock start date for history
                             >
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                                     <option key={m} value={m}>{new Date(currentFullYear, m - 1).toLocaleString('it-IT', { month: 'long' })}</option>
@@ -178,7 +203,7 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
                                 value={debtToEdit.startYear}
                                 onChange={(e) => setDebtToEdit({ ...debtToEdit, startYear: parseInt(e.target.value) || currentFullYear })}
                                 className={inputBaseClass}
-                                disabled={debtToEdit.id && isHistorical(debtToEdit.startYear)} // Lock start date for history
+                                disabled={!!debtToEdit.id && isHistorical(debtToEdit.startYear)} // Lock start date for history
                             />
                             {!debtToEdit.id && <p className="text-xs text-gray-500 mt-1">Per anni passati, cambia anno in alto.</p>}
                         </div>
@@ -264,11 +289,11 @@ const FixedDebtsView: React.FC<FixedDebtsViewProps> = ({ fixedDebts, currentYear
 
                             <div className="mt-4 pt-4 border-t space-y-2">
                                 <button
-                                    onClick={() => onRegisterPayment(debt.id)}
+                                    onClick={() => handleRegisterPayment(debt.id)}
                                     disabled={debt.paymentMode === 'auto'}
                                     className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                         }`}
                                     title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
                                 >
