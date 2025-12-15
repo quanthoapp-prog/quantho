@@ -5,6 +5,7 @@ import TagInput from './TagInput';
 import { Transaction } from '../types';
 import { formatCurrency } from '../constants';
 import { useFinance } from '../context/FinanceContext';
+import ConfirmDialog from './ConfirmDialog';
 
 const TransactionsView: React.FC = () => {
     const {
@@ -24,6 +25,7 @@ const TransactionsView: React.FC = () => {
 
     const [showAddTransaction, setShowAddTransaction] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
 
     // Initial check for startAdding state from navigation
     useEffect(() => {
@@ -106,17 +108,11 @@ const TransactionsView: React.FC = () => {
                 status
             };
 
-            try {
-                if (editingId) {
-                    await updateTransaction({ ...transactionData, id: editingId });
-                } else {
-                    await addTransaction(transactionData);
-                }
-                resetForm();
-            } catch (error) {
-                console.error("Failed to save transaction", error);
-                alert("Errore durante il salvataggio della transazione.");
-            }
+            await (editingId
+                ? updateTransaction({ ...transactionData, id: editingId })
+                : addTransaction(transactionData));
+
+            resetForm();
         }
     };
 
@@ -136,14 +132,14 @@ const TransactionsView: React.FC = () => {
         setShowAddTransaction(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (confirm("Sei sicuro di voler eliminare questa transazione?")) {
-            try {
-                await deleteTransaction(id);
-            } catch (error) {
-                console.error(error);
-                alert("Errore durante l'eliminazione.");
-            }
+    const confirmDelete = (id: number) => {
+        setDeleteModal({ isOpen: true, id });
+    }
+
+    const performDelete = async () => {
+        if (deleteModal.id) {
+            await deleteTransaction(deleteModal.id);
+            setDeleteModal({ isOpen: false, id: null });
         }
     };
 
@@ -183,6 +179,14 @@ const TransactionsView: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, id: null })}
+                onConfirm={performDelete}
+                title="Elimina Transazione"
+                message="Sei sicuro di voler eliminare questa transazione? L'operazione non è reversibile."
+            />
+
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">Transazioni ({currentYear})</h2>
                 <button onClick={() => { setEditingId(null); setShowAddTransaction(true); }} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors">
@@ -332,7 +336,7 @@ const TransactionsView: React.FC = () => {
                                         <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
                                             <Pencil size={16} />
                                         </button>
-                                        <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
+                                        <button onClick={() => confirmDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>

@@ -3,6 +3,7 @@ import { PlusCircle, Save, Repeat, Pencil, Trash2, Calendar, PauseCircle, CheckC
 import { FixedDebt } from '../types';
 import { formatCurrency, getMonthsElapsed } from '../constants';
 import { useFinance } from '../context/FinanceContext';
+import ConfirmDialog from './ConfirmDialog';
 
 const initialDebtState: Omit<FixedDebt, 'id'> = {
     name: '', totalDue: 0, installment: 0, debitDay: 1, isSuspended: false, type: 'debt',
@@ -23,6 +24,7 @@ const FixedDebtsView: React.FC = () => {
 
     // Form state handles strings for inputs to allow empty states during typing
     const [debtToEdit, setDebtToEdit] = useState<(Omit<FixedDebt, 'id'> & { id?: number, totalDueStr?: string, installmentStr?: string }) | null>(null);
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
 
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -75,18 +77,21 @@ const FixedDebtsView: React.FC = () => {
             setDebtToEdit(null);
         } catch (error) {
             console.error(error);
-            alert("Errore durante il salvataggio.");
         }
     };
 
-    const deleteDebt = async (id: number) => {
-        if (confirm("Sei sicuro di voler eliminare questo debito?")) {
+    const confirmDelete = (id: number) => {
+        setDeleteModal({ isOpen: true, id });
+    };
+
+    const performDelete = async () => {
+        if (deleteModal.id) {
             try {
-                await deleteFixedDebt(id);
+                await deleteFixedDebt(deleteModal.id);
             } catch (error) {
                 console.error(error);
-                alert("Errore durante l'eliminazione.");
             }
+            setDeleteModal({ isOpen: false, id: null });
         }
     };
 
@@ -100,10 +105,8 @@ const FixedDebtsView: React.FC = () => {
     const handleRegisterPayment = async (id: number) => {
         try {
             await registerDebtPayment(id);
-            alert("Pagamento registrato con successo!");
         } catch (error) {
             console.error(error);
-            alert("Errore durante la registrazione del pagamento.");
         }
     };
 
@@ -114,6 +117,13 @@ const FixedDebtsView: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, id: null })}
+                onConfirm={performDelete}
+                title="Elimina Debito"
+                message="Sei sicuro di voler eliminare questo debito? L'operazione non è reversibile."
+            />
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">Debiti e Abbonamenti Fissi</h2>
                 <button onClick={openNewDebt} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors">
@@ -257,7 +267,7 @@ const FixedDebtsView: React.FC = () => {
                                         </button>
                                     ) : (
                                         <button
-                                            onClick={() => deleteDebt(debt.id)}
+                                            onClick={() => confirmDelete(debt.id)}
                                             className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors"
                                             title="Elimina"
                                         >

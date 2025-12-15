@@ -10,6 +10,7 @@ import FixedDebtsView from './components/FixedDebtsView';
 import GoalsView from './components/GoalsView';
 import SettingsView from './components/SettingsView';
 import { FinanceProvider } from './context/FinanceContext';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const App: React.FC = () => {
     // Auth State
@@ -44,7 +45,7 @@ const App: React.FC = () => {
     };
 
     if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Caricamento...</div>;
+        return <LoadingSpinner fullScreen text="Avvio applicazione..." />;
     }
 
     if (!user || !userId) {

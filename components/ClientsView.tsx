@@ -16,7 +16,6 @@ const ClientsView: React.FC = () => {
                 setShowAddClient(false);
             } catch (error) {
                 console.error(error);
-                alert("Errore durante l'aggiunta del cliente.");
             }
         }
     };

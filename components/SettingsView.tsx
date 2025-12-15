@@ -5,6 +5,7 @@ import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
 import { supabase } from '../lib/supabase';
+import ConfirmDialog from './ConfirmDialog';
 
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
@@ -29,6 +30,7 @@ const SettingsView: React.FC = () => {
     });
     const [suggestions, setSuggestions] = useState<typeof ATECO_SEED_DATA>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
 
     // Handle Opening Balance
     const currentOpeningBalance = settings.openingHistory[currentYear] || 0;
@@ -108,23 +110,26 @@ const SettingsView: React.FC = () => {
                 setShowSuggestions(false);
             } catch (error) {
                 console.error(error);
-                alert("Errore durante l'aggiunta del codice ATECO.");
             }
         }
     };
 
-    const handleDeleteAteco = async (id: string) => {
+    const handleDeleteAteco = (id: string) => {
         if (atecoCodes.length > 1) {
-            if (confirm("Sei sicuro di voler eliminare questo codice ATECO?")) {
-                try {
-                    await deleteAtecoCode(id);
-                } catch (error) {
-                    console.error(error);
-                    alert("Errore durante l'eliminazione.");
-                }
-            }
+            setDeleteModal({ isOpen: true, id });
         } else {
             alert("Devi mantenere almeno un codice ATECO.");
+        }
+    };
+
+    const performDeleteAteco = async () => {
+        if (deleteModal.id) {
+            try {
+                await deleteAtecoCode(deleteModal.id);
+            } catch (error) {
+                console.error(error);
+            }
+            setDeleteModal({ isOpen: false, id: null });
         }
     };
 
@@ -575,6 +580,13 @@ const SettingsView: React.FC = () => {
 
     return (
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
+            <ConfirmDialog
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, id: null })}
+                onConfirm={performDeleteAteco}
+                title="Elimina Codice ATECO"
+                message="Sei sicuro di voler eliminare questo codice? Le transazioni associate potrebbero perdere il riferimento."
+            />
             {/* Sidebar Navigation */}
             <div className="md:w-64 flex-shrink-0">
                 <nav className="space-y-1">

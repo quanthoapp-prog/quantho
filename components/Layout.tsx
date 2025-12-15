@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { Toaster } from 'react-hot-toast';
 
 const Layout: React.FC = () => {
     const { currentYear, availableYears, setCurrentYear } = useFinance();
@@ -125,8 +126,8 @@ const Layout: React.FC = () => {
                                     setMobileMenuOpen(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(item.path)
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <item.icon size={20} />
@@ -146,8 +147,8 @@ const Layout: React.FC = () => {
                                 key={item.path}
                                 onClick={() => navigate(item.path)}
                                 className={`flex items-center gap-2 py-4 border-b-2 text-sm font-medium transition-colors ${isActive(item.path)
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                             >
                                 <item.icon size={18} />
@@ -162,6 +163,7 @@ const Layout: React.FC = () => {
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 fade-in">
                 <Outlet />
             </main>
+            <Toaster position="top-right" />
         </div>
     );
 };

@@ -8,6 +8,7 @@ import { debtsService } from '../services/debts';
 import { atecoService } from '../services/ateco';
 import { useTaxCalculations } from '../hooks/useTaxCalculations';
 import { supabase } from '../lib/supabase';
+import { toast } from 'react-hot-toast';
 
 interface FinanceContextType {
     // Data
@@ -124,75 +125,89 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
     // Actions
     const addTransaction = async (t: Omit<Transaction, 'id'>) => {
         if (!userId) return;
-        try {
-            const newTx = await transactionService.add(t, userId);
-            setTransactions(prev => [...prev, newTx]);
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = transactionService.add(t, userId)
+            .then(newTx => setTransactions(prev => [...prev, newTx]));
+
+        toast.promise(promise, {
+            loading: 'Aggiunta transazione...',
+            success: 'Transazione aggiunta!',
+            error: 'Errore durante l\'aggiunta'
+        });
+        await promise;
     };
 
     const updateTransaction = async (t: Transaction) => {
-        try {
-            const updated = await transactionService.update(t);
-            setTransactions(prev => prev.map(item => item.id === updated.id ? updated : item));
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = transactionService.update(t)
+            .then(updated => setTransactions(prev => prev.map(item => item.id === updated.id ? updated : item)));
+
+        toast.promise(promise, {
+            loading: 'Aggiornamento...',
+            success: 'Transazione aggiornata!',
+            error: 'Errore durante l\'aggiornamento'
+        });
+        await promise;
     };
 
     const deleteTransaction = async (id: number) => {
-        try {
-            await transactionService.delete(id);
-            setTransactions(prev => prev.filter(item => item.id !== id));
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = transactionService.delete(id)
+            .then(() => setTransactions(prev => prev.filter(item => item.id !== id)));
+
+        toast.promise(promise, {
+            loading: 'Eliminazione...',
+            success: 'Transazione eliminata!',
+            error: 'Errore durante l\'eliminazione'
+        });
+        await promise;
     };
 
     const addClient = async (c: Omit<Client, 'id'>) => {
         if (!userId) return;
-        try {
-            const newClient = await clientService.add(c, userId);
-            setClients(prev => [...prev, newClient]);
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = clientService.add(c, userId)
+            .then(newClient => setClients(prev => [...prev, newClient]));
+
+        toast.promise(promise, {
+            loading: 'Aggiunta cliente...',
+            success: 'Cliente aggiunto!',
+            error: 'Errore durante l\'aggiunta del cliente'
+        });
+        await promise;
     };
 
     const addFixedDebt = async (d: Omit<FixedDebt, 'id'>) => {
         if (!userId) return;
-        try {
-            const newDebt = await debtsService.add(d, userId);
-            setFixedDebts(prev => [...prev, newDebt]);
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = debtsService.add(d, userId)
+            .then(newDebt => setFixedDebts(prev => [...prev, newDebt]));
+
+        toast.promise(promise, {
+            loading: 'Salvataggio...',
+            success: 'Debito fisso salvato!',
+            error: 'Errore durante il salvataggio'
+        });
+        await promise;
     };
 
     const updateFixedDebt = async (d: FixedDebt) => {
-        try {
-            const updated = await debtsService.update(d);
-            setFixedDebts(prev => prev.map(item => item.id === updated.id ? updated : item));
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = debtsService.update(d)
+            .then(updated => setFixedDebts(prev => prev.map(item => item.id === updated.id ? updated : item)));
+
+        toast.promise(promise, {
+            loading: 'Aggiornamento...',
+            success: 'Debito aggiornato!',
+            error: 'Errore durante l\'aggiornamento'
+        });
+        await promise;
     };
 
     const deleteFixedDebt = async (id: number) => {
-        try {
-            await debtsService.delete(id);
-            setFixedDebts(prev => prev.filter(item => item.id !== id));
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = debtsService.delete(id)
+            .then(() => setFixedDebts(prev => prev.filter(item => item.id !== id)));
+
+        toast.promise(promise, {
+            loading: 'Eliminazione...',
+            success: 'Debito eliminato con successo!',
+            error: 'Errore durante l\'eliminazione'
+        });
+        await promise;
     };
 
     const registerDebtPayment = async (debtId: number) => {
@@ -205,56 +220,63 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const currentYearVal = today.getFullYear();
         const paymentTag = `debito-fisso-${debt.id}-${currentYearVal}-${currentMonth}`;
 
-        try {
-            const newTx = await transactionService.add({
-                date: today.toISOString().split('T')[0],
-                type: 'expense',
-                category: 'personal',
-                amount: debt.installment,
-                description: `Rata ${debt.name} - ${currentMonth}/${currentYearVal}`,
-                client: '',
-                tags: paymentTag,
-                atecoCodeId: undefined,
-                status: 'active'
-            }, userId);
-            setTransactions(prev => [...prev, newTx]);
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = transactionService.add({
+            date: today.toISOString().split('T')[0],
+            type: 'expense',
+            category: 'personal',
+            amount: debt.installment,
+            description: `Rata ${debt.name} - ${currentMonth}/${currentYearVal}`,
+            client: '',
+            tags: paymentTag,
+            atecoCodeId: undefined,
+            status: 'active'
+        }, userId).then(newTx => setTransactions(prev => [...prev, newTx]));
+
+        toast.promise(promise, {
+            loading: 'Registrazione pagamento...',
+            success: 'Pagamento registrato!',
+            error: 'Errore durante la registrazione'
+        });
+        await promise;
     };
 
     const updateSettingsAction = async (newSettings: UserSettings) => {
         if (!userId) return;
         // Optimistic update
         setSettings(newSettings);
-        try {
-            await settingsService.update(newSettings, userId);
-        } catch (e) {
-            console.error("Failed to sync settings", e);
-            // Could revert here if needed
-        }
+        const promise = settingsService.update(newSettings, userId);
+
+        toast.promise(promise, {
+            loading: 'Salvataggio impostazioni...',
+            success: 'Impostazioni salvate!',
+            error: 'Errore nel salvataggio remoto'
+        });
+        await promise;
     };
 
     const addAtecoCode = async (ateco: AtecoCode) => {
         if (!userId) return;
-        try {
-            await atecoService.add(ateco, userId);
-            setAtecoCodes(prev => [...prev, ateco]);
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = atecoService.add(ateco, userId)
+            .then(() => setAtecoCodes(prev => [...prev, ateco]));
+
+        toast.promise(promise, {
+            loading: 'Aggiunta codice ATECO...',
+            success: 'Codice ATECO aggiunto!',
+            error: 'Errore durante l\'aggiunta'
+        });
+        await promise;
     };
 
     const deleteAtecoCode = async (id: string) => {
-        try {
-            await atecoService.delete(id);
-            setAtecoCodes(prev => prev.filter(item => item.id !== id));
-        } catch (e) {
-            console.error(e);
-            throw e;
-        }
+        const promise = atecoService.delete(id)
+            .then(() => setAtecoCodes(prev => prev.filter(item => item.id !== id)));
+
+        toast.promise(promise, {
+            loading: 'Eliminazione...',
+            success: 'Codice eliminato!',
+            error: 'Errore durante l\'eliminazione'
+        });
+        await promise;
     };
 
     const exportData = () => {
