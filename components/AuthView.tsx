@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ChevronsRight, Mail, Lock, ArrowRight, Loader2, CheckCircle, Info } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle, Info, Wallet } from 'lucide-react';
 
 interface AuthViewProps {
     onLogin: (email: string) => void;
@@ -9,11 +8,13 @@ interface AuthViewProps {
 
 const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
+    const [isForgot, setIsForgot] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,17 +22,18 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            if (isLogin) {
+            if (isForgot) {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin,
+                });
+                if (error) throw error;
+                setResetEmailSent(true);
+            } else if (isLogin) {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
                 if (error) throw error;
-                // onLogin is handled by the parent listening to auth state changes, 
-                // but we can call it here or just let the app redirect.
-                // However, App.tsx likely needs refactoring to listen to state instead of callback.
-                // For now, let's keep the callback as a success signal if needed, 
-                // but proper flow is App.tsx reacting to session.
                 onLogin(email);
             } else {
                 const { error } = await supabase.auth.signUp({
@@ -42,11 +44,11 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 setRegistrationSuccess(true);
             }
         } catch (err: any) {
-            console.log("Signup Error Full Object:", err);
-            console.log("Signup Error Message:", err.message);
-
+            console.log("Auth Error:", err);
             if (err.message && (err.message.includes("User already registered") || err.message.includes("already has been registered"))) {
                 setError('Mail già registrata');
+            } else if (err.message && err.message.includes("Infrequent")) {
+                setError('Troppe richieste. Riprova più tardi.');
             } else {
                 setError(err.message || 'Si è verificato un errore durante l\'autenticazione.');
             }
@@ -71,12 +73,35 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                     </p>
 
                     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mx-4">
-                        <div className="flex items-center gap-3 text-left text-sm text-gray-600 mb-4">
-                            <Info size={20} className="text-blue-500 flex-shrink-0" />
-                            <p>Se non trovi l'email, controlla nella cartella <strong>Spam</strong> o <strong>Posta Indesiderata</strong>.</p>
-                        </div>
                         <button
                             onClick={() => { setRegistrationSuccess(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                        >
+                            Torna al Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (resetEmailSent) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+                <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+                    <div className="flex justify-center items-center gap-3 mb-6">
+                        <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-lg">
+                            <Mail size={40} strokeWidth={3} />
+                        </div>
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Email Inviata</h2>
+                    <p className="text-gray-600 mb-8">
+                        Se l'indirizzo <strong>{email}</strong> è registrato, riceverai un link per reimpostare la password.
+                    </p>
+
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mx-4">
+                        <button
+                            onClick={() => { setResetEmailSent(false); setIsForgot(false); setIsLogin(true); setEmail(''); setPassword(''); }}
                             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
                         >
                             Torna al Login
@@ -92,26 +117,24 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                 {/* LOGO */}
                 <div className="flex justify-center items-center gap-3 mb-6">
-                    <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-lg">
-                        <ChevronsRight size={40} strokeWidth={3} />
+                    <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg shadow-blue-200">
+                        <Wallet size={36} strokeWidth={2.5} />
                     </div>
-                    <div className="text-left">
-                        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-none">
-                            Quantho
-                        </h1>
-                        <p className="text-xs font-bold text-blue-600 tracking-wide uppercase mt-0.5">
-                            Controlla le spese, vivi meglio!
-                        </p>
+                    <div className="flex flex-col text-left">
+                        <span className="text-3xl font-extrabold text-slate-800 tracking-tight leading-none">Quant'ho</span>
+                        <div className="text-[10px] font-semibold text-slate-400 mt-0.5 tracking-wider uppercase">Finance Manager</div>
                     </div>
                 </div>
 
                 <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                    {isLogin ? 'Accedi al tuo account' : 'Crea il tuo spazio finanziario'}
+                    {isForgot ? 'Recupera Password' : (isLogin ? 'Accedi al tuo account' : 'Crea il tuo spazio finanziario')}
                 </h2>
-                <p className="mt-2 text-sm text-gray-600 max-w-xs mx-auto">
-                    La dashboard completa per il regime forfettario.
-                    Monitora tasse, fatturato e previsioni in un unico posto.
-                </p>
+                {!isForgot && (
+                    <p className="mt-2 text-sm text-gray-600 max-w-xs mx-auto">
+                        La dashboard completa per il regime forfettario.
+                        Monitora tasse, fatturato e previsioni in un unico posto.
+                    </p>
+                )}
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -139,27 +162,29 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                             </div>
                         </div>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Password
-                            </label>
-                            <div className="mt-1 relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-gray-400" />
+                        {!isForgot && (
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                    Password
+                                </label>
+                                <div className="mt-1 relative rounded-md shadow-sm">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="current-password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
+                                        placeholder="••••••••"
+                                    />
                                 </div>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
-                                    placeholder="••••••••"
-                                />
                             </div>
-                        </div>
+                        )}
 
                         {error && (
                             <div className="rounded-md bg-red-50 p-3">
@@ -181,12 +206,24 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                                     <Loader2 className="animate-spin h-5 w-5" />
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        {isLogin ? 'Accedi' : 'Registrati Gratuitamente'} <ArrowRight size={16} />
+                                        {isForgot ? 'Invia link di reset' : (isLogin ? 'Accedi' : 'Registrati Gratuitamente')}
+                                        {!isForgot && !isLoading && <ArrowRight size={16} />}
                                     </span>
                                 )}
                             </button>
                         </div>
                     </form>
+
+                    {!isForgot && isLogin && (
+                        <div className="mt-4 text-center">
+                            <button
+                                onClick={() => { setIsForgot(true); setError(''); }}
+                                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                            >
+                                Hai dimenticato la password?
+                            </button>
+                        </div>
+                    )}
 
                     <div className="mt-6">
                         <div className="relative">
@@ -195,23 +232,30 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white text-gray-500">
-                                    {isLogin ? 'Nuovo su Quantho?' : 'Hai già un account?'}
+                                    {isForgot ? 'O torna indietro' : (isLogin ? 'Nuovo su Quantho?' : 'Hai già un account?')}
                                 </span>
                             </div>
                         </div>
 
                         <div className="mt-6 grid grid-cols-1 gap-3">
                             <button
-                                onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                                onClick={() => {
+                                    if (isForgot) {
+                                        setIsForgot(false);
+                                    } else {
+                                        setIsLogin(!isLogin);
+                                    }
+                                    setError('');
+                                }}
                                 className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
                             >
-                                {isLogin ? 'Crea un nuovo account' : 'Torna al Login'}
+                                {isForgot ? 'Annulla' : (isLogin ? 'Crea un nuovo account' : 'Torna al Login')}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {!isLogin && (
+                {!isLogin && !isForgot && (
                     <div className="mt-6 grid grid-cols-2 gap-4 text-xs text-gray-500 max-w-sm mx-auto">
                         <div className="flex items-center gap-2">
                             <CheckCircle size={14} className="text-green-500" />
