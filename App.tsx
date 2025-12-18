@@ -17,6 +17,7 @@ const App: React.FC = () => {
     const [user, setUser] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRecovering, setIsRecovering] = useState(false);
 
     // Auth Listener
     useEffect(() => {
@@ -30,7 +31,10 @@ const App: React.FC = () => {
         // Listen for changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                setIsRecovering(true);
+            }
             setUser(session?.user?.email ?? null);
             setUserId(session?.user?.id ?? null);
             setIsLoading(false);
@@ -48,8 +52,8 @@ const App: React.FC = () => {
         return <LoadingSpinner fullScreen text="Avvio applicazione..." />;
     }
 
-    if (!user || !userId) {
-        return <AuthView onLogin={handleLogin} />;
+    if (!user || !userId || isRecovering) {
+        return <AuthView onLogin={handleLogin} recoveryMode={isRecovering} onPasswordReset={() => setIsRecovering(false)} />;
     }
 
     return (

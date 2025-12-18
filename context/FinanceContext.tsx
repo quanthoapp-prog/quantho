@@ -37,6 +37,7 @@ interface FinanceContextType {
     addAtecoCode: (a: AtecoCode) => Promise<void>;
     deleteAtecoCode: (id: string) => Promise<void>;
     exportData: () => void;
+    deleteAccount: () => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -302,6 +303,39 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         document.body.removeChild(link);
     };
 
+    const deleteAccount = async () => {
+        if (!userId) return;
+
+        const promise = (async () => {
+            // 1. Delete all transactions
+            const { error: txError } = await supabase.from('transactions').delete().eq('user_id', userId);
+            if (txError) throw txError;
+
+            // 2. Delete all clients
+            const { error: clError } = await supabase.from('clients').delete().eq('user_id', userId);
+            if (clError) throw clError;
+
+            // 3. Delete all fixed debts
+            const { error: dbError } = await supabase.from('fixed_debts').delete().eq('user_id', userId);
+            if (dbError) throw dbError;
+
+            // 4. Delete user settings
+            const { error: stError } = await supabase.from('user_settings').delete().eq('user_id', userId);
+            if (stError) throw stError;
+
+            // 5. Sign out
+            const { error: authError } = await supabase.auth.signOut();
+            if (authError) throw authError;
+        })();
+
+        toast.promise(promise, {
+            loading: 'Eliminazione account in corso...',
+            success: 'Account eliminato correttamente',
+            error: 'Errore durante l\'eliminazione'
+        });
+        await promise;
+    };
+
     const value = {
         transactions,
         clients,
@@ -325,7 +359,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         updateSettings: updateSettingsAction,
         addAtecoCode,
         deleteAtecoCode,
-        exportData
+        exportData,
+        deleteAccount
     };
 
     return (

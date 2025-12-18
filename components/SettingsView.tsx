@@ -6,6 +6,7 @@ import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
 import { supabase } from '../lib/supabase';
 import ConfirmDialog from './ConfirmDialog';
+import { toast } from 'react-hot-toast';
 
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
@@ -19,7 +20,8 @@ const SettingsView: React.FC = () => {
         currentYear,
         transactions,
         userEmail,
-        exportData
+        exportData,
+        deleteAccount
     } = useFinance();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
@@ -31,6 +33,7 @@ const SettingsView: React.FC = () => {
     const [suggestions, setSuggestions] = useState<typeof ATECO_SEED_DATA>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
+    const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
 
     // Handle Opening Balance
     const currentOpeningBalance = settings.openingHistory[currentYear] || 0;
@@ -138,6 +141,23 @@ const SettingsView: React.FC = () => {
         // window.location.reload(); // Optional, but usually Auth provider update handles it.
     };
 
+    const handleResetPasswordRequest = async () => {
+        if (!userEmail) return;
+        const promise = supabase.auth.resetPasswordForEmail(userEmail, {
+            redirectTo: window.location.origin,
+        });
+        toast.promise(promise, {
+            loading: 'Invio email di reset...',
+            success: 'Email inviata! Controlla la tua posta.',
+            error: 'Errore durante l\'invio'
+        });
+    };
+
+    const handleDeleteAccount = async () => {
+        await deleteAccount();
+        setIsDeleteAccountOpen(false);
+    };
+
     const renderAccountSection = () => (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
@@ -161,7 +181,10 @@ const SettingsView: React.FC = () => {
                     </div>
 
                     <div className="pt-4 border-t flex flex-col sm:flex-row gap-3">
-                        <button className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                        <button
+                            onClick={handleResetPasswordRequest}
+                            className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                        >
                             Reset Password
                         </button>
                         <button className="flex-1 border border-blue-200 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
@@ -181,11 +204,31 @@ const SettingsView: React.FC = () => {
 
                         <button
                             onClick={handleLogout}
-                            className="w-full bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                            className="w-full bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
                         >
                             <LogOut size={16} /> Disconnetti Account
                         </button>
                     </div>
+
+                    <div className="pt-4 border-t">
+                        <button
+                            onClick={() => setIsDeleteAccountOpen(true)}
+                            className="w-full bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Trash2 size={16} /> Elimina Account e Dati Correlati
+                        </button>
+                    </div>
+
+                    <ConfirmDialog
+                        isOpen={isDeleteAccountOpen}
+                        onClose={() => setIsDeleteAccountOpen(false)}
+                        onConfirm={handleDeleteAccount}
+                        title="Elimina Account"
+                        message="Sei sicuro di voler eliminare definitivamente il tuo account e tutti i dati associati (transazioni, clienti, debiti)? Questa azione non è reversibile."
+                        confirmLabel="Sì, Elimina Tutto"
+                        cancelLabel="Annulla"
+                        variant="danger"
+                    />
                 </div>
             </div>
         </div>

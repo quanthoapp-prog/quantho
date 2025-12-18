@@ -4,17 +4,22 @@ import { Mail, Lock, ArrowRight, Loader2, CheckCircle, Info, Wallet } from 'luci
 
 interface AuthViewProps {
     onLogin: (email: string) => void;
+    recoveryMode?: boolean;
+    onPasswordReset?: () => void;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordReset }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [isForgot, setIsForgot] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(recoveryMode || false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
     const [resetEmailSent, setResetEmailSent] = useState(false);
+    const [passwordUpdated, setPasswordUpdated] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,7 +27,14 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
         setIsLoading(true);
 
         try {
-            if (isForgot) {
+            if (isUpdating) {
+                const { error } = await supabase.auth.updateUser({
+                    password: newPassword,
+                });
+                if (error) throw error;
+                setPasswordUpdated(true);
+                if (onPasswordReset) onPasswordReset();
+            } else if (isForgot) {
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
                     redirectTo: window.location.origin,
                 });
@@ -85,23 +97,23 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
         );
     }
 
-    if (resetEmailSent) {
+    if (passwordUpdated) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                     <div className="flex justify-center items-center gap-3 mb-6">
-                        <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-lg">
-                            <Mail size={40} strokeWidth={3} />
+                        <div className="bg-green-600 text-white p-3 rounded-2xl shadow-lg">
+                            <CheckCircle size={40} strokeWidth={3} />
                         </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Email Inviata</h2>
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Password Aggiornata</h2>
                     <p className="text-gray-600 mb-8">
-                        Se l'indirizzo <strong>{email}</strong> è registrato, riceverai un link per reimpostare la password.
+                        La tua password è stata reimpostata con successo. Ora puoi accedere con la nuova password.
                     </p>
 
                     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mx-4">
                         <button
-                            onClick={() => { setResetEmailSent(false); setIsForgot(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                            onClick={() => { setPasswordUpdated(false); setIsUpdating(false); setIsLogin(true); setEmail(''); setPassword(''); }}
                             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
                         >
                             Torna al Login
@@ -127,7 +139,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 </div>
 
                 <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                    {isForgot ? 'Recupera Password' : (isLogin ? 'Accedi al tuo account' : 'Crea il tuo spazio finanziario')}
+                    {isUpdating ? 'Reimposta la tua Password' : (isForgot ? 'Recupera Password' : (isLogin ? 'Accedi al tuo account' : 'Crea il tuo spazio finanziario'))}
                 </h2>
                 {!isForgot && (
                     <p className="mt-2 text-sm text-gray-600 max-w-xs mx-auto">
@@ -140,29 +152,31 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-gray-100">
                     <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Indirizzo Email
-                            </label>
-                            <div className="mt-1 relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-gray-400" />
+                        {!isUpdating && (
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                    Indirizzo Email
+                                </label>
+                                <div className="mt-1 relative rounded-md shadow-sm">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Mail className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
+                                        placeholder="tuo@email.com"
+                                    />
                                 </div>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
-                                    placeholder="tuo@email.com"
-                                />
                             </div>
-                        </div>
+                        )}
 
-                        {!isForgot && (
+                        {!isForgot && !isUpdating && (
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                     Password
@@ -179,6 +193,29 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {isUpdating && (
+                            <div>
+                                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                                    Nuova Password
+                                </label>
+                                <div className="mt-1 relative rounded-md shadow-sm">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="new-password"
+                                        name="new-password"
+                                        type="password"
+                                        required
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
                                         className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg py-2.5 border"
                                         placeholder="••••••••"
                                     />
@@ -206,8 +243,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                                     <Loader2 className="animate-spin h-5 w-5" />
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        {isForgot ? 'Invia link di reset' : (isLogin ? 'Accedi' : 'Registrati Gratuitamente')}
-                                        {!isForgot && !isLoading && <ArrowRight size={16} />}
+                                        {isUpdating ? 'Aggiorna Password' : (isForgot ? 'Invia link di reset' : (isLogin ? 'Accedi' : 'Registrati Gratuitamente'))}
+                                        {!isLoading && <ArrowRight size={16} />}
                                     </span>
                                 )}
                             </button>
@@ -240,7 +277,10 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                         <div className="mt-6 grid grid-cols-1 gap-3">
                             <button
                                 onClick={() => {
-                                    if (isForgot) {
+                                    if (isUpdating) {
+                                        setIsUpdating(false);
+                                        setIsLogin(true);
+                                    } else if (isForgot) {
                                         setIsForgot(false);
                                     } else {
                                         setIsLogin(!isLogin);
@@ -249,7 +289,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                                 }}
                                 className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
                             >
-                                {isForgot ? 'Annulla' : (isLogin ? 'Crea un nuovo account' : 'Torna al Login')}
+                                {isUpdating ? 'Annulla reset' : (isForgot ? 'Annulla' : (isLogin ? 'Crea un nuovo account' : 'Torna al Login'))}
                             </button>
                         </div>
                     </div>
