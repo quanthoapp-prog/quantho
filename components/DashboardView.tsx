@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, LIMITE_FORFETTARIO } from '../constants';
+import IncomeExpenseChart from './charts/IncomeExpenseChart';
+import CategoryPieChart from './charts/CategoryPieChart';
 
 const DashboardView: React.FC = () => {
     const { stats, currentYear, transactions, settings } = useFinance();
@@ -117,6 +119,22 @@ const DashboardView: React.FC = () => {
                             <span className="opacity-80"> + Riporto</span>
                         )}
                     </div>
+                </div>
+            </div>
+
+            {/* CHARTS SECTION */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 lg:col-span-2">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-800 flex items-center gap-2">
+                        <TrendingUp size={20} className="text-blue-600" /> Andamento Mensile
+                    </h3>
+                    <IncomeExpenseChart transactions={transactions} year={currentYear} />
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-800 flex items-center gap-2">
+                        <PieChart size={20} className="text-purple-600" /> Ripartizione Spese
+                    </h3>
+                    <CategoryPieChart transactions={transactions} year={currentYear} />
                 </div>
             </div>
 

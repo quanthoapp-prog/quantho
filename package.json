@@ -12,10 +12,11 @@
     "@supabase/supabase-js": "^2.86.2",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.556.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hot-toast": "^2.6.0",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

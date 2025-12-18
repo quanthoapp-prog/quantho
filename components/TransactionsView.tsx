@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save } from 'lucide-react';
+import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save, Search, Receipt } from 'lucide-react';
 import TagInput from './TagInput';
 import { Transaction } from '../types';
 import { formatCurrency } from '../constants';
 import { useFinance } from '../context/FinanceContext';
 import ConfirmDialog from './ConfirmDialog';
+import EmptyState from './EmptyState';
 
 const TransactionsView: React.FC = () => {
     const {
@@ -167,10 +168,10 @@ const TransactionsView: React.FC = () => {
 
     const getCategoryBadge = (category: string) => {
         switch (category) {
-            case 'tax': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">F24 TASSE</span>;
-            case 'inps': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">F24 INPS</span>;
-            case 'business': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">BUSINESS</span>;
-            case 'personal': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">PERSONALE</span>;
+            case 'tax': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium border border-red-200">F24 TASSE</span>;
+            case 'inps': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium border border-purple-200">F24 INPS</span>;
+            case 'business': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium border border-blue-200">BUSINESS</span>;
+            case 'personal': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium border border-gray-200">PERSONALE</span>;
             default: return null;
         }
     };
@@ -190,7 +191,9 @@ const TransactionsView: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">Transazioni ({currentYear})</h2>
                 <button onClick={() => { setEditingId(null); setShowAddTransaction(true); }} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors">
-                    <PlusCircle size={20} />Nuova transazione
+                    <PlusCircle size={20} />
+                    <span className="hidden md:inline">Nuova transazione</span>
+                    <span className="md:hidden">Nuova</span>
                 </button>
             </div>
 
@@ -290,62 +293,114 @@ const TransactionsView: React.FC = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipologia</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Importo</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
+            {/* Empty State */}
+            {sortedTransactions.length === 0 && !showAddTransaction && (
+                <EmptyState
+                    title="Nessuna Transazione"
+                    message={`Non ci sono ancora movimenti registrati per l'anno ${currentYear}. Inizia aggiungendo la tua prima entrata o uscita.`}
+                    icon={Receipt}
+                    actionLabel="Nuova Transazione"
+                    onAction={() => setShowAddTransaction(true)}
+                />
+            )}
+
+            {/* Content when there are transactions */}
+            {sortedTransactions.length > 0 && (
+                <>
+                    {/* DESKTOP TABLE VIEW (Hidden on Mobile) */}
+                    <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipologia</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Importo</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {sortedTransactions.map(t => (
+                                    <tr key={t.id} className="hover:bg-blue-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{new Date(t.date).toLocaleDateString('it-IT')}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            <div className="font-medium">{t.description}</div>
+                                            <div className="flex flex-col gap-0.5 mt-0.5">
+                                                {t.client && <span className="text-xs text-blue-600">Cliente: {t.client}</span>}
+                                                {t.type === 'income' && t.atecoCodeId && (
+                                                    <span className="text-xs text-gray-500">
+                                                        ATECO: {getAtecoLabel(t.atecoCodeId) || <span className="text-orange-500">Non specificato</span>}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div className="flex flex-col gap-1 items-start">
+                                                {getCategoryBadge(t.category)}
+                                                {t.status === 'scheduled' && (
+                                                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium inline-block">
+                                                        📅 Programmata
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold text-right ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                            {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
+                                                    <Pencil size={16} />
+                                                </button>
+                                                <button onClick={() => confirmDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* MOBILE CARD VIEW (Filtered via CSS) */}
+                    <div className="md:hidden space-y-4">
                         {sortedTransactions.map(t => (
-                            <tr key={t.id} className="hover:bg-blue-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{new Date(t.date).toLocaleDateString('it-IT')}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">
-                                    <div className="font-medium">{t.description}</div>
-                                    <div className="flex flex-col gap-0.5 mt-0.5">
-                                        {t.client && <span className="text-xs text-blue-600">Cliente: {t.client}</span>}
-                                        {t.type === 'income' && (
-                                            <span className="text-xs text-gray-500">
-                                                ATECO: {getAtecoLabel(t.atecoCodeId) || <span className="text-orange-500">Non specificato</span>}
-                                            </span>
-                                        )}
-                                        {t.category === 'tax' && <span className="text-xs text-red-500 font-semibold flex items-center gap-1"><Banknote size={14} />Saldo/Acconto Imposta</span>}
-                                        {t.category === 'inps' && <span className="text-xs text-purple-600 font-semibold flex items-center gap-1"><ShieldCheck size={14} />Contributi INPS</span>}
+                            <div key={t.id} className="bg-white p-4 rounded-xl shadow border border-gray-100 flex flex-col gap-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">{new Date(t.date).toLocaleDateString('it-IT')}</div>
+                                        <div className="font-semibold text-gray-900">{t.description}</div>
+                                        {t.client && <div className="text-xs text-blue-600 mt-0.5">Cliente: {t.client}</div>}
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <div className="flex flex-col gap-1">
+                                    <div className={`text-lg font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-end border-t border-gray-50 pt-3">
+                                    <div className="flex flex-col gap-1 items-start">
                                         {getCategoryBadge(t.category)}
                                         {t.status === 'scheduled' && (
-                                            <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium inline-block">
+                                            <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-[10px] font-medium">
                                                 📅 Programmata
                                             </span>
                                         )}
                                     </div>
-                                </td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold text-right ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                                    {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
-                                            <Pencil size={16} />
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handleEdit(t)} className="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition-colors">
+                                            <Pencil size={18} />
                                         </button>
-                                        <button onClick={() => confirmDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
-                                            <Trash2 size={16} />
+                                        <button onClick={() => confirmDelete(t.id)} className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition-colors">
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
-            </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

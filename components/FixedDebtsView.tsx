@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { PlusCircle, Save, Repeat, Pencil, Trash2, Calendar, PauseCircle, CheckCircle, Lock, AlertTriangle } from 'lucide-react';
+import { PlusCircle, Repeat, PauseCircle, Calendar, Pencil, Lock, Trash2, CheckCircle, AlertTriangle, Save } from 'lucide-react';
+import { useFinance } from '../context/FinanceContext';
 import { FixedDebt } from '../types';
 import { formatCurrency, getMonthsElapsed } from '../constants';
-import { useFinance } from '../context/FinanceContext';
 import ConfirmDialog from './ConfirmDialog';
+import EmptyState from './EmptyState';
 
 const initialDebtState: Omit<FixedDebt, 'id'> = {
     name: '', totalDue: 0, installment: 0, debitDay: 1, isSuspended: false, type: 'debt',
@@ -227,104 +228,114 @@ const FixedDebtsView: React.FC = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {fixedDebts.map(debt => {
-                    const elapsedMonthsTotal = getMonthsElapsed(debt.startYear, debt.startMonth, currentFullYear, currentMonth + 1);
-                    const paidAmount = debt.isSuspended ? 0 : (debt.installment * elapsedMonthsTotal);
-                    const remainingBalance = Math.max(0, debt.totalDue - paidAmount);
-                    const isHistoricalDebt = isHistorical(debt.startYear);
+            {fixedDebts.length === 0 && !debtToEdit ? (
+                <EmptyState
+                    title="Nessun Debito Fisso"
+                    message="Tieni traccia di mutui, prestiti, abbonamenti e servizi ricorrenti che si rinnovano automaticamente."
+                    icon={Repeat}
+                    actionLabel="Aggiungi Debito"
+                    onAction={openNewDebt}
+                />
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {fixedDebts.map(debt => {
+                        const elapsedMonthsTotal = getMonthsElapsed(debt.startYear, debt.startMonth, currentFullYear, currentMonth + 1);
+                        const paidAmount = debt.isSuspended ? 0 : (debt.installment * elapsedMonthsTotal);
+                        const remainingBalance = Math.max(0, debt.totalDue - paidAmount);
+                        const isHistoricalDebt = isHistorical(debt.startYear);
 
-                    return (
-                        <div key={debt.id} className={`bg-white rounded-xl shadow-lg p-6 border ${debt.isSuspended ? 'border-yellow-300 opacity-70' : 'border-gray-100 hover:border-blue-400'} transition-all`}>
-                            <div className="flex justify-between items-start gap-3">
-                                <div className="overflow-hidden flex-1">
-                                    <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2 mb-1">
-                                        <span className="truncate">{debt.name}</span>
-                                        {debt.isSuspended && (
-                                            <PauseCircle className="text-yellow-500 flex-shrink-0" size={18} />
+                        return (
+                            <div key={debt.id} className={`bg-white rounded-xl shadow-lg p-6 border ${debt.isSuspended ? 'border-yellow-300 opacity-70' : 'border-gray-100 hover:border-blue-400'} transition-all`}>
+                                <div className="flex justify-between items-start gap-3">
+                                    <div className="overflow-hidden flex-1">
+                                        <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2 mb-1">
+                                            <span className="truncate">{debt.name}</span>
+                                            {debt.isSuspended && (
+                                                <PauseCircle className="text-yellow-500 flex-shrink-0" size={18} />
+                                            )}
+                                            {isHistoricalDebt && (
+                                                <Calendar className="text-gray-400 flex-shrink-0" size={16} title={`Debito storico (iniziato nel ${debt.startYear})`} />
+                                            )}
+                                        </h3>
+                                        <div className="text-sm text-gray-600 flex items-center gap-1">
+                                            <Repeat size={14} className="text-blue-500 flex-shrink-0" />
+                                            <span className="font-semibold">{formatCurrency(debt.installment)}</span>
+                                            <span>/ Mese</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button onClick={() => openEditDebt(debt)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
+                                            <Pencil size={16} />
+                                        </button>
+                                        {isHistoricalDebt ? (
+                                            <button
+                                                onClick={() => alert(`Non puoi eliminare questo debito perché è iniziato nel ${debt.startYear} (anno precedente). Se l'hai estinto o vuoi interromperlo, usa il tasto 'Sospendi'. Eliminandolo altereresti i bilanci degli anni passati.`)}
+                                                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors cursor-not-allowed"
+                                                title="Impossibile eliminare dati storici"
+                                            >
+                                                <Lock size={16} />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => confirmDelete(debt.id)}
+                                                className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Elimina"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         )}
-                                        {isHistoricalDebt && (
-                                            <Calendar className="text-gray-400 flex-shrink-0" size={16} title={`Debito storico (iniziato nel ${debt.startYear})`} />
-                                        )}
-                                    </h3>
-                                    <div className="text-sm text-gray-600 flex items-center gap-1">
-                                        <Repeat size={14} className="text-blue-500 flex-shrink-0" />
-                                        <span className="font-semibold">{formatCurrency(debt.installment)}</span>
-                                        <span>/ Mese</span>
                                     </div>
                                 </div>
-                                <div className="flex gap-2 flex-shrink-0">
-                                    <button onClick={() => openEditDebt(debt)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
-                                        <Pencil size={16} />
+
+                                <div className="mt-4 border-t pt-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div className="text-sm text-gray-500">Totale Dovuto</div>
+                                            <div className="font-medium text-gray-900">{formatCurrency(debt.totalDue)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-gray-500">Residuo</div>
+                                            <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                                {formatCurrency(remainingBalance)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-3 truncate">
+                                        <Calendar size={12} className="inline text-gray-400 mr-1" />
+                                        Giorno {debt.debitDay}
+                                        {remainingBalance > 0 && debt.totalDue > 0 && ` • ${Math.ceil(remainingBalance / debt.installment)} rate`}
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 pt-4 border-t space-y-2">
+                                    <button
+                                        onClick={() => handleRegisterPayment(debt.id)}
+                                        disabled={debt.paymentMode === 'auto'}
+                                        className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                            }`}
+                                        title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
+                                    >
+                                        <Repeat size={16} className="flex-shrink-0" />
+                                        Registra Pagamento
                                     </button>
-                                    {isHistoricalDebt ? (
-                                        <button
-                                            onClick={() => alert(`Non puoi eliminare questo debito perché è iniziato nel ${debt.startYear} (anno precedente). Se l'hai estinto o vuoi interromperlo, usa il tasto 'Sospendi'. Eliminandolo altereresti i bilanci degli anni passati.`)}
-                                            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors cursor-not-allowed"
-                                            title="Impossibile eliminare dati storici"
-                                        >
-                                            <Lock size={16} />
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => confirmDelete(debt.id)}
-                                            className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Elimina"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <button
+                                        onClick={() => toggleSuspension(debt.id)}
+                                        className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                            }`}
+                                    >
+                                        {debt.isSuspended ? <><CheckCircle size={16} className="flex-shrink-0" />Riattiva</> : <><PauseCircle size={16} className="flex-shrink-0" />Sospendi</>}
+                                    </button>
+                                    {debt.isSuspended && isHistoricalDebt && (
+                                        <p className="text-[10px] text-center text-gray-400 mt-1">Sospeso dal calcolo corrente</p>
                                     )}
                                 </div>
                             </div>
-
-                            <div className="mt-4 border-t pt-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <div className="text-sm text-gray-500">Totale Dovuto</div>
-                                        <div className="font-medium text-gray-900">{formatCurrency(debt.totalDue)}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-sm text-gray-500">Residuo</div>
-                                        <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                            {formatCurrency(remainingBalance)}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-3 truncate">
-                                    <Calendar size={12} className="inline text-gray-400 mr-1" />
-                                    Giorno {debt.debitDay}
-                                    {remainingBalance > 0 && debt.totalDue > 0 && ` • ${Math.ceil(remainingBalance / debt.installment)} rate`}
-                                </div>
-                            </div>
-
-                            <div className="mt-4 pt-4 border-t space-y-2">
-                                <button
-                                    onClick={() => handleRegisterPayment(debt.id)}
-                                    disabled={debt.paymentMode === 'auto'}
-                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                        }`}
-                                    title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
-                                >
-                                    <Repeat size={16} className="flex-shrink-0" />
-                                    Registra Pagamento
-                                </button>
-                                <button
-                                    onClick={() => toggleSuspension(debt.id)}
-                                    className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                                        }`}
-                                >
-                                    {debt.isSuspended ? <><CheckCircle size={16} className="flex-shrink-0" />Riattiva</> : <><PauseCircle size={16} className="flex-shrink-0" />Sospendi</>}
-                                </button>
-                                {debt.isSuspended && isHistoricalDebt && (
-                                    <p className="text-[10px] text-center text-gray-400 mt-1">Sospeso dal calcolo corrente</p>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Informative Legend */}
             <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">

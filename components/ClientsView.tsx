@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { PlusCircle, Users } from 'lucide-react';
-import { formatCurrency } from '../constants';
+import { PlusCircle, Search, Users } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
+import { formatCurrency } from '../constants';
+import EmptyState from './EmptyState';
 
 const ClientsView: React.FC = () => {
     const { clients, transactions, currentYear, addClient } = useFinance();
@@ -16,6 +17,7 @@ const ClientsView: React.FC = () => {
                 setShowAddClient(false);
             } catch (error) {
                 console.error(error);
+                // toast is handled in context, but currently disabled there.
             }
         }
     };
@@ -55,31 +57,41 @@ const ClientsView: React.FC = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {clients.map(client => {
-                    const clientIncome = transactions
-                        .filter(t => t.type === 'income' && t.client === client.name && new Date(t.date).getFullYear() === currentYear)
-                        .reduce((sum, t) => sum + t.amount, 0);
+            {clients.length === 0 && !showAddClient ? (
+                <EmptyState
+                    title="Nessun Cliente"
+                    message="Aggiungi i tuoi clienti per monitorare il fatturato generato da ciascuno."
+                    icon={Users}
+                    actionLabel="Nuovo Cliente"
+                    onAction={() => setShowAddClient(true)}
+                />
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {clients.map(client => {
+                        const clientIncome = transactions
+                            .filter(t => t.type === 'income' && t.client === client.name && new Date(t.date).getFullYear() === currentYear)
+                            .reduce((sum, t) => sum + t.amount, 0);
 
-                    return (
-                        <div key={client.id} className="bg-white rounded-xl shadow-lg p-6 border hover:border-blue-400 transition-colors">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Users className="text-blue-600" size={24} />
+                        return (
+                            <div key={client.id} className="bg-white rounded-xl shadow-lg p-6 border hover:border-blue-400 transition-colors">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <Users className="text-blue-600" size={24} />
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <h3 className="font-bold text-lg truncate">{client.name}</h3>
+                                        <div className="text-sm text-gray-600 mt-1">Fatturato ({currentYear}): <span className="text-green-600 font-bold">{formatCurrency(clientIncome)}</span></div>
+                                    </div>
                                 </div>
-                                <div className="overflow-hidden">
-                                    <h3 className="font-bold text-lg truncate">{client.name}</h3>
-                                    <div className="text-sm text-gray-600 mt-1">Fatturato ({currentYear}): <span className="text-green-600 font-bold">{formatCurrency(clientIncome)}</span></div>
+                                <div className="mt-4 space-y-1 text-sm text-gray-700">
+                                    {client.email && <div className="truncate">📧 {client.email}</div>}
+                                    {client.phone && <div>📱 {client.phone}</div>}
                                 </div>
                             </div>
-                            <div className="mt-4 space-y-1 text-sm text-gray-700">
-                                {client.email && <div className="truncate">📧 {client.email}</div>}
-                                {client.phone && <div>📱 {client.phone}</div>}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
