@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Mail, Lock, ArrowRight, Loader2, CheckCircle, Info, Wallet } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle, Info, Wallet, Shield } from 'lucide-react';
 
 interface AuthViewProps {
     onLogin: (email: string) => void;
@@ -269,7 +269,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white text-gray-500">
-                                    {isForgot ? 'O torna indietro' : (isLogin ? 'Nuovo su Quantho?' : 'Hai già un account?')}
+                                    {isUpdating ? 'O torna indietro' : (isForgot ? 'O torna indietro' : (isLogin ? 'Nuovo su Quantho?' : 'Hai già un account?'))}
                                 </span>
                             </div>
                         </div>
@@ -291,6 +291,14 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
                             >
                                 {isUpdating ? 'Annulla reset' : (isForgot ? 'Annulla' : (isLogin ? 'Crea un nuovo account' : 'Torna al Login'))}
                             </button>
+                        </div>
+
+                        {/* PRIVACY DISCLAIMER */}
+                        <div className="mt-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-2">
+                            <Shield size={14} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-[10px] text-blue-800 leading-relaxed font-medium">
+                                <strong>Privacy & Sicurezza:</strong> I tuoi dati sono privati e criptati. Quantho <strong>non si collega</strong> direttamente al tuo conto bancario per la tua massima sicurezza.
+                            </p>
                         </div>
                     </div>
                 </div>

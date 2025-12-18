@@ -180,6 +180,13 @@ const SettingsView: React.FC = () => {
                         </div>
                     </div>
 
+                    <div className="mb-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-2">
+                        <Shield size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                            <strong>Nota sulla Privacy:</strong> Tutti i tuoi dati finanziari sono gestiti in modo privato e sicuro. Quantho <strong>non richiede né effettua alcuna connessione diretta</strong> ai tuoi conti correnti bancari.
+                        </p>
+                    </div>
+
                     <div className="pt-4 border-t flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={handleResetPasswordRequest}
