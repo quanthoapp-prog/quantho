@@ -7,9 +7,10 @@ import IncomeExpenseChart from './charts/IncomeExpenseChart';
 import CategoryPieChart from './charts/CategoryPieChart';
 import FiscalSchedule from './FiscalSchedule';
 import TaxBreakdownModal from './TaxBreakdownModal';
+import UpcomingPayments from './UpcomingPayments';
 
 const DashboardView: React.FC = () => {
-    const { stats, currentYear, transactions, settings } = useFinance();
+    const { stats, currentYear, transactions, settings, fixedDebts } = useFinance();
     const navigate = useNavigate();
     const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
 
@@ -140,6 +141,13 @@ const DashboardView: React.FC = () => {
                     <CategoryPieChart transactions={transactions} year={currentYear} />
                 </div>
             </div>
+
+            {/* NEW: Upcoming Fixed Payments (Phase 5) */}
+            <UpcomingPayments
+                fixedDebts={fixedDebts}
+                transactions={transactions}
+                currentYear={currentYear}
+            />
 
             {/* ANALISI E OBIETTIVI */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

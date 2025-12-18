@@ -262,6 +262,17 @@ const FixedDebtsView: React.FC = () => {
                                             <span className="font-semibold">{formatCurrency(debt.installment)}</span>
                                             <span>/ Mese</span>
                                         </div>
+                                        <div className="flex gap-1 mt-1">
+                                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${debt.paymentMode === 'auto' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-50 text-gray-600 border-gray-100'
+                                                }`}>
+                                                {debt.paymentMode === 'auto' ? 'AUTO' : 'MANUALE'}
+                                            </span>
+                                            {debt.type === 'subscription' && (
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">
+                                                    ABBONAMENTO
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
                                         <button onClick={() => openEditDebt(debt)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
@@ -335,7 +346,8 @@ const FixedDebtsView: React.FC = () => {
                         );
                     })}
                 </div>
-            )}
+            )
+            }
 
             {/* Informative Legend */}
             <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -348,7 +360,7 @@ const FixedDebtsView: React.FC = () => {
                     <p><strong>• Manuale:</strong> Usa il pulsante "Registra Pagamento" quando effettui il pagamento per creare la transazione.</p>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

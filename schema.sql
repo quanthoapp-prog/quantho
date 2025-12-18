@@ -50,6 +50,7 @@ create table fixed_debts (
   type text not null check (type in ('debt', 'subscription')),
   start_month integer not null,
   start_year integer not null,
+  payment_mode text default 'manual' check (payment_mode in ('auto', 'manual')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -65,6 +66,8 @@ create table user_settings (
   artigiani_exceed_rate numeric,
   annual_goal numeric default 0,
   expense_goals jsonb default '{}'::jsonb,
+  manual_saldo numeric default 0,
+  manual_acconti_paid numeric default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(user_id) -- One settings row per user
 );

@@ -103,7 +103,7 @@ export const debtsService = {
                     .from('transactions')
                     .select('id')
                     .eq('user_id', userId)
-                    .ilike('tags', `%${paymentTag}%`)
+                    .or(`tags.eq.${paymentTag},tags.ilike.%,${paymentTag},%,tags.ilike.${paymentTag},%,tags.ilike.%,${paymentTag}`)
                     .limit(1);
 
                 // If no payment exists, create it

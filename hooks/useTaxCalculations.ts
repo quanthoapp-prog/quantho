@@ -49,9 +49,9 @@ export const useTaxCalculations = ({
             // This implies it was calculating run-rate for the ACTUAL CURRENT CALENDAR YEAR.
             // I will keep the original logic for now to avoid breaking changes, using `currentFullYear`.
 
-            const effectiveStartMonth = debt.startYear < currentFullYear ? 1 : debt.startMonth;
+            const effectiveStartMonth = debt.startYear < currentYear ? 1 : debt.startMonth;
 
-            if (debt.startYear <= currentFullYear) {
+            if (debt.startYear <= currentYear) {
                 const activeMonthsInCurrentYear = Math.max(0, 12 - effectiveStartMonth + 1);
                 totalFixedDebtEstimate += activeMonthsInCurrentYear * debt.installment;
             }
