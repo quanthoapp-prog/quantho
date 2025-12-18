@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AtecoCode } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator } from 'lucide-react';
 import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
@@ -271,6 +271,37 @@ const SettingsView: React.FC = () => {
                                 <span className="block text-sm text-gray-500">Aliquota ordinaria forfettaria</span>
                             </div>
                         </label>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t space-y-4">
+                        <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                            <Calculator size={16} className="text-blue-600" />
+                            Rettifiche Fiscali Manuali
+                        </h4>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Saldo Anno Precedente (€)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={settings.manualSaldo || ''}
+                                onChange={(e) => updateSettings({ ...settings, manualSaldo: parseFloat(e.target.value) || 0 })}
+                                placeholder="0.00"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">Verrà aggiunto alla scadenza di Giugno.</p>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Acconti già versati (€)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={settings.manualAccontiPaid || ''}
+                                onChange={(e) => updateSettings({ ...settings, manualAccontiPaid: parseFloat(e.target.value) || 0 })}
+                                placeholder="0.00"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">Utilizza per scalare pagamenti già effettuati fuori dall'app.</p>
+                        </div>
                     </div>
                 </div>
 

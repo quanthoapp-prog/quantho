@@ -17,6 +17,9 @@ export interface UserSettings {
     annualGoal: number; // Obiettivo di fatturato annuo
     expenseGoals: { [tag: string]: number }; // Obiettivi di spesa per tag
     savedTags?: string[]; // Tag salvati per autocomplete
+    // Fiscal Manual Data
+    manualSaldo?: number; // Saldo anno precedente inserito manualmente
+    manualAccontiPaid?: number; // Acconti già versati per l'anno corrente
 }
 
 export interface Transaction {
@@ -52,6 +55,14 @@ export interface FixedDebt {
     paymentMode: 'auto' | 'manual'; // auto = automatic transaction creation, manual = user registers payment
 }
 
+export interface FiscalDeadline {
+    tax: number;
+    inps: number;
+    total: number;
+    label: string;
+    date: string;
+}
+
 export interface Stats {
     income: number;
     realExpenses: number; // Includes Business, Personal, Tax, INPS
@@ -69,6 +80,11 @@ export interface Stats {
     totalFixedDebtEstimate: number;
     percentualeSoglia: number;
     taxRateApplied: number; // 0.05 or 0.15
+    // Deadlines
+    deadlines: {
+        june: FiscalDeadline;
+        november: FiscalDeadline;
+    };
     // Forecasting
     breakEvenTurnover: number; // Fatturato di pareggio (Gross Up di Spese + Debiti)
     monthlyNetIncome: number; // Stipendio mensile equivalente (Netto Disponibile / 12)

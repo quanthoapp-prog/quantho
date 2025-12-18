@@ -1,14 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy, Info, ChevronRight, Calculator } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, LIMITE_FORFETTARIO } from '../constants';
 import IncomeExpenseChart from './charts/IncomeExpenseChart';
 import CategoryPieChart from './charts/CategoryPieChart';
+import FiscalSchedule from './FiscalSchedule';
+import TaxBreakdownModal from './TaxBreakdownModal';
 
 const DashboardView: React.FC = () => {
     const { stats, currentYear, transactions, settings } = useFinance();
     const navigate = useNavigate();
+    const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
 
     const taxPaymentPercentage = stats.totalTaxEstimate > 0 ? (stats.taxesPaid / stats.totalTaxEstimate) * 100 : 0;
 
@@ -189,12 +192,22 @@ const DashboardView: React.FC = () => {
             </div>
 
             {/* FISCAL RECAP */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
-                        <FileText size={20} />
-                        Riepilogo Stima Fiscale {currentYear}
-                    </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2 space-y-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-semibold flex items-center gap-2 text-blue-700">
+                            <FileText size={20} />
+                            Riepilogo Stima Fiscale {currentYear}
+                        </h3>
+                        <button
+                            onClick={() => setIsTaxModalOpen(true)}
+                            className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100"
+                        >
+                            <Calculator size={14} />
+                            DETTAGLIO CALCOLO
+                        </button>
+                    </div>
+
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div>
                             <div className="text-sm text-gray-600">Reddito Imponibile</div>
@@ -220,16 +233,21 @@ const DashboardView: React.FC = () => {
                             <div className="text-xs text-gray-500">Netto - Debiti Fissi</div>
                         </div>
                     </div>
+
+                    {/* NEW: Fiscal Deadlines Schedule */}
+                    <div className="pt-6 border-t">
+                        <FiscalSchedule deadlines={stats.deadlines} taxesPaid={stats.taxesPaid} />
+                    </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 flex flex-col justify-between">
+                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 flex flex-col justify-between h-fit">
                     <div>
                         <h3 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800">
                             <Banknote size={20} className="text-red-500" />
-                            Pagamenti Fiscali
+                            Accantonamento Tasse
                         </h3>
                         <div className="text-sm text-gray-600 mb-4">
-                            Totale stimato: <span className="font-semibold">{formatCurrency(stats.totalTaxEstimate)}</span>
+                            Ti consigliamo di tenere da parte <span className="font-bold text-gray-900">{formatCurrency(stats.totalTaxEstimate)}</span> per le tasse di quest'anno.
                         </div>
 
                         <div className="mb-4">
@@ -249,15 +267,22 @@ const DashboardView: React.FC = () => {
 
                     <div className="border-t pt-4">
                         <div className="text-lg font-bold flex justify-between items-center">
-                            <span>Da Versare:</span>
+                            <span>Manca alla stima:</span>
                             <span className={`${stats.remainingTaxDue > 0 ? 'text-red-600' : 'text-green-600'} text-2xl font-extrabold`}>
                                 {formatCurrency(stats.remainingTaxDue)}
                             </span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Da accantonare</p>
+                        <p className="text-xs text-gray-500 mt-1 italic">Basato sul fatturato incassato finora</p>
                     </div>
                 </div>
             </div>
+
+            <TaxBreakdownModal
+                isOpen={isTaxModalOpen}
+                onClose={() => setIsTaxModalOpen(false)}
+                stats={stats}
+                settings={settings}
+            />
 
             {/* SEPARATED SECTIONS: EXPENSE REPORT & RECENT TRANSACTIONS */}
             <div className="space-y-6">

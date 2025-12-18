@@ -228,7 +228,33 @@ export const useTaxCalculations = ({
         const marginalTax = marginalTaxBase * taxRate;
         const taxEfficiencyPer1000 = 1000 - marginalInps - marginalTax;
 
-        // D. Goals Calculation
+        // D. Deadlines (Scadenze)
+        // Standard Forfettario: 100% Acconto (split 40/60 or 50/50) + Saldo
+        const saldoAnteriore = settings.manualSaldo || 0;
+
+        // Acconto logic: usually based on previous year, but here we provide a projection 
+        // based on the CURRENT estimated totalTaxEstimate.
+        const taxAccontoTotal = flatTax;
+        const inpsAccontoTotal = inpsEstimate;
+
+        const deadlines = {
+            june: {
+                tax: (taxAccontoTotal * 0.4) + (saldoAnteriore * 0.5),
+                inps: (inpsAccontoTotal * 0.4) + (saldoAnteriore * 0.5),
+                total: (taxAccontoTotal * 0.4) + (inpsAccontoTotal * 0.4) + saldoAnteriore,
+                label: 'Saldo + 1° Acconto',
+                date: `${currentYear}-06-30`
+            },
+            november: {
+                tax: taxAccontoTotal * 0.6,
+                inps: inpsAccontoTotal * 0.6,
+                total: (taxAccontoTotal * 0.6) + (inpsAccontoTotal * 0.6),
+                label: '2° Acconto',
+                date: `${currentYear}-11-30`
+            }
+        };
+
+        // E. Goals Calculation
         const goalPercentage = settings.annualGoal > 0 ? (income / settings.annualGoal) * 100 : 0;
         const gapToGoal = Math.max(0, settings.annualGoal - income);
 
@@ -249,6 +275,7 @@ export const useTaxCalculations = ({
             totalFixedDebtEstimate,
             percentualeSoglia: (income / LIMITE_FORFETTARIO) * 100,
             taxRateApplied: taxRate,
+            deadlines,
             breakEvenTurnover,
             monthlyNetIncome,
             taxEfficiencyPer1000,
