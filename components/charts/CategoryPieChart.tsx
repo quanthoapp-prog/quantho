@@ -49,15 +49,15 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ transactions, year 
     if (categoryData.length === 0) return null;
 
     return (
-        <div className="h-[300px] w-full relative">
+        <div className="h-[400px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
                         data={categoryData}
                         cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
+                        cy="45%"
+                        innerRadius={70}
+                        outerRadius={100}
                         paddingAngle={5}
                         dataKey="value"
                     >
@@ -71,18 +71,19 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ transactions, year 
                         itemStyle={{ color: '#374151' }}
                     />
                     <Legend
-                        layout="vertical"
-                        verticalAlign="middle"
-                        align="right"
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                        align="center"
                         iconType="circle"
                         iconSize={8}
+                        wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
                     />
                 </PieChart>
             </ResponsiveContainer>
             {/* Center Text displaying Total Expenses */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                <p className="text-xs text-gray-400 font-medium">Totale</p>
-                <p className="text-sm font-bold text-gray-800">
+            <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Totale</p>
+                <p className="text-lg font-bold text-gray-800">
                     {formatCurrency(categoryData.reduce((acc, curr) => acc + curr.value, 0))}
                 </p>
             </div>
