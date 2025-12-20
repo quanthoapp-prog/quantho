@@ -19,6 +19,15 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
+    },
+    test: {
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/*.spec.ts'
+      ],
+      globals: true,
+      environment: 'jsdom',
     }
   };
 });

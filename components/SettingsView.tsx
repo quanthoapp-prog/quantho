@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AtecoCode } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy } from 'lucide-react';
 import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
@@ -203,6 +203,7 @@ const SettingsView: React.FC = () => {
 
                     <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <button
+                            id="export-data-button"
                             onClick={exportData}
                             className="w-full bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
                         >
@@ -210,6 +211,7 @@ const SettingsView: React.FC = () => {
                         </button>
 
                         <button
+                            id="logout-button"
                             onClick={handleLogout}
                             className="w-full bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
                         >
@@ -219,6 +221,7 @@ const SettingsView: React.FC = () => {
 
                     <div className="pt-4 border-t">
                         <button
+                            id="delete-account-button"
                             onClick={() => setIsDeleteAccountOpen(true)}
                             className="w-full bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                         >
@@ -535,126 +538,207 @@ const SettingsView: React.FC = () => {
     );
 
     const renderGuideSection = () => (
-        <div className="space-y-8">
-            {/* Guide Content Omitted for Brevity - Keeping same as original but just returning */}
-            {/* I will copy paste the guide content from original */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 prose prose-blue max-w-none">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Benvenuto in Quantho</h3>
-                <p className="text-gray-600 mb-8">
-                    Quantho è l'applicazione professionale progettata per semplificare la gestione finanziaria del Regime Forfettario.
-                    Monitora tasse, fatturato e liquidità reale in un unico posto sicuro.
-                </p>
-
-                <div className="space-y-8">
-                    {/* DASHBOARD */}
-                    <div className="bg-blue-50 p-5 rounded-lg border border-blue-100">
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-blue-800 mb-3">
-                            <FileText size={22} /> Dashboard
-                        </h4>
-                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
-                            <li><strong>Fatturato Annuo:</strong> Il totale delle fatture emesse nell'anno corrente. Include la barra di avanzamento verso il limite degli 85.000€.</li>
-                            <li><strong>Spese Totali (Cassa):</strong> Tutte le uscite reali dal conto corrente (Spese Business + Personali + Tasse pagate).</li>
-                            <li><strong>Liquidità di Cassa:</strong> I soldi effettivamente disponibili. Calcolato come: <em>Saldo Iniziale Anno + Entrate - Uscite Totali</em>.</li>
-                            <li><strong>Fatturato di Pareggio:</strong> Un calcolo avanzato che ti dice quanto devi fatturare quest'anno per coprire esattamente le spese stimate e i debiti fissi, considerando anche le tasse che dovrai pagare su quel fatturato (Gross-up).</li>
-                        </ul>
-                    </div>
-
-                    {/* TRANSAZIONI */}
-                    <div className="bg-green-50 p-5 rounded-lg border border-green-100">
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-green-800 mb-3">
-                            <TrendingUp size={22} /> Gestione Transazioni
-                        </h4>
-                        <div className="text-sm text-gray-700 space-y-3">
-                            <p>Registra ogni movimento finanziario per tenere aggiornata la dashboard.</p>
-                            <ul className="space-y-2 list-disc list-inside">
-                                <li><strong>Entrate:</strong> Associa sempre il <em>Codice ATECO</em> corretto. Il sistema usa il coefficiente di redditività di quel codice per calcolare le tasse in modo preciso.</li>
-                                <li><strong>Uscite - Tipologia:</strong> È fondamentale categorizzare bene le uscite:
-                                    <ul className="list-disc list-inside ml-4 mt-1 text-gray-600">
-                                        <li><em>Business / Personale:</em> Impattano solo sulla cassa (liquidità).</li>
-                                        <li><em>F24 Tasse:</em> Pagamento dell'imposta sostitutiva (non deducibile).</li>
-                                        <li><em>F24 INPS:</em> Pagamento dei contributi previdenziali. <strong>Importante:</strong> Quantho deduce automaticamente questi importi dal reddito imponibile per il calcolo delle tasse, facendoti risparmiare sulla stima fiscale.</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* DEBITI FISSI */}
-                    <div className="bg-purple-50 p-5 rounded-lg border border-purple-100">
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-purple-800 mb-3">
-                            <Wallet size={22} /> Debiti Fissi & Abbonamenti
-                        </h4>
-                        <p className="text-sm text-gray-700 mb-2">
-                            Inserisci qui le spese ricorrenti (Affitto, Mutuo, Software, Rate Auto).
-                        </p>
-                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
-                            <li><strong>Previsione Automatica:</strong> Il sistema proietta questi costi su tutto l'anno per calcolare il <em>Reddito Disponibile</em> reale.</li>
-                            <li><strong>Sicurezza Storica:</strong> I debiti iniziati negli anni passati non possono essere cancellati per non alterare i bilanci storici, ma possono essere <em>Sospesi</em> se estinti.</li>
-                        </ul>
-                    </div>
-
-                    {/* IMPOSTAZIONI */}
-                    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-3">
-                            <Settings size={22} /> Configurazione
-                        </h4>
-                        <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
-                            <li><strong>Profilo Fiscale:</strong> Scegli tra Aliquota Start-up (5%) o Ordinaria (15%).</li>
-                            <li><strong>Cassa INPS:</strong> Supporto per Gestione Separata (aliquota fissa) e Artigiani/Commercianti (fissale + eccedenza).</li>
-                            <li><strong>Saldo Iniziale:</strong> Fondamentale per la correttezza della "Liquidità". A inizio anno, usa il tasto "Importa Saldo" per riportare la giacenza dell'anno precedente.</li>
-                        </ul>
-                    </div>
+        <div className="space-y-10 pb-10">
+            {/* INTRO */}
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-2xl shadow-xl text-white relative overflow-hidden">
+                <div className="relative z-10">
+                    <h3 className="text-3xl font-extrabold mb-4 flex items-center gap-3">
+                        <BookOpen size={32} />
+                        Guida Completa Quantho
+                    </h3>
+                    <p className="text-blue-100 text-lg max-w-2xl leading-relaxed">
+                        Questa guida ti aiuterà a sfruttare al massimo tutte le potenzialità di Quantho per gestire il tuo Regime Forfettario con precisione chirurgica e zero stress.
+                    </p>
+                </div>
+                <div className="absolute right-[-20px] bottom-[-20px] opacity-10">
+                    <Calculator size={200} />
                 </div>
             </div>
 
-            {/* PRIVACY SECTION */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
-                <h3 className="flex items-center gap-2 text-xl font-bold text-blue-900 mb-4">
-                    <Shield size={24} /> Privacy e Sicurezza Dati
-                </h3>
-                <div className="text-sm text-gray-600 space-y-4">
-                    <p>
-                        La sicurezza dei tuoi dati finanziari è la nostra priorità assoluta.
-                        Ecco come proteggiamo le tue informazioni in Quantho:
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div className="flex gap-3">
-                            <Lock className="text-green-600 flex-shrink-0" size={20} />
-                            <div>
-                                <h5 className="font-bold text-gray-800">Crittografia End-to-End</h5>
-                                <p>I dati sensibili vengono trasmessi utilizzando protocolli sicuri (HTTPS/SSL) e archiviati in database criptati.</p>
-                            </div>
+            <div className="grid grid-cols-1 gap-8">
+                {/* 1. DASHBOARD */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-blue-100 p-3 rounded-xl text-blue-600">
+                            <TrendingUp size={28} />
                         </div>
-                        <div className="flex gap-3">
-                            <User className="text-blue-600 flex-shrink-0" size={20} />
-                            <div>
-                                <h5 className="font-bold text-gray-800">Accesso Esclusivo</h5>
-                                <p>I tuoi dati sono accessibili esclusivamente tramite le tue credenziali. Nessun altro utente può visualizzare le tue transazioni.</p>
+                        <h4 className="text-2xl font-bold text-gray-900 text-center md:text-left">Dashboard: Il tuo Centro di Controllo</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>La Dashboard offre una panoramica in tempo reale della salute finanziaria della tua partita IVA.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    KPI Principali
+                                </h5>
+                                <ul className="text-sm space-y-2">
+                                    <li><strong>Fatturato Annuo:</strong> Somma di tutte le entrate "Attive". La barra indica la distanza dal limite di 85.000€.</li>
+                                    <li><strong>Liquidità di Cassa:</strong> I soldi "veri" sul tuo conto, calcolati sottraendo tutte le spese (tasse incluse) alle entrate, partendo dal saldo iniziale.</li>
+                                    <li><strong>Netto Disponibile:</strong> Il tuo vero guadagno. È ciò che ti rimane dopo aver accantonato le tasse stimate e coperto tutti i debiti fissi dell'anno.</li>
+                                </ul>
                             </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <Banknote className="text-purple-600 flex-shrink-0" size={20} />
-                            <div>
-                                <h5 className="font-bold text-gray-800">Nessun Collegamento Bancario</h5>
-                                <p>Quantho opera in modalità "Offline-First" per i dati bancari. Non ci colleghiamo direttamente ai tuoi conti correnti bancari, garantendo un isolamento totale dai tuoi asset reali.</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <Download className="text-gray-600 flex-shrink-0" size={20} />
-                            <div>
-                                <h5 className="font-bold text-gray-800">Proprietà dei Dati</h5>
-                                <p>I dati inseriti rimangono di tua esclusiva proprietà. Puoi esportarli o richiedere la cancellazione completa dell'account in qualsiasi momento contattando l'assistenza.</p>
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    Analisi Avanzata
+                                </h5>
+                                <ul className="text-sm space-y-2">
+                                    <li><strong>Fatturato di Pareggio:</strong> Ti indica quanto devi fatturare per non andare in perdita, considerando stile di vita e tasse.</li>
+                                    <li><strong>Scadenzario Fiscale:</strong> Ti ricorda le date critiche (Giugno e Novembre) per il versamento di Saldo e Acconti.</li>
+                                    <li><strong>Prossime Scadenze:</strong> Monitora i debiti fissi del mese corrente e le transazioni programmate.</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+                </section>
 
-                    <div className="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-xs border border-blue-100">
-                        <strong>Nota Legale:</strong> Quantho è uno strumento di supporto gestionale e previsionale.
-                        Non sostituisce il parere del tuo commercialista né ha valore legale ai fini della dichiarazione dei redditi.
-                        L'utente è responsabile della correttezza dei dati inseriti.
+                {/* 2. TRANSAZIONI */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-green-100 p-3 rounded-xl text-green-600">
+                            <Receipt size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 border-none">Transazioni: Entrate e Uscite</h4>
                     </div>
-                </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>Ogni movimento deve essere registrato con precisione per garantire stime fiscali affidabili.</p>
+                        <div className="space-y-4 mt-4">
+                            <div className="flex gap-4 items-start">
+                                <div className="mt-1 bg-green-500 text-white rounded-full p-1"><PlusCircle size={14} /></div>
+                                <div>
+                                    <h5 className="font-bold text-gray-800 mb-1">Entrate (Fatturato)</h5>
+                                    <p className="text-sm">Associa sempre il <strong>Codice ATECO</strong> corretto. Quantho applicherà automaticamente il coefficiente di redditività per calcolare la base imponibile. Puoi inserire fatture con data futura: queste verranno segnate come "Programmate" e non influiranno sulla cassa finché non arriva il giorno dell'incasso.</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 items-start">
+                                <div className="mt-1 bg-red-400 text-white rounded-full p-1"><Trash2 size={14} /></div>
+                                <div>
+                                    <h5 className="font-bold text-gray-800 mb-1">Uscite e Categorie</h5>
+                                    <p className="text-sm">Categorizzare correttamente le uscite è vitale:</p>
+                                    <ul className="text-sm mt-2 space-y-1">
+                                        <li><strong>Business/Personale:</strong> Spese ordinarie che riducono la liquidità ma non influiscono sulle tasse (nel forfettario le spese non sono deducibili analiticamente).</li>
+                                        <li><strong>F24 INPS:</strong> Le uniche spese **deducibili** dal reddito imponibile. Registrale qui per vedere scendere la stima delle tasse successive!</li>
+                                        <li><strong>F24 Tasse:</strong> L'imposta sostitutiva (5%/15%). Registrale per azzerare il debito fiscale calcolato nella Dashboard.</li>
+                                        <li><strong>Tagging Strategico:</strong> Usa i <strong>Tag</strong> (es. software, marketing, ufficio) per ogni spesa per sbloccare l'analisi nel grafico a torta e impostare budget specifici.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 3. OBIETTIVI & BUDGET */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-yellow-100 p-3 rounded-xl text-yellow-600">
+                            <Trophy size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 border-none text-center md:text-left">Obiettivi: Trasforma i numeri in traguardi</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>La sezione Obiettivi è il cuore motivazionale di Quantho. Ti permette di passare dall'amministrazione alla gestione strategica.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2">Traguardo Fatturato</h5>
+                                <p className="text-sm">Imposta quanto desideri incassare entro fine anno. Quantho calcolerà in tempo reale la percentuale di completamento, aiutandoti a capire se sei in linea con le tue aspettative.</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2">Budgeting per Tag</h5>
+                                <p className="text-sm">Qui sta il vero valore: puoi assegnare un <strong>limite di spesa</strong> a ogni tag (es: max 500€ per "Software"). Il sistema ti avviserà non appena superi il budget, permettendoti di ottimizzare i costi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 4. DEBITI FISSI */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-purple-100 p-3 rounded-xl text-purple-600">
+                            <Wallet size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900">Debiti Fissi e Automazioni</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>Gestisci prestiti, affitti, rate o abbonamenti professionali.</p>
+                        <ul className="text-sm space-y-3 mt-4">
+                            <li className="flex gap-3">
+                                <div className="font-bold text-purple-600">MODALITÀ AUTO:</div>
+                                <div>Il sistema creerà automaticamente una transazione di uscita nel giorno stabilito di ogni mese. Ideale per addebiti diretti (SDD).</div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="font-bold text-blue-600">MODALITÀ MANUALE:</div>
+                                <div>Il debito appare in Dashboard come "Scadenza". Sarai tu a cliccare "Registra Pagamento" quando effettuerai il bonifico o il pagamento fisico.</div>
+                            </li>
+                            <li className="flex gap-3">
+                                <div className="font-bold text-gray-600">SOSPENSIONE:</div>
+                                <div>Se un abbonamento finisce, usa "Sospendi". Non cancellarlo, altrimenti Quantho non potrà più calcolare correttamente i bilanci degli anni passati.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                {/* 5. CONFIGURAZIONE FISCALE */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-orange-100 p-3 rounded-xl text-orange-600">
+                            <Settings size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900">5. Configurazione Fiscale</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>Assicurati che i parametri siano allineati alla tua situazione reale per avere stime al centesimo.</p>
+                        <ul className="text-sm space-y-3 mt-4">
+                            <li><strong>Aliquota:</strong> 5% per le nuove attività (primi 5 anni), 15% per quelle esistenti o dopo il quinto anno.</li>
+                            <li><strong>Gestione Separata INPS:</strong> Applica un'aliquota fissa (~26%) sul reddito imponibile netto.</li>
+                            <li><strong>Artigiani e Commercianti:</strong> Considera i contributi fissi trimestrali obbligatori e l'eventuale eccedenza se superi il minimale INPS.</li>
+                            <li><strong>Saldo Iniziale:</strong> Inserisci quanto avevi sul conto al 1° Gennaio. È il punto di partenza per calcolare la tua liquidità attuale.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                {/* 6. PRIVACY & ACCOUNT */}
+                <section className="bg-slate-900 p-8 rounded-2xl shadow-2xl text-white">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="bg-blue-500/20 p-3 rounded-xl text-blue-400">
+                            <Shield size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold">Privacy e Sovranità dei Dati</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div className="flex gap-4">
+                            <div className="text-blue-400 mt-1"><Lock size={20} /></div>
+                            <div>
+                                <h5 className="font-bold mb-2">Sicurezza Totale</h5>
+                                <p className="text-sm text-slate-400">Tutti i dati sono criptati e archiviati su server sicuri gestiti da Supabase. Nessun essere umano o software terzo può visualizzare le tue finanze.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="text-green-400 mt-1"><Banknote size={20} /></div>
+                            <div>
+                                <h5 className="font-bold mb-2">No Bank-Link</h5>
+                                <p className="text-sm text-slate-400">Quantho <strong>non si collegherà mai</strong> al tuo conto corrente. Tu inserisci i dati, noi facciamo i calcoli. Massima sicurezza, rischio zero.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="text-purple-400 mt-1"><Download size={20} /></div>
+                            <div>
+                                <h5 className="font-bold mb-2">Esportabilità</h5>
+                                <p className="text-sm text-slate-400">In qualsiasi momento puoi scaricare un backup JSON completo dei tuoi dati dalla sezione Account. I tuoi dati sono tuoi, per sempre.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="text-red-400 mt-1"><Trash2 size={20} /></div>
+                            <div>
+                                <h5 className="font-bold mb-2">Diritto all'Oblio</h5>
+                                <p className="text-sm text-slate-400">Se decidi di lasciarci, il tasto "Elimina Account" effettuerà una cancellazione irreversibile di ogni riga di dato associata a te.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-xs text-slate-500 italic">
+                        Nota: Quantho è uno strumento di supporto gestionale. Non sostituisce il commercialista e non ha valore ai fini della dichiarazione dei redditi. Verifica sempre i risultati prima di prendere decisioni finanziarie importanti.
+                    </div>
+                </section>
             </div>
         </div>
     );

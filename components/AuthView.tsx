@@ -235,6 +235,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
 
                         <div>
                             <button
+                                id="auth-submit-button"
                                 type="submit"
                                 disabled={isLoading}
                                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
@@ -251,11 +252,13 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
                         </div>
                     </form>
 
-                    {!isForgot && isLogin && (
-                        <div className="mt-4 text-center">
+                    {isLogin && !isForgot && !isUpdating && (
+                        <div className="flex items-center justify-end">
                             <button
-                                onClick={() => { setIsForgot(true); setError(''); }}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                id="forgot-password-button"
+                                type="button"
+                                onClick={() => setIsForgot(true)}
+                                className="text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors"
                             >
                                 Hai dimenticato la password?
                             </button>
@@ -276,6 +279,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
 
                         <div className="mt-6 grid grid-cols-1 gap-3">
                             <button
+                                id="auth-toggle-button"
                                 onClick={() => {
                                     if (isUpdating) {
                                         setIsUpdating(false);
@@ -303,32 +307,34 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
                     </div>
                 </div>
 
-                {!isLogin && !isForgot && (
-                    <div className="mt-6 grid grid-cols-2 gap-4 text-xs text-gray-500 max-w-sm mx-auto">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={14} className="text-green-500" />
-                            <span>Privacy Garantita</span>
+                {
+                    !isLogin && !isForgot && (
+                        <div className="mt-6 grid grid-cols-2 gap-4 text-xs text-gray-500 max-w-sm mx-auto">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={14} className="text-green-500" />
+                                <span>Privacy Garantita</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={14} className="text-green-500" />
+                                <span>Backup in Cloud</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={14} className="text-green-500" />
+                                <span>Multi-device</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={14} className="text-green-500" />
+                                <span>Export Dati</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={14} className="text-green-500" />
-                            <span>Backup in Cloud</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={14} className="text-green-500" />
-                            <span>Multi-device</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={14} className="text-green-500" />
-                            <span>Export Dati</span>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    )
+                }
+            </div >
 
             <footer className="mt-auto py-6 text-center text-xs text-gray-400">
                 &copy; {new Date().getFullYear()} Quantho. Tutti i diritti riservati.
             </footer>
-        </div>
+        </div >
     );
 };
 

@@ -190,7 +190,11 @@ const TransactionsView: React.FC = () => {
 
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">Transazioni ({currentYear})</h2>
-                <button onClick={() => { setEditingId(null); setShowAddTransaction(true); }} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors">
+                <button
+                    id="open-add-transaction-button"
+                    onClick={() => { setEditingId(null); setShowAddTransaction(true); }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors"
+                >
                     <PlusCircle size={20} />
                     <span className="hidden md:inline">Nuova transazione</span>
                     <span className="md:hidden">Nuova</span>
@@ -204,11 +208,18 @@ const TransactionsView: React.FC = () => {
                         {/* FIRST ROW: Date, Type, Amount */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                            <input type="date" value={newTransaction.date} onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })} className={inputBaseClass} />
+                            <input
+                                id="tx-date"
+                                type="date"
+                                value={newTransaction.date}
+                                onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+                                className={inputBaseClass}
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Movimento</label>
                             <select
+                                id="tx-type"
                                 value={newTransaction.type}
                                 onChange={(e) => setNewTransaction({ ...newTransaction, type: e.target.value as 'income' | 'expense', category: 'business' })}
                                 className={inputBaseClass}
@@ -219,13 +230,28 @@ const TransactionsView: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Importo (€)</label>
-                            <input type="number" step="0.01" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} className={inputBaseClass} placeholder="0.00" />
+                            <input
+                                id="tx-amount"
+                                type="number"
+                                step="0.01"
+                                value={newTransaction.amount}
+                                onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
+                                className={inputBaseClass}
+                                placeholder="0.00"
+                            />
                         </div>
 
                         {/* SECOND ROW: Description (Full) */}
                         <div className="md:col-span-3">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
-                            <input type="text" value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} className={inputBaseClass} placeholder="Es: Fattura cliente X" />
+                            <input
+                                id="tx-description"
+                                type="text"
+                                value={newTransaction.description}
+                                onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+                                className={inputBaseClass}
+                                placeholder="Es: Fattura cliente X"
+                            />
                         </div>
 
                         {/* THIRD ROW: Context Specific */}
@@ -285,7 +311,12 @@ const TransactionsView: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex gap-2 mt-6">
-                        <button onClick={handleSave} disabled={!newTransaction.amount || !newTransaction.description} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                        <button
+                            id="save-transaction-button"
+                            onClick={handleSave}
+                            disabled={!newTransaction.amount || !newTransaction.description}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                        >
                             {editingId ? <><Save size={18} /> Aggiorna</> : 'Salva'}
                         </button>
                         <button onClick={resetForm} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Annulla</button>

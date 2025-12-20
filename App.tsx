@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import AuthView from './components/AuthView';
 import Layout from './components/Layout';
@@ -57,7 +57,7 @@ const App: React.FC = () => {
     }
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <FinanceProvider userId={userId} userEmail={user}>
                 <Routes>
                     <Route element={<Layout />}>
@@ -72,7 +72,7 @@ const App: React.FC = () => {
                     </Route>
                 </Routes>
             </FinanceProvider>
-        </BrowserRouter>
+        </HashRouter>
     );
 };
 
