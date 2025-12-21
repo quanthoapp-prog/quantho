@@ -84,13 +84,32 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const loadData = async () => {
             setIsLoading(true);
             try {
-                const [txs, cls, dbs, sts, atc, pro] = await Promise.all([
-                    transactionService.getAll(),
-                    clientService.getAll(),
-                    debtsService.getAll(),
-                    settingsService.get(userId),
-                    atecoService.getAll(),
-                    profileService.get(userId)
+                // Load profile first to ensure permissions are set correctly
+                try {
+                    const pro = await profileService.get(userId);
+                    if (pro) {
+                        setProfile(pro);
+                    } else {
+                        setProfile({
+                            id: userId,
+                            email: userEmail || '',
+                            role: 'user',
+                            subscriptionStatus: 'trial',
+                            subscriptionEndDate: null,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                } catch (pe) {
+                    console.error("FinanceContext: Critical error loading profile:", pe);
+                }
+
+                // Load other data
+                const [txs, cls, dbs, sts, atc] = await Promise.all([
+                    transactionService.getAll().catch(e => { console.error("txs error", e); return []; }),
+                    clientService.getAll().catch(e => { console.error("clients error", e); return []; }),
+                    debtsService.getAll().catch(e => { console.error("debts error", e); return []; }),
+                    settingsService.get(userId).catch(e => { console.error("settings error", e); return DEFAULT_SETTINGS; }),
+                    atecoService.getAll().catch(e => { console.error("ateco error", e); return []; })
                 ]);
 
                 setTransactions(txs);
@@ -98,12 +117,10 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setFixedDebts(dbs);
                 setSettings(sts);
                 setAtecoCodes(atc);
-                setProfile(pro);
 
                 // Run automated checks after load
                 const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs, userId);
                 if (newPaymentsCount > 0) {
-                    // Refetch transactions if new ones were created
                     const updatedTxs = await transactionService.getAll();
                     setTransactions(updatedTxs);
                 }

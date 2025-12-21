@@ -2,16 +2,20 @@ import { supabase } from '../lib/supabase';
 import { UserProfile } from '../types';
 
 export const profileService = {
-    async get(userId: string): Promise<UserProfile> {
+    async get(userId: string): Promise<UserProfile | null> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error fetching profile:", error);
+            return null;
+        }
 
-        // Map snake_case from DB to camelCase for TS
+        if (!data) return null;
+
         return {
             id: data.id,
             email: data.email,
