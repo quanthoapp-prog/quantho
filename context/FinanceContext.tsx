@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats } from '../types';
+import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats, UserProfile } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import { transactionService } from '../services/transactions';
 import { clientService } from '../services/clients';
 import { settingsService } from '../services/settings';
 import { debtsService } from '../services/debts';
 import { atecoService } from '../services/ateco';
+import { profileService } from '../services/profiles';
 import { useTaxCalculations } from '../hooks/useTaxCalculations';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -22,6 +23,10 @@ interface FinanceContextType {
     availableYears: number[];
     isLoading: boolean;
     userEmail: string | null;
+    profile: UserProfile | null;
+
+    // Admin Data
+    allProfiles: UserProfile[];
 
     // Actions
     setCurrentYear: (year: number) => void;
@@ -38,6 +43,8 @@ interface FinanceContextType {
     deleteAtecoCode: (id: string) => Promise<void>;
     exportData: () => void;
     deleteAccount: () => Promise<void>;
+    updateProfile: (id: string, updates: Partial<UserProfile>) => Promise<void>;
+    fetchAllProfiles: () => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -63,6 +70,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [atecoCodes, setAtecoCodes] = useState<AtecoCode[]>([]);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial Load
@@ -75,12 +84,13 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const loadData = async () => {
             setIsLoading(true);
             try {
-                const [txs, cls, dbs, sts, atc] = await Promise.all([
+                const [txs, cls, dbs, sts, atc, pro] = await Promise.all([
                     transactionService.getAll(),
                     clientService.getAll(),
                     debtsService.getAll(),
                     settingsService.get(userId),
-                    atecoService.getAll()
+                    atecoService.getAll(),
+                    profileService.get(userId)
                 ]);
 
                 setTransactions(txs);
@@ -88,6 +98,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setFixedDebts(dbs);
                 setSettings(sts);
                 setAtecoCodes(atc);
+                setProfile(pro);
 
                 // Run automated checks after load
                 const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs, userId);
@@ -336,6 +347,32 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         await promise;
     };
 
+    const fetchAllProfiles = async () => {
+        if (profile?.role !== 'admin') return;
+        try {
+            const data = await profileService.getAll();
+            setAllProfiles(data);
+        } catch (error) {
+            console.error("Failed to fetch all profiles", error);
+        }
+    };
+
+    const updateProfile = async (id: string, updates: Partial<UserProfile>) => {
+        if (profile?.role !== 'admin') return;
+        const promise = profileService.update(id, updates)
+            .then(updated => {
+                setAllProfiles(prev => prev.map(p => p.id === id ? updated : p));
+                if (id === userId) setProfile(updated);
+            });
+
+        toast.promise(promise, {
+            loading: 'Aggiornamento profilo...',
+            success: 'Profilo aggiornato!',
+            error: 'Errore durante l\'aggiornamento'
+        });
+        await promise;
+    };
+
     const value = {
         transactions,
         clients,
@@ -360,7 +397,11 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         addAtecoCode,
         deleteAtecoCode,
         exportData,
-        deleteAccount
+        deleteAccount,
+        profile,
+        allProfiles,
+        fetchAllProfiles,
+        updateProfile
     };
 
     return (

@@ -95,4 +95,13 @@ export interface Stats {
     scheduledExpenses: number; // Total of future/scheduled expenses
 }
 
-export type TabId = 'dashboard' | 'transactions' | 'fixedDebts' | 'clients' | 'settings' | 'goals';
+export interface UserProfile {
+    id: string;
+    email: string;
+    role: 'user' | 'admin';
+    subscriptionStatus: 'trial' | 'active' | 'expired' | 'canceled';
+    subscriptionEndDate: string | null;
+    createdAt: string;
+}
+
+export type TabId = 'dashboard' | 'transactions' | 'fixedDebts' | 'clients' | 'settings' | 'goals' | 'admin';

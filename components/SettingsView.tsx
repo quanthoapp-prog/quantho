@@ -11,18 +11,7 @@ import { toast } from 'react-hot-toast';
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
 const SettingsView: React.FC = () => {
-    const {
-        settings,
-        updateSettings,
-        atecoCodes,
-        addAtecoCode,
-        deleteAtecoCode,
-        currentYear,
-        transactions,
-        userEmail,
-        exportData,
-        deleteAccount
-    } = useFinance();
+    const { userEmail, exportData, deleteAccount, settings, updateSettings, atecoCodes, addAtecoCode, deleteAtecoCode, profile, currentYear, transactions } = useFinance();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
     const [newAteco, setNewAteco] = useState<Partial<AtecoCode>>({
@@ -172,10 +161,22 @@ const SettingsView: React.FC = () => {
                             <div className="font-semibold text-gray-900">{userEmail}</div>
                         </div>
                         <div className="bg-gray-50 p-3 rounded-lg">
-                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Tipo Licenza</label>
-                            <div className="font-semibold text-green-600 flex items-center gap-1">
-                                Free Plan
-                                <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full ml-2">ATTIVO</span>
+                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Stato Licenza</label>
+                            <div className="font-semibold flex items-center gap-1">
+                                <span className={`flex items-center gap-1 ${profile?.subscriptionStatus === 'active' ? 'text-green-600' :
+                                    profile?.subscriptionStatus === 'trial' ? 'text-blue-600' :
+                                        'text-red-600'
+                                    }`}>
+                                    {profile?.subscriptionStatus === 'trial' ? 'Periodo di Prova' :
+                                        profile?.subscriptionStatus === 'active' ? 'Abbonamento Attivo' :
+                                            profile?.subscriptionStatus === 'expired' ? 'Abbonamento Scaduto' :
+                                                profile?.subscriptionStatus === 'canceled' ? 'Abbonamento Annullato' : 'Sconosciuto'}
+                                </span>
+                                {profile?.subscriptionEndDate && (
+                                    <span className="text-[10px] text-gray-400 ml-1 font-normal">
+                                        (fino al {new Date(profile.subscriptionEndDate).toLocaleDateString('it-IT')})
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

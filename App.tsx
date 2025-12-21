@@ -9,6 +9,7 @@ import ClientsView from './components/ClientsView';
 import FixedDebtsView from './components/FixedDebtsView';
 import GoalsView from './components/GoalsView';
 import SettingsView from './components/SettingsView';
+import AdminPanelView from './components/AdminPanelView';
 import { FinanceProvider } from './context/FinanceContext';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -67,6 +68,7 @@ const App: React.FC = () => {
                         <Route path="/fixed-debts" element={<FixedDebtsView />} />
                         <Route path="/goals" element={<GoalsView />} />
                         <Route path="/settings" element={<SettingsView />} />
+                        <Route path="/admin" element={<AdminPanelView />} />
                         {/* Fallback */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>

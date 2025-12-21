@@ -69,8 +69,51 @@ create table user_settings (
   manual_saldo numeric default 0,
   manual_acconti_paid numeric default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(user_id) -- One settings row per user
+-- 6. Profiles Table (Extends auth.users)
+create table profiles (
+  id uuid references auth.users on delete cascade primary key,
+  email text,
+  role text default 'user' check (role in ('user', 'admin')),
+  subscription_status text default 'trial' check (subscription_status in ('trial', 'active', 'expired', 'canceled')),
+  subscription_end_date timestamp with time zone,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Row Level Security (RLS) for Profiles
+alter table profiles enable row level security;
+
+create policy "Users can view own profile" on profiles
+  for select using (auth.uid() = id);
+
+create policy "Admins can view all profiles" on profiles
+  for select using (
+    exists (
+      select 1 from profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+create policy "Admins can update all profiles" on profiles
+  for update using (
+    exists (
+      select 1 from profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+-- 7. Trigger to create profile on signup
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email)
+  values (new.id, new.email);
+  return new;
+end;
+$$ language plpgsql security modeller;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
 
 -- Row Level Security (RLS) Policies
 -- This ensures users can only access their own data

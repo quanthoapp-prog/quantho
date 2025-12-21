@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
-import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings } from 'lucide-react';
+import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Toaster } from 'react-hot-toast';
 
 const Layout: React.FC = () => {
-    const { currentYear, availableYears, setCurrentYear } = useFinance();
+    const { currentYear, availableYears, setCurrentYear, profile } = useFinance();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -22,7 +22,8 @@ const Layout: React.FC = () => {
         { path: '/fixed-debts', label: 'Debiti Fissi', icon: Banknote },
         { path: '/clients', label: 'Clienti', icon: Users },
         { path: '/goals', label: 'Obiettivi', icon: Target },
-        { path: '/settings', label: 'Impostazioni', icon: Settings }
+        { path: '/settings', label: 'Impostazioni', icon: Settings },
+        ...(profile?.role === 'admin' ? [{ path: '/admin', label: 'Admin', icon: ShieldCheck }] : [])
     ];
 
     const isActive = (path: string) => {
