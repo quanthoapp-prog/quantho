@@ -27,6 +27,7 @@ const TransactionsView: React.FC = () => {
     const [showAddTransaction, setShowAddTransaction] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Initial check for startAdding state from navigation
     useEffect(() => {
@@ -156,8 +157,22 @@ const TransactionsView: React.FC = () => {
     };
 
     // View Helpers
-    const sortedTransactions = transactions
+    const filteredTransactions = transactions
         .filter(t => new Date(t.date).getFullYear() === currentYear)
+        .filter(t => {
+            if (!searchTerm) return true;
+            const s = searchTerm.toLowerCase();
+            const dateStr = new Date(t.date).toLocaleDateString('it-IT');
+            return (
+                t.description.toLowerCase().includes(s) ||
+                (t.client?.toLowerCase().includes(s)) ||
+                (t.tags?.toLowerCase().includes(s)) ||
+                t.amount.toString().includes(s) ||
+                dateStr.includes(s) ||
+                t.category.toLowerCase().includes(s) ||
+                t.type.toLowerCase().includes(s)
+            );
+        })
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const getAtecoLabel = (id?: string) => {
@@ -188,17 +203,29 @@ const TransactionsView: React.FC = () => {
                 message="Sei sicuro di voler eliminare questa transazione? L'operazione non è reversibile."
             />
 
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">Transazioni ({currentYear})</h2>
-                <button
-                    id="open-add-transaction-button"
-                    onClick={() => { setEditingId(null); setShowAddTransaction(true); }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors"
-                >
-                    <PlusCircle size={20} />
-                    <span className="hidden md:inline">Nuova transazione</span>
-                    <span className="md:hidden">Nuova</span>
-                </button>
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Cerca transazione..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+                        />
+                    </div>
+                    <button
+                        id="open-add-transaction-button"
+                        onClick={() => { setEditingId(null); setShowAddTransaction(true); }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    >
+                        <PlusCircle size={20} />
+                        <span className="hidden md:inline">Nuova transazione</span>
+                        <span className="md:hidden">Nuova</span>
+                    </button>
+                </div>
             </div>
 
             {showAddTransaction && (
@@ -325,18 +352,20 @@ const TransactionsView: React.FC = () => {
             )}
 
             {/* Empty State */}
-            {sortedTransactions.length === 0 && !showAddTransaction && (
+            {filteredTransactions.length === 0 && !showAddTransaction && (
                 <EmptyState
-                    title="Nessuna Transazione"
-                    message={`Non ci sono ancora movimenti registrati per l'anno ${currentYear}. Inizia aggiungendo la tua prima entrata o uscita.`}
-                    icon={Receipt}
-                    actionLabel="Nuova Transazione"
-                    onAction={() => setShowAddTransaction(true)}
+                    title={searchTerm ? "Nessun Risultato" : "Nessuna Transazione"}
+                    message={searchTerm
+                        ? `Non abbiamo trovato transazioni che corrispondono a "${searchTerm}". Prova con un termine diverso.`
+                        : `Non ci sono ancora movimenti registrati per l'anno ${currentYear}. Inizia aggiungendo la tua prima entrata o uscita.`}
+                    icon={searchTerm ? Search : Receipt}
+                    actionLabel={searchTerm ? "Pulisci Ricerca" : "Nuova Transazione"}
+                    onAction={() => searchTerm ? setSearchTerm('') : setShowAddTransaction(true)}
                 />
             )}
 
             {/* Content when there are transactions */}
-            {sortedTransactions.length > 0 && (
+            {filteredTransactions.length > 0 && (
                 <>
                     {/* DESKTOP TABLE VIEW (Hidden on Mobile) */}
                     <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-x-auto">
@@ -351,7 +380,7 @@ const TransactionsView: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {sortedTransactions.map(t => (
+                                {filteredTransactions.map(t => (
                                     <tr key={t.id} className="hover:bg-blue-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{new Date(t.date).toLocaleDateString('it-IT')}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700">
@@ -396,7 +425,7 @@ const TransactionsView: React.FC = () => {
 
                     {/* MOBILE CARD VIEW (Filtered via CSS) */}
                     <div className="md:hidden space-y-4">
-                        {sortedTransactions.map(t => (
+                        {filteredTransactions.map(t => (
                             <div key={t.id} className="bg-white p-4 rounded-xl shadow border border-gray-100 flex flex-col gap-3">
                                 <div className="flex justify-between items-start">
                                     <div>
