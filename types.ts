@@ -99,7 +99,7 @@ export interface UserProfile {
     id: string;
     email: string;
     role: 'user' | 'admin';
-    subscriptionStatus: 'trial' | 'active' | 'expired' | 'canceled';
+    subscriptionStatus: 'trial' | 'active' | 'expired' | 'canceled' | 'pending';
     subscriptionEndDate: string | null;
     createdAt: string;
 }

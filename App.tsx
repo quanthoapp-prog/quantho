@@ -10,7 +10,8 @@ import FixedDebtsView from './components/FixedDebtsView';
 import GoalsView from './components/GoalsView';
 import SettingsView from './components/SettingsView';
 import AdminPanelView from './components/AdminPanelView';
-import { FinanceProvider } from './context/FinanceContext';
+import SubscriptionSelectionView from './components/SubscriptionSelectionView';
+import { FinanceProvider, useFinance } from './context/FinanceContext';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const App: React.FC = () => {
@@ -60,21 +61,40 @@ const App: React.FC = () => {
     return (
         <HashRouter>
             <FinanceProvider userId={userId} userEmail={user}>
-                <Routes>
-                    <Route element={<Layout />}>
-                        <Route path="/" element={<DashboardView />} />
-                        <Route path="/transactions" element={<TransactionsView />} />
-                        <Route path="/clients" element={<ClientsView />} />
-                        <Route path="/fixed-debts" element={<FixedDebtsView />} />
-                        <Route path="/goals" element={<GoalsView />} />
-                        <Route path="/settings" element={<SettingsView />} />
-                        <Route path="/admin" element={<AdminPanelView />} />
-                        {/* Fallback */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                </Routes>
+                <SubscriptionRouteHandler />
             </FinanceProvider>
         </HashRouter>
+    );
+};
+
+// Helper component to handle conditional routing based on profile context
+const SubscriptionRouteHandler: React.FC = () => {
+    const { profile, isLoading } = useFinance();
+
+    if (isLoading) {
+        return <LoadingSpinner fullScreen text="Caricamento profilo..." />;
+    }
+
+    // Force redirection to subscription page if status is pending
+    // We allow admin to bypass or we might handle it differently for admin, but basically new users are pending
+    if (profile?.subscriptionStatus === 'pending') {
+        return <SubscriptionSelectionView />;
+    }
+
+    return (
+        <Routes>
+            <Route element={<Layout />}>
+                <Route path="/" element={<DashboardView />} />
+                <Route path="/transactions" element={<TransactionsView />} />
+                <Route path="/clients" element={<ClientsView />} />
+                <Route path="/fixed-debts" element={<FixedDebtsView />} />
+                <Route path="/goals" element={<GoalsView />} />
+                <Route path="/settings" element={<SettingsView />} />
+                <Route path="/admin" element={<AdminPanelView />} />
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+        </Routes>
     );
 };
 
