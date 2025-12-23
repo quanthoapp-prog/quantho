@@ -66,64 +66,69 @@ const NotificationPanel: React.FC = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 animate-in fade-in zoom-in-95 origin-top-right overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                        <h3 className="font-bold text-gray-900">Notifiche</h3>
-                        <div className="flex gap-2">
-                            {safeUnreadCount > 0 && (
-                                <button
-                                    onClick={() => markAllNotificationsRead()}
-                                    className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                                    title="Segna tutte come lette"
-                                >
-                                    <CheckCheck size={14} /> Leggi tutte
-                                </button>
+                <>
+                    {/* Backdrop for mobile to close when clicking outside */}
+                    <div className="fixed inset-0 z-40 md:hidden" onClick={() => setIsOpen(false)}></div>
+
+                    <div className="fixed inset-x-4 top-20 w-auto md:absolute md:inset-auto md:right-0 md:top-full md:mt-2 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 animate-in fade-in zoom-in-95 origin-top-right overflow-hidden">
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h3 className="font-bold text-gray-900">Notifiche</h3>
+                            <div className="flex gap-2">
+                                {safeUnreadCount > 0 && (
+                                    <button
+                                        onClick={() => markAllNotificationsRead()}
+                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                                        title="Segna tutte come lette"
+                                    >
+                                        <CheckCheck size={14} /> Leggi tutte
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="max-h-[60vh] overflow-y-auto">
+                            {safeNotifications.length === 0 ? (
+                                <div className="p-8 text-center text-gray-400 flex flex-col items-center">
+                                    <Bell size={32} className="mb-2 opacity-20" />
+                                    <p className="text-sm">Nessuna notifica</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-50">
+                                    {safeNotifications.map(n => (
+                                        <div
+                                            key={n.id}
+                                            className={`p-4 hover:bg-gray-50 transition-colors relative group cursor-pointer ${!n.isRead ? 'bg-blue-50/30' : ''}`}
+                                            onClick={() => handleNotificationClick(n)}
+                                        >
+                                            <div className="flex gap-3">
+                                                <div className="mt-0.5 shrink-0">
+                                                    {getIcon(n.type)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-sm text-gray-900 mb-0.5 ${!n.isRead ? 'font-semibold' : ''}`}>{n.title}</p>
+                                                    <p className="text-xs text-gray-600 leading-relaxed mb-1">{n.message}</p>
+                                                    <p className="text-[10px] text-gray-400">
+                                                        {format(new Date(n.createdAt), 'd MMM yyyy, HH:mm', { locale: it })}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                                                    className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
+                                                    title="Elimina"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                            {!n.isRead && (
+                                                <div className="absolute top-4 right-4 h-2 w-2 bg-blue-500 rounded-full"></div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     </div>
-
-                    <div className="max-h-[60vh] overflow-y-auto">
-                        {safeNotifications.length === 0 ? (
-                            <div className="p-8 text-center text-gray-400 flex flex-col items-center">
-                                <Bell size={32} className="mb-2 opacity-20" />
-                                <p className="text-sm">Nessuna notifica</p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-gray-50">
-                                {safeNotifications.map(n => (
-                                    <div
-                                        key={n.id}
-                                        className={`p-4 hover:bg-gray-50 transition-colors relative group cursor-pointer ${!n.isRead ? 'bg-blue-50/30' : ''}`}
-                                        onClick={() => handleNotificationClick(n)}
-                                    >
-                                        <div className="flex gap-3">
-                                            <div className="mt-0.5 shrink-0">
-                                                {getIcon(n.type)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className={`text-sm text-gray-900 mb-0.5 ${!n.isRead ? 'font-semibold' : ''}`}>{n.title}</p>
-                                                <p className="text-xs text-gray-600 leading-relaxed mb-1">{n.message}</p>
-                                                <p className="text-[10px] text-gray-400">
-                                                    {format(new Date(n.createdAt), 'd MMM yyyy, HH:mm', { locale: it })}
-                                                </p>
-                                            </div>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
-                                                className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
-                                                title="Elimina"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        </div>
-                                        {!n.isRead && (
-                                            <div className="absolute top-4 right-4 h-2 w-2 bg-blue-500 rounded-full"></div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
+                </>
             )}
         </div>
     );
