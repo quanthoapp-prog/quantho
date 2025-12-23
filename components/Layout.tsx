@@ -4,6 +4,7 @@ import { useFinance } from '../context/FinanceContext';
 import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Toaster } from 'react-hot-toast';
+import NotificationPanel from './NotificationPanel';
 
 const Layout: React.FC = () => {
     const { currentYear, availableYears, setCurrentYear, profile } = useFinance();
@@ -65,6 +66,9 @@ const Layout: React.FC = () => {
                             </div>
                             <div className="h-6 w-px bg-gray-300"></div>
 
+                            {/* Notification Panel */}
+                            <NotificationPanel />
+
                             {/* Desktop Navigation Links (Optional: Add here or keep mobile only style? 
                                Original app implied tab switching. A top navbar is nice. 
                                Let's add simple icons or text links here or keep it as "Mobile Menu style" for simplicity? 
@@ -96,10 +100,13 @@ const Layout: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Mobile: Hamburger */}
-                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600">
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
+                        {/* Mobile: Notification & Hamburger */}
+                        <div className="md:hidden flex items-center gap-2">
+                            <NotificationPanel />
+                            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

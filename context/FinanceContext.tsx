@@ -69,6 +69,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
     const [fixedDebts, setFixedDebts] = useState<FixedDebt[]>([]);
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [atecoCodes, setAtecoCodes] = useState<AtecoCode[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
@@ -112,11 +113,12 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                     atecoService.getAll().catch(e => { console.error("ateco error", e); return []; })
                 ]);
 
-                setTransactions(txs);
-                setClients(cls);
-                setFixedDebts(dbs);
+                setTransactions(txs || []);
+                setClients(cls || []);
+                setFixedDebts(dbs || []);
                 setSettings(sts);
-                setAtecoCodes(atc);
+                setAtecoCodes(atc || []);
+                setNotifications([]); // Initial empty state, will be updated if notification service is fully integrated
 
                 // Run automated checks after load
                 const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs, userId);
