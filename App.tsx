@@ -9,6 +9,7 @@ import ClientsView from './components/ClientsView';
 import FixedDebtsView from './components/FixedDebtsView';
 import GoalsView from './components/GoalsView';
 import SettingsView from './components/SettingsView';
+import CalendarView from './components/CalendarView';
 import AdminPanelView from './components/AdminPanelView';
 import SubscriptionSelectionView from './components/SubscriptionSelectionView';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
@@ -86,6 +87,7 @@ const SubscriptionRouteHandler: React.FC = () => {
             <Route element={<Layout />}>
                 <Route path="/" element={<DashboardView />} />
                 <Route path="/transactions" element={<TransactionsView />} />
+                <Route path="/calendar" element={<CalendarView />} />
                 <Route path="/clients" element={<ClientsView />} />
                 <Route path="/fixed-debts" element={<FixedDebtsView />} />
                 <Route path="/goals" element={<GoalsView />} />

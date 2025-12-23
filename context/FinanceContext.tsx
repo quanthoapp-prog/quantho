@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats, UserProfile } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats, UserProfile, Notification, Reminder } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import { transactionService } from '../services/transactions';
 import { clientService } from '../services/clients';
@@ -10,6 +10,8 @@ import { profileService } from '../services/profiles';
 import { useTaxCalculations } from '../hooks/useTaxCalculations';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
+import { notificationService } from '../services/notifications';
+import { reminderService } from '../services/reminders';
 
 interface FinanceContextType {
     // Data
@@ -28,6 +30,11 @@ interface FinanceContextType {
     // Admin Data
     allProfiles: UserProfile[];
 
+    // Calendar Data
+    reminders: Reminder[];
+    notifications: Notification[];
+    unreadNotificationsCount: number;
+
     // Actions
     setCurrentYear: (year: number) => void;
     addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>;
@@ -45,6 +52,16 @@ interface FinanceContextType {
     deleteAccount: () => Promise<void>;
     updateProfile: (id: string, updates: Partial<UserProfile>) => Promise<void>;
     fetchAllProfiles: () => Promise<void>;
+
+    // Notification Actions
+    markNotificationAsRead: (id: string) => Promise<void>;
+    markAllNotificationsRead: () => Promise<void>;
+    deleteNotification: (id: string) => Promise<void>;
+
+    // Reminder Actions
+    addReminder: (r: Omit<Reminder, 'id'>) => Promise<void>;
+    updateReminder: (r: Reminder) => Promise<void>;
+    deleteReminder: (id: number) => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -70,6 +87,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [atecoCodes, setAtecoCodes] = useState<AtecoCode[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
@@ -85,7 +103,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const loadData = async () => {
             setIsLoading(true);
             try {
-                // Load profile first to ensure permissions are set correctly
+                // Load profile first
                 try {
                     const pro = await profileService.get(userId);
                     if (pro) {
@@ -101,16 +119,18 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                         });
                     }
                 } catch (pe) {
-                    console.error("FinanceContext: Critical error loading profile:", pe);
+                    console.error("Critical error loading profile:", pe);
                 }
 
                 // Load other data
-                const [txs, cls, dbs, sts, atc] = await Promise.all([
+                const [txs, cls, dbs, sts, atc, rems, notifs] = await Promise.all([
                     transactionService.getAll().catch(e => { console.error("txs error", e); return []; }),
                     clientService.getAll().catch(e => { console.error("clients error", e); return []; }),
                     debtsService.getAll().catch(e => { console.error("debts error", e); return []; }),
                     settingsService.get(userId).catch(e => { console.error("settings error", e); return DEFAULT_SETTINGS; }),
-                    atecoService.getAll().catch(e => { console.error("ateco error", e); return []; })
+                    atecoService.getAll().catch(e => { console.error("ateco error", e); return []; }),
+                    reminderService.getAll(userId).catch(e => { console.error("reminders error", e); return []; }),
+                    notificationService.getAll().catch(e => { console.error("notifications error", e); return []; })
                 ]);
 
                 setTransactions(txs || []);
@@ -118,14 +138,16 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setFixedDebts(dbs || []);
                 setSettings(sts);
                 setAtecoCodes(atc || []);
-                setNotifications([]); // Initial empty state, will be updated if notification service is fully integrated
+                setReminders(rems || []);
+                setNotifications(notifs || []);
 
                 // Run automated checks after load
-                const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs, userId);
+                const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs || [], userId);
                 if (newPaymentsCount > 0) {
                     const updatedTxs = await transactionService.getAll();
-                    setTransactions(updatedTxs);
+                    setTransactions(updatedTxs || []);
                 }
+
             } catch (error) {
                 console.error("Failed to load initial data", error);
             } finally {
@@ -392,6 +414,54 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         await promise;
     };
 
+    // Notification Actions
+    const markNotificationAsRead = async (id: string) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        await notificationService.markAsRead(id);
+    };
+
+    const markAllNotificationsRead = async () => {
+        if (!userId) return;
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        await notificationService.markAllAsRead(userId);
+    };
+
+    const deleteNotification = async (id: string) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        await notificationService.delete(id);
+    };
+
+    const unreadNotificationsCount = notifications?.filter(n => !n.isRead).length || 0;
+
+    // Reminder Actions
+    const addReminder = async (r: Omit<Reminder, 'id'>) => {
+        if (!userId) return;
+        const promise = reminderService.add(r, userId)
+            .then(newRem => setReminders(prev => [...prev, newRem]));
+
+        toast.promise(promise, {
+            loading: 'Salvataggio promemoria...',
+            success: 'Promemoria salvato!',
+            error: 'Errore salvataggio'
+        });
+        await promise;
+    };
+
+    const updateReminder = async (r: Reminder) => {
+        const promise = reminderService.update(r)
+            .then(updated => setReminders(prev => prev.map(item => item.id === updated.id ? updated : item)));
+
+        await promise;
+    };
+
+    const deleteReminder = async (id: number) => {
+        const promise = reminderService.delete(id)
+            .then(() => setReminders(prev => prev.filter(item => item.id !== id)));
+
+        toast.success("Promemoria eliminato");
+        await promise;
+    };
+
     const value = {
         transactions,
         clients,
@@ -403,6 +473,15 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         availableYears,
         isLoading,
         userEmail,
+        profile,
+        allProfiles,
+
+        // Calendar & Notifications
+        notifications,
+        reminders,
+        unreadNotificationsCount,
+
+        // Actions
         setCurrentYear,
         addTransaction,
         updateTransaction,
@@ -417,10 +496,16 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         deleteAtecoCode,
         exportData,
         deleteAccount,
-        profile,
-        allProfiles,
         fetchAllProfiles,
-        updateProfile
+        updateProfile,
+
+        // New Actions
+        markNotificationAsRead,
+        markAllNotificationsRead,
+        deleteNotification,
+        addReminder,
+        updateReminder,
+        deleteReminder
     };
 
     return (

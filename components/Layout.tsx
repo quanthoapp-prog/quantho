@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
-import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings, ShieldCheck } from 'lucide-react';
+import { Wallet, LogOut, Menu, X, FileText, TrendingUp, Banknote, Users, Target, Settings, ShieldCheck, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Toaster } from 'react-hot-toast';
 import NotificationPanel from './NotificationPanel';
@@ -20,6 +20,7 @@ const Layout: React.FC = () => {
     const navItems = [
         { path: '/', label: 'Dashboard', icon: FileText },
         { path: '/transactions', label: 'Transazioni', icon: TrendingUp },
+        { path: '/calendar', label: 'Calendario', icon: Calendar },
         { path: '/fixed-debts', label: 'Debiti Fissi', icon: Banknote },
         { path: '/clients', label: 'Clienti', icon: Users },
         { path: '/goals', label: 'Obiettivi', icon: Target },
