@@ -29,6 +29,18 @@ const TransactionsView: React.FC = () => {
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Advanced Filters State
+    const [filters, setFilters] = useState({
+        period: 'all', // 'all', 'current-month', 'prev-month', 'last-3-months', 'last-6-months', 'year', 'custom'
+        customStartDate: '',
+        customEndDate: '',
+        type: 'all', // 'all', 'income', 'expense'
+        category: 'all', // 'all', 'business', 'personal', 'tax', 'inps'
+        status: 'all', // 'all', 'active', 'scheduled'
+    });
+
+    const [showFilters, setShowFilters] = useState(false);
+
     // Initial check for startAdding state from navigation
     useEffect(() => {
         if (location.state?.startAdding) {
@@ -98,29 +110,29 @@ const TransactionsView: React.FC = () => {
 
             const status: 'active' | 'scheduled' = transactionDate > today ? 'scheduled' : 'active';
 
-            const transactionData: any = {
+            const transaction = {
                 date: newTransaction.date,
                 type: newTransaction.type,
                 category: newTransaction.category,
                 amount: parseFloat(newTransaction.amount),
                 description: newTransaction.description,
-                client: newTransaction.type === 'income' ? (newTransaction.client || null) : null,
-                tags: newTransaction.tags || null,
-                atecoCodeId: (newTransaction.type === 'income' && newTransaction.atecoCodeId) ? newTransaction.atecoCodeId : null,
+                client: newTransaction.client || undefined,
+                tags: newTransaction.tags || undefined,
+                atecoCodeId: newTransaction.atecoCodeId || undefined,
                 status
             };
 
-            await (editingId
-                ? updateTransaction({ ...transactionData, id: editingId })
-                : addTransaction(transactionData));
+            if (editingId) {
+                await updateTransaction(editingId, transaction);
+            } else {
+                await addTransaction(transaction);
+            }
 
             resetForm();
         }
     };
 
     const handleEdit = (t: Transaction) => {
-        setEditingId(t.id);
-        const code = t.atecoCodeId || (atecoCodes.length > 0 ? atecoCodes[0].id : '');
         setNewTransaction({
             date: t.date,
             type: t.type,
@@ -129,17 +141,18 @@ const TransactionsView: React.FC = () => {
             description: t.description,
             client: t.client || '',
             tags: t.tags || '',
-            atecoCodeId: code
+            atecoCodeId: t.atecoCodeId || '',
         });
+        setEditingId(t.id);
         setShowAddTransaction(true);
     };
 
-    const confirmDelete = (id: number) => {
+    const handleDeleteClick = (id: number) => {
         setDeleteModal({ isOpen: true, id });
-    }
+    };
 
     const performDelete = async () => {
-        if (deleteModal.id) {
+        if (deleteModal.id !== null) {
             await deleteTransaction(deleteModal.id);
             setDeleteModal({ isOpen: false, id: null });
         }
@@ -156,24 +169,110 @@ const TransactionsView: React.FC = () => {
         setShowAddTransaction(false);
     };
 
-    // View Helpers
+    // Helper to get date range based on period filter
+    const getDateRange = () => {
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+
+        switch (filters.period) {
+            case 'current-month':
+                return {
+                    start: new Date(currentYear, currentMonth, 1),
+                    end: new Date(currentYear, currentMonth + 1, 0)
+                };
+            case 'prev-month':
+                return {
+                    start: new Date(currentYear, currentMonth - 1, 1),
+                    end: new Date(currentYear, currentMonth, 0)
+                };
+            case 'last-3-months':
+                return {
+                    start: new Date(currentYear, currentMonth - 2, 1),
+                    end: new Date(currentYear, currentMonth + 1, 0)
+                };
+            case 'last-6-months':
+                return {
+                    start: new Date(currentYear, currentMonth - 5, 1),
+                    end: new Date(currentYear, currentMonth + 1, 0)
+                };
+            case 'year':
+                return {
+                    start: new Date(currentYear, 0, 1),
+                    end: new Date(currentYear, 11, 31)
+                };
+            case 'custom':
+                if (filters.customStartDate && filters.customEndDate) {
+                    return {
+                        start: new Date(filters.customStartDate),
+                        end: new Date(filters.customEndDate)
+                    };
+                }
+                return null;
+            default:
+                return null;
+        }
+    };
+
+    // View Helpers - Enhanced with filters
     const filteredTransactions = transactions
         .filter(t => new Date(t.date).getFullYear() === currentYear)
         .filter(t => {
-            if (!searchTerm) return true;
-            const s = searchTerm.toLowerCase();
-            const dateStr = new Date(t.date).toLocaleDateString('it-IT');
-            return (
-                t.description.toLowerCase().includes(s) ||
-                (t.client?.toLowerCase().includes(s)) ||
-                (t.tags?.toLowerCase().includes(s)) ||
-                t.amount.toString().includes(s) ||
-                dateStr.includes(s) ||
-                t.category.toLowerCase().includes(s) ||
-                t.type.toLowerCase().includes(s)
-            );
+            // Period filter
+            const dateRange = getDateRange();
+            if (dateRange) {
+                const tDate = new Date(t.date);
+                if (tDate < dateRange.start || tDate > dateRange.end) {
+                    return false;
+                }
+            }
+
+            // Type filter
+            if (filters.type !== 'all' && t.type !== filters.type) {
+                return false;
+            }
+
+            // Category filter
+            if (filters.category !== 'all' && t.category !== filters.category) {
+                return false;
+            }
+
+            // Status filter
+            if (filters.status !== 'all' && t.status !== filters.status) {
+                return false;
+            }
+
+            // Search term filter
+            if (searchTerm) {
+                const s = searchTerm.toLowerCase();
+                const dateStr = new Date(t.date).toLocaleDateString('it-IT');
+                return (
+                    t.description.toLowerCase().includes(s) ||
+                    (t.client?.toLowerCase().includes(s)) ||
+                    (t.tags?.toLowerCase().includes(s)) ||
+                    t.amount.toString().includes(s) ||
+                    dateStr.includes(s) ||
+                    t.category.toLowerCase().includes(s) ||
+                    t.type.toLowerCase().includes(s)
+                );
+            }
+
+            return true;
         })
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // Calculate totals for filtered results
+    const filteredStats = filteredTransactions.reduce((acc, t) => {
+        if (t.type === 'income') {
+            acc.income += t.amount;
+        } else {
+            acc.expenses += t.amount;
+        }
+        return acc;
+    }, { income: 0, expenses: 0 });
+
+    const hasActiveFilters = filters.period !== 'all' || filters.type !== 'all' ||
+        filters.category !== 'all' || filters.status !== 'all' || searchTerm !== '';
 
     const getAtecoLabel = (id?: string) => {
         if (!id) return null;
@@ -226,6 +325,160 @@ const TransactionsView: React.FC = () => {
                         <span className="md:hidden">Nuova</span>
                     </button>
                 </div>
+            </div>
+
+
+            {/* ADVANCED FILTERS PANEL */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                        <svg className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Filtri Avanzati
+                        {hasActiveFilters && (
+                            <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                Attivi
+                            </span>
+                        )}
+                    </button>
+
+                    {hasActiveFilters && (
+                        <button
+                            onClick={() => {
+                                setFilters({
+                                    period: 'all',
+                                    customStartDate: '',
+                                    customEndDate: '',
+                                    type: 'all',
+                                    category: 'all',
+                                    status: 'all',
+                                });
+                                setSearchTerm('');
+                            }}
+                            className="text-xs text-red-600 hover:text-red-700 font-medium"
+                        >
+                            Cancella filtri
+                        </button>
+                    )}
+                </div>
+
+                {showFilters && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 border-t">
+                        {/* Period Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Periodo</label>
+                            <select
+                                value={filters.period}
+                                onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="all">Tutto l'anno</option>
+                                <option value="current-month">Mese corrente</option>
+                                <option value="prev-month">Mese precedente</option>
+                                <option value="last-3-months">Ultimi 3 mesi</option>
+                                <option value="last-6-months">Ultimi 6 mesi</option>
+                                <option value="year">Anno {currentYear}</option>
+                                <option value="custom">Personalizzato</option>
+                            </select>
+                        </div>
+
+                        {/* Custom Date Range */}
+                        {filters.period === 'custom' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Data inizio</label>
+                                    <input
+                                        type="date"
+                                        value={filters.customStartDate}
+                                        onChange={(e) => setFilters({ ...filters, customStartDate: e.target.value })}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Data fine</label>
+                                    <input
+                                        type="date"
+                                        value={filters.customEndDate}
+                                        onChange={(e) => setFilters({ ...filters, customEndDate: e.target.value })}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Type Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+                            <select
+                                value={filters.type}
+                                onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="all">Tutte</option>
+                                <option value="income">Solo Entrate</option>
+                                <option value="expense">Solo Uscite</option>
+                            </select>
+                        </div>
+
+                        {/* Category Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Categoria</label>
+                            <select
+                                value={filters.category}
+                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="all">Tutte</option>
+                                <option value="business">Business</option>
+                                <option value="personal">Personale</option>
+                                <option value="tax">F24 Tasse</option>
+                                <option value="inps">F24 INPS</option>
+                            </select>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Stato</label>
+                            <select
+                                value={filters.status}
+                                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="all">Tutte</option>
+                                <option value="active">Attive</option>
+                                <option value="scheduled">Programmate</option>
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {/* Compact Stats Display */}
+                {hasActiveFilters && filteredTransactions.length > 0 && (
+                    <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Risultati:</span>
+                            <span className="font-bold text-gray-900">{filteredTransactions.length}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Entrate:</span>
+                            <span className="font-bold text-green-600">{formatCurrency(filteredStats.income)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Uscite:</span>
+                            <span className="font-bold text-red-600">{formatCurrency(filteredStats.expenses)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Saldo:</span>
+                            <span className={`font-bold ${filteredStats.income - filteredStats.expenses >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                                {formatCurrency(filteredStats.income - filteredStats.expenses)}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {showAddTransaction && (
@@ -412,7 +665,7 @@ const TransactionsView: React.FC = () => {
                                                 <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors" title="Modifica">
                                                     <Pencil size={16} />
                                                 </button>
-                                                <button onClick={() => confirmDelete(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
+                                                <button onClick={() => handleDeleteClick(t.id)} className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors" title="Elimina">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
@@ -451,7 +704,7 @@ const TransactionsView: React.FC = () => {
                                         <button onClick={() => handleEdit(t)} className="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition-colors">
                                             <Pencil size={18} />
                                         </button>
-                                        <button onClick={() => confirmDelete(t.id)} className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition-colors">
+                                        <button onClick={() => handleDeleteClick(t.id)} className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition-colors">
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
