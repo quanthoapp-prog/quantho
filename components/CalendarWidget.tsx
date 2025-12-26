@@ -23,6 +23,7 @@ const CalendarWidget: React.FC = () => {
                 allEvents.push({
                     type: 'reminder',
                     date: rDate,
+                    time: r.time,
                     title: r.title,
                     id: `rem-${r.id}`,
                     color: 'text-indigo-600 bg-indigo-50 border-indigo-100'
@@ -117,7 +118,10 @@ const CalendarWidget: React.FC = () => {
                                 <div className={`p-1.5 rounded-full bg-white/60 backdrop-blur-sm`}>
                                     <Clock size={14} className="opacity-70" />
                                 </div>
-                                <span className="text-sm font-semibold truncate max-w-[140px]">{evt.title}</span>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-sm font-semibold truncate max-w-[140px]">{evt.title}</span>
+                                    {evt.time && <span className="text-[10px] font-bold opacity-60">ore {evt.time}</span>}
+                                </div>
                             </div>
                             <span className="text-xs font-bold opacity-80 whitespace-nowrap bg-white/50 px-2 py-0.5 rounded-md">
                                 {formatDateFriendly(evt.date)}

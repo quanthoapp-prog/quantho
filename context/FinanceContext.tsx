@@ -57,6 +57,7 @@ interface FinanceContextType {
     markNotificationAsRead: (id: string) => Promise<void>;
     markAllNotificationsRead: () => Promise<void>;
     deleteNotification: (id: string) => Promise<void>;
+    deleteAllNotifications: () => Promise<void>;
 
     // Reminder Actions
     addReminder: (r: Omit<Reminder, 'id'>) => Promise<void>;
@@ -142,6 +143,14 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setNotifications(notifs || []);
 
                 // Run automated checks after load
+                if (userId) {
+                    const hasNewNotifs = await notificationService.sync(rems || [], dbs || [], userId);
+                    if (hasNewNotifs) {
+                        const updatedNotifs = await notificationService.getAll();
+                        setNotifications(updatedNotifs || []);
+                    }
+                }
+
                 const newPaymentsCount = await debtsService.checkAndCreateAutomaticPayments(dbs || [], userId);
                 if (newPaymentsCount > 0) {
                     const updatedTxs = await transactionService.getAll();
@@ -431,6 +440,12 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         await notificationService.delete(id);
     };
 
+    const deleteAllNotifications = async () => {
+        if (!userId) return;
+        setNotifications([]);
+        await notificationService.deleteAll(userId);
+    };
+
     const unreadNotificationsCount = notifications?.filter(n => !n.isRead).length || 0;
 
     // Reminder Actions
@@ -451,6 +466,11 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const promise = reminderService.update(r)
             .then(updated => setReminders(prev => prev.map(item => item.id === updated.id ? updated : item)));
 
+        toast.promise(promise, {
+            loading: 'Aggiornamento...',
+            success: 'Promemoria aggiornato!',
+            error: 'Errore aggiornamento'
+        });
         await promise;
     };
 
@@ -503,6 +523,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         markNotificationAsRead,
         markAllNotificationsRead,
         deleteNotification,
+        deleteAllNotifications,
         addReminder,
         updateReminder,
         deleteReminder

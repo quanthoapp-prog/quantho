@@ -6,14 +6,19 @@ export const reminderService = {
         const { data, error } = await supabase
             .from('reminders')
             .select('*')
+            .eq('user_id', userId)
             .order('date', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error fetching reminders:", error);
+            throw error;
+        }
 
         return data.map((r: any) => ({
             id: r.id,
             title: r.title,
-            date: r.date, // format is usually YYYY-MM-DD from DB date column
+            date: r.date,
+            time: r.time,
             type: r.type,
             isCompleted: r.is_completed
         })) as Reminder[];
@@ -24,6 +29,7 @@ export const reminderService = {
             user_id: userId,
             title: reminder.title,
             date: reminder.date,
+            time: reminder.time,
             type: reminder.type,
             is_completed: reminder.isCompleted
         };
@@ -34,12 +40,16 @@ export const reminderService = {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error adding reminder:", error);
+            throw error;
+        }
 
         return {
             id: data.id,
             title: data.title,
             date: data.date,
+            time: data.time,
             type: data.type,
             isCompleted: data.is_completed
         } as Reminder;
@@ -51,6 +61,7 @@ export const reminderService = {
             .update({
                 title: reminder.title,
                 date: reminder.date,
+                time: reminder.time,
                 type: reminder.type,
                 is_completed: reminder.isCompleted
             })
@@ -58,12 +69,16 @@ export const reminderService = {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error updating reminder:", error);
+            throw error;
+        }
 
         return {
             id: data.id,
             title: data.title,
             date: data.date,
+            time: data.time,
             type: data.type,
             isCompleted: data.is_completed
         } as Reminder;

@@ -105,3 +105,25 @@ export interface UserProfile {
 }
 
 export type TabId = 'dashboard' | 'transactions' | 'fixedDebts' | 'clients' | 'settings' | 'goals' | 'admin';
+
+export interface Reminder {
+    id: number;
+    title: string;
+    date: string; // YYYY-MM-DD
+    time?: string; // HH:mm
+    type: 'payment' | 'collection' | 'memo';
+    isCompleted: boolean;
+}
+
+export interface Notification {
+    id: string;
+    userId: string;
+    title: string;
+    message: string;
+    type: 'info' | 'warning' | 'success' | 'error';
+    isRead: boolean;
+    createdAt: string;
+    link?: string;
+    reminderId?: number; // Optional reference to a reminder
+    deadlineId?: string; // Optional reference to a fiscal deadline or debt
+}

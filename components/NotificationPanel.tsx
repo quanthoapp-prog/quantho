@@ -6,7 +6,7 @@ import { it } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 
 const NotificationPanel: React.FC = () => {
-    const { notifications, unreadNotificationsCount, markNotificationAsRead, markAllNotificationsRead, deleteNotification } = useFinance();
+    const { notifications, unreadNotificationsCount, markNotificationAsRead, markAllNotificationsRead, deleteNotification, deleteAllNotifications } = useFinance();
     const [isOpen, setIsOpen] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -72,25 +72,44 @@ const NotificationPanel: React.FC = () => {
 
                     <div className="fixed inset-x-4 top-20 w-auto md:absolute md:inset-auto md:right-0 md:top-full md:mt-2 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 animate-in fade-in zoom-in-95 origin-top-right overflow-hidden">
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900">Notifiche</h3>
-                            <div className="flex gap-2">
+                            <div>
+                                <h3 className="font-bold text-gray-900 leading-none">Notifiche</h3>
+                                <p className="text-[10px] text-gray-500 mt-1">{safeNotifications.length} messaggi</p>
+                            </div>
+                            <div className="flex gap-3">
                                 {safeUnreadCount > 0 && (
                                     <button
                                         onClick={() => markAllNotificationsRead()}
-                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                                        className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
                                         title="Segna tutte come lette"
                                     >
                                         <CheckCheck size={14} /> Leggi tutte
                                     </button>
                                 )}
+                                {safeNotifications.length > 0 && (
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Sei sicuro di voler eliminare tutte le notifiche?')) {
+                                                deleteAllNotifications();
+                                            }
+                                        }}
+                                        className="text-[11px] text-red-500 hover:text-red-700 font-bold flex items-center gap-1"
+                                        title="Elimina tutte"
+                                    >
+                                        <Trash2 size={14} /> Pulisci
+                                    </button>
+                                )}
                             </div>
                         </div>
 
-                        <div className="max-h-[60vh] overflow-y-auto">
+                        <div className="max-h-[60vh] overflow-y-auto overscroll-contain">
                             {safeNotifications.length === 0 ? (
                                 <div className="p-8 text-center text-gray-400 flex flex-col items-center">
-                                    <Bell size={32} className="mb-2 opacity-20" />
-                                    <p className="text-sm">Nessuna notifica</p>
+                                    <div className="bg-gray-100 p-4 rounded-full mb-3">
+                                        <Bell size={32} className="opacity-20" />
+                                    </div>
+                                    <p className="text-sm font-medium">Nessuna notifica</p>
+                                    <p className="text-xs mt-1">Ti avviseremo quando ci saranno novità.</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-50">
@@ -116,7 +135,7 @@ const NotificationPanel: React.FC = () => {
                                                     className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
                                                     title="Elimina"
                                                 >
-                                                    <X size={14} />
+                                                    <Trash2 size={14} />
                                                 </button>
                                             </div>
                                             {!n.isRead && (
