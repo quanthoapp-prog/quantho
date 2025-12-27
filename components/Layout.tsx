@@ -13,8 +13,24 @@ const Layout: React.FC = () => {
     const location = useLocation();
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        // The App component auth listener will handle the redirect/state change
+        try {
+            // Start sign out
+            supabase.auth.signOut();
+
+            // Clear local storage as safety
+            localStorage.clear();
+
+            // Force redirect and reload after a tiny delay to allow signOut to start
+            setTimeout(() => {
+                window.location.href = '#/';
+                window.location.reload();
+            }, 100);
+        } catch (error) {
+            console.error('Logout error:', error);
+            localStorage.clear();
+            window.location.href = '#/';
+            window.location.reload();
+        }
     };
 
     const navItems = [
@@ -143,6 +159,15 @@ const Layout: React.FC = () => {
                                 {item.label}
                             </button>
                         ))}
+                    </div>
+                    <div className="px-4 py-3 border-t">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                            <LogOut size={20} />
+                            Disconnetti Account
+                        </button>
                     </div>
                 </div>
             )}

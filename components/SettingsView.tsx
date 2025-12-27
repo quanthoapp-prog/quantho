@@ -126,8 +126,21 @@ const SettingsView: React.FC = () => {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        // window.location.reload(); // Optional, but usually Auth provider update handles it.
+        try {
+            toast.loading('Disconnessione in corso...');
+            supabase.auth.signOut();
+            localStorage.clear();
+
+            setTimeout(() => {
+                window.location.href = '#/';
+                window.location.reload();
+            }, 500);
+        } catch (error) {
+            console.error('Logout error:', error);
+            localStorage.clear();
+            window.location.href = '#/';
+            window.location.reload();
+        }
     };
 
     const handleResetPasswordRequest = async () => {
