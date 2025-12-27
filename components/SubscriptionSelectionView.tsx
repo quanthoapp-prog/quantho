@@ -102,7 +102,7 @@ const SubscriptionSelectionView: React.FC = () => {
                     plan: selectedPlan,
                     userId: profile.id,
                     userEmail: profile.email,
-                    priceId: selectedPlan === 'monthly' ? 'YOUR_STRIPE_MONTHLY_PRICE_ID' : 'YOUR_STRIPE_ANNUAL_PRICE_ID'
+                    priceId: selectedPlan === 'monthly' ? 'price_1SizFxF1GflKFaFBQ3b7CDVY' : 'price_1SizGHF1GflKFaFBqpKLR77O'
                 }
             });
 
