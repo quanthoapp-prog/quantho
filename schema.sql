@@ -163,7 +163,29 @@ create table notifications (
 );
 
 alter table notifications enable row level security;
-create policy "Users can manage own notifications" on notifications for all using (auth.uid() = user_id);
+
+-- Users can view and manage their own notifications
+create policy "Users can view own notifications" on notifications 
+  for select using (auth.uid() = user_id);
+
+create policy "Users can update own notifications" on notifications 
+  for update using (auth.uid() = user_id);
+
+create policy "Users can delete own notifications" on notifications 
+  for delete using (auth.uid() = user_id);
+
+-- Users can create their own notifications
+create policy "Users can create own notifications" on notifications 
+  for insert with check (auth.uid() = user_id);
+
+-- Admins can create notifications for any user (for broadcast messaging)
+create policy "Admins can create notifications for all users" on notifications 
+  for insert with check (
+    exists (
+      select 1 from profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
 
 create index idx_notifications_user_id on notifications(user_id);
 create index idx_notifications_is_read on notifications(is_read);

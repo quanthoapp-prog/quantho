@@ -162,14 +162,24 @@ export const notificationService = {
 
     // Function to create a notification (usually called by backend or trigger, but good to have)
     async add(notification: Omit<Notification, 'id' | 'isRead' | 'createdAt'>) {
-        const payload = {
+        const payload: any = {
             user_id: notification.userId,
             title: notification.title,
             message: notification.message,
             type: notification.type,
-            link: notification.link,
             is_read: false
         };
+
+        // Add optional fields only if they exist
+        if (notification.link) {
+            payload.link = notification.link;
+        }
+        if (notification.reminderId) {
+            payload.reminder_id = notification.reminderId;
+        }
+        if (notification.deadlineId) {
+            payload.deadline_id = notification.deadlineId;
+        }
 
         const { data, error } = await supabase
             .from('notifications')
@@ -177,7 +187,10 @@ export const notificationService = {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error adding notification:', error);
+            throw error;
+        }
 
         return {
             id: data.id,
@@ -187,7 +200,9 @@ export const notificationService = {
             type: data.type,
             isRead: data.is_read,
             createdAt: data.created_at,
-            link: data.link
+            link: data.link,
+            reminderId: data.reminder_id,
+            deadlineId: data.deadline_id
         } as Notification;
     }
 };

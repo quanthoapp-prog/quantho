@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import LoadingSpinner from './LoadingSpinner';
 import { notificationService } from '../services/notifications';
+import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface BroadcastMessage {
@@ -62,16 +63,33 @@ const AdminPanelView: React.FC = () => {
             // Get all user IDs
             const userIds = allProfiles.map(p => p.id);
 
-            // Send notification to each user
-            const promises = userIds.map(userId =>
-                notificationService.add({
-                    userId,
-                    title: broadcastTitle,
-                    message: broadcastMessage,
-                    type: broadcastType,
-                    link: undefined
-                })
-            );
+            if (userIds.length === 0) {
+                toast.error('Nessun utente trovato');
+                setIsSending(false);
+                return;
+            }
+
+            console.log(`Sending broadcast to ${userIds.length} users...`);
+
+            // Use PostgreSQL function to bypass RLS
+            const promises = userIds.map(async (userId) => {
+                const { data, error } = await supabase.rpc('create_notification_as_admin', {
+                    target_user_id: userId,
+                    notification_title: broadcastTitle,
+                    notification_message: broadcastMessage,
+                    notification_type: broadcastType,
+                    notification_link: null,
+                    notification_reminder_id: null,
+                    notification_deadline_id: null
+                });
+
+                if (error) {
+                    console.error(`Error sending to user ${userId}:`, error);
+                    throw error;
+                }
+
+                return data;
+            });
 
             await Promise.all(promises);
 
@@ -92,9 +110,10 @@ const AdminPanelView: React.FC = () => {
             setBroadcastTitle('');
             setBroadcastMessage('');
             setBroadcastType('info');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error sending broadcast:', error);
-            toast.error('Errore durante l\'invio del messaggio');
+            const errorMessage = error?.message || error?.toString() || 'Errore sconosciuto';
+            toast.error(`Errore: ${errorMessage}`);
         } finally {
             setIsSending(false);
         }
