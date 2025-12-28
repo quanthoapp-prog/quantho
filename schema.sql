@@ -29,7 +29,7 @@ create table transactions (
   user_id uuid references auth.users not null default auth.uid(),
   date date not null,
   type text not null check (type in ('income', 'expense')),
-  category text not null check (category in ('business', 'personal', 'tax', 'inps')),
+  category text not null check (category in ('business', 'personal', 'tax', 'inps', 'extra')),
   amount numeric not null,
   description text,
   client text, -- Storing name directly as per current App logic, can be FK later

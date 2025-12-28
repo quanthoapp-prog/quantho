@@ -286,6 +286,7 @@ const TransactionsView: React.FC = () => {
             case 'inps': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium border border-purple-200">F24 INPS</span>;
             case 'business': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium border border-blue-200">BUSINESS</span>;
             case 'personal': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium border border-gray-200">PERSONALE</span>;
+            case 'extra': return <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium border border-amber-200">EXTRA</span>;
             default: return null;
         }
     };
