@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AtecoCode } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star } from 'lucide-react';
 import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
@@ -579,28 +579,28 @@ const SettingsView: React.FC = () => {
                         <h4 className="text-2xl font-bold text-gray-900 text-center md:text-left">Dashboard: Il tuo Centro di Controllo</h4>
                     </div>
                     <div className="prose prose-slate max-w-none text-gray-600">
-                        <p>La Dashboard offre una panoramica in tempo reale della salute finanziaria della tua partita IVA.</p>
+                        <p>La Dashboard è il cuore pulsante di Quantho, ora completamente personalizzabile per adattarsi al tuo modo di lavorare.</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                                 <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    KPI Principali
+                                    KPI e Liquidità
                                 </h5>
                                 <ul className="text-sm space-y-2">
-                                    <li><strong>Fatturato Annuo:</strong> Somma di tutte le entrate "Attive". La barra indica la distanza dal limite di 85.000€.</li>
-                                    <li><strong>Liquidità di Cassa:</strong> I soldi "veri" sul tuo conto, calcolati sottraendo tutte le spese (tasse incluse) alle entrate, partendo dal saldo iniziale.</li>
-                                    <li><strong>Netto Disponibile:</strong> Il tuo vero guadagno. È ciò che ti rimane dopo aver accantonato le tasse stimate e coperto tutti i debiti fissi dell'anno.</li>
+                                    <li><strong>Fatturato Business:</strong> Solo le entrate soggette a tassazione. La barra indica la distanza dal limite di 85.000€.</li>
+                                    <li><strong>Extra Fatturato:</strong> Regali, affitti o extra che non pesano sul limite fiscale ma aumentano la tua cassa.</li>
+                                    <li><strong>Liquidità Totale:</strong> Il saldo reale del tuo portafoglio, includendo Fatturato, Extra e detraendo tutte le spese e tasse.</li>
                                 </ul>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                                 <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                    Analisi Avanzata
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    Personalizzazione & Widget
                                 </h5>
                                 <ul className="text-sm space-y-2">
-                                    <li><strong>Fatturato di Pareggio:</strong> Ti indica quanto devi fatturare per non andare in perdita, considerando stile di vita e tasse.</li>
-                                    <li><strong>Scadenzario Fiscale:</strong> Ti ricorda le date critiche (Giugno e Novembre) per il versamento di Saldo e Acconti.</li>
-                                    <li><strong>Prossime Scadenze:</strong> Monitora i debiti fissi del mese corrente e le transazioni programmate.</li>
+                                    <li><strong>Drag & Drop:</strong> Trascina i widget (grafici, scadenze, transazioni) tramite la maniglia in alto a destra per riordinare la dashboard come preferisci.</li>
+                                    <li><strong>Widget Calendario:</strong> Una vista rapida dei prossimi 4 eventi cruciali, dai pagamenti alle scadenze fiscali.</li>
+                                    <li><strong>Analisi Goal:</strong> Monitora quanto manca al tuo obiettivo annuo di guadagno netto.</li>
                                 </ul>
                             </div>
                         </div>
@@ -616,26 +616,35 @@ const SettingsView: React.FC = () => {
                         <h4 className="text-2xl font-bold text-gray-900 border-none">Transazioni: Entrate e Uscite</h4>
                     </div>
                     <div className="prose prose-slate max-w-none text-gray-600">
-                        <p>Ogni movimento deve essere registrato con precisione per garantire stime fiscali affidabili.</p>
+                        <p>Gestire i movimenti non è mai stato così potente. Usa i filtri avanzati per analizzare specifici periodi o categorie.</p>
                         <div className="space-y-4 mt-4">
                             <div className="flex gap-4 items-start">
                                 <div className="mt-1 bg-green-500 text-white rounded-full p-1"><PlusCircle size={14} /></div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 mb-1">Entrate (Fatturato)</h5>
-                                    <p className="text-sm">Associa sempre il <strong>Codice ATECO</strong> corretto. Quantho applicherà automaticamente il coefficiente di redditività per calcolare la base imponibile. Puoi inserire fatture con data futura: queste verranno segnate come "Programmate" e non influiranno sulla cassa finché non arriva il giorno dell'incasso.</p>
+                                    <h5 className="font-bold text-gray-800 mb-1">Entrate: Business vs Extra</h5>
+                                    <p className="text-sm">
+                                        Scegli <strong>"Fatturato Business"</strong> per i tuoi incassi professionali: verranno calcolate tasse e INPS.
+                                        Scegli <strong>"Altra Entrata (Extra)"</strong> per regali o affitti: questi aumenteranno la tua liquidità senza pesare sul fatturato fiscale.
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-start">
-                                <div className="mt-1 bg-red-400 text-white rounded-full p-1"><Trash2 size={14} /></div>
+                                <div className="mt-1 bg-blue-500 text-white rounded-full p-1"><Filter size={14} /></div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 mb-1">Uscite e Categorie</h5>
-                                    <p className="text-sm">Categorizzare correttamente le uscite è vitale:</p>
-                                    <ul className="text-sm mt-2 space-y-1">
-                                        <li><strong>Business/Personale:</strong> Spese ordinarie che riducono la liquidità ma non influiscono sulle tasse (nel forfettario le spese non sono deducibili analiticamente).</li>
-                                        <li><strong>F24 INPS:</strong> Le uniche spese **deducibili** dal reddito imponibile. Registrale qui per vedere scendere la stima delle tasse successive!</li>
-                                        <li><strong>F24 Tasse:</strong> L'imposta sostitutiva (5%/15%). Registrale per azzerare il debito fiscale calcolato nella Dashboard.</li>
-                                        <li><strong>Tagging Strategico:</strong> Usa i <strong>Tag</strong> (es. software, marketing, ufficio) per ogni spesa per sbloccare l'analisi nel grafico a torta e impostare budget specifici.</li>
-                                    </ul>
+                                    <h5 className="font-bold text-gray-800 mb-1">Filtri Avanzati & Ricerca</h5>
+                                    <p className="text-sm">
+                                        Usa il pannello filtri per isolare i movimenti dell'ultimo mese, di un cliente specifico o di una categoria (es. solo INPS).
+                                        La Dashboard e le statistiche si aggiorneranno in tempo reale mostrandoti il saldo parziale dei risultati filtrati.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 items-start">
+                                <div className="mt-1 bg-red-400 text-white rounded-full p-1"><Zap size={14} /></div>
+                                <div>
+                                    <h5 className="font-bold text-gray-800 mb-1">Transazioni Programmate</h5>
+                                    <p className="text-sm">
+                                        Inserisci spese o entrate con data futura. Verranno segnate come "Programmate" e appariranno automaticamente tra i movimenti attivi al raggiungimento della data, permettendoti di prevedere il flusso di cassa futuro.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -692,13 +701,63 @@ const SettingsView: React.FC = () => {
                     </div>
                 </section>
 
-                {/* 5. CONFIGURAZIONE FISCALE */}
+                {/* 5. NOTIFICHE E PROMEMORIA */}
+                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-blue-100 p-3 rounded-xl text-blue-600">
+                            <Bell size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900">Notifiche & Smart Sync</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>Quantho non ti lascia mai solo. Il sistema di notifiche monitora h24 la tua situazione.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">🚀 Promemoria Automatici</h5>
+                                <p className="text-xs">Ogni volta che si avvicina una scadenza fiscale, un debito fisso o un promemoria nel calendario, Quantho genera automaticamente una notifica per avvisarti.</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">📢 Comunicazioni Admin</h5>
+                                <p className="text-xs">Ricevi avvisi diretti per aggiornamenti normativi, scadenze nazionali critiche o nuove funzionalità dell'app direttamente nel tuo centro notifiche.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 6. ABBONAMENTO PREMIUM */}
+                <section className="bg-amber-50 p-6 md:p-8 rounded-2xl shadow-md border border-amber-200">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-amber-100 p-3 rounded-xl text-amber-600">
+                            <Star size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-amber-900 border-none">Abbonamento: Entra nel Club Early Bird</h4>
+                    </div>
+                    <div className="prose prose-slate max-w-none text-gray-600">
+                        <p>Quantho offre un'offerta irripetibile per i primi sostenitori del progetto.</p>
+                        <div className="mt-4 space-y-3">
+                            <div className="flex items-start gap-3">
+                                <div className="text-amber-600 mt-1"><Check size={16} /></div>
+                                <p className="text-sm font-medium">✨ <strong>Prezzo Bloccato:</strong> Solo 1,99€/mese o 19,90€/anno per i primi 1000 utenti. Il prezzo non aumenterà mai per te.</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="text-amber-600 mt-1"><Check size={16} /></div>
+                                <p className="text-sm font-medium">🔐 <strong>Sicurezza Stripe:</strong> Pagamenti gestiti interamente da Stripe. I tuoi dati sensibili non toccano mai i nostri server.</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="text-amber-600 mt-1"><Check size={16} /></div>
+                                <p className="text-sm font-medium">📅 <strong>Prova Gratuita:</strong> 15 giorni per testare tutto al 100% senza impegno.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 7. CONFIGURAZIONE FISCALE */}
                 <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="bg-orange-100 p-3 rounded-xl text-orange-600">
                             <Settings size={28} />
                         </div>
-                        <h4 className="text-2xl font-bold text-gray-900">5. Configurazione Fiscale</h4>
+                        <h4 className="text-2xl font-bold text-gray-900 border-none">7. Configurazione Fiscale</h4>
                     </div>
                     <div className="prose prose-slate max-w-none text-gray-600">
                         <p>Assicurati che i parametri siano allineati alla tua situazione reale per avere stime al centesimo.</p>
