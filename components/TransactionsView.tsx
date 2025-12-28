@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save, Search, Receipt } from 'lucide-react';
+import { PlusCircle, Trash2, Banknote, ShieldCheck, Pencil, Save, Search, Receipt, Info } from 'lucide-react';
 import TagInput from './TagInput';
 import { Transaction } from '../types';
 import { formatCurrency } from '../constants';
@@ -435,6 +435,7 @@ const TransactionsView: React.FC = () => {
                                 <option value="all">Tutte</option>
                                 <option value="business">Business</option>
                                 <option value="personal">Personale</option>
+                                <option value="extra">Extra (Regali/Affitti)</option>
                                 <option value="tax">F24 Tasse</option>
                                 <option value="inps">F24 INPS</option>
                             </select>
@@ -552,26 +553,46 @@ const TransactionsView: React.FC = () => {
                         ) : (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-                                    <select value={newTransaction.client} onChange={(e) => setNewTransaction({ ...newTransaction, client: e.target.value })} className={inputBaseClass}>
-                                        <option value="">Seleziona</option>
-                                        {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Codice ATECO</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia Entrata</label>
                                     <select
-                                        value={newTransaction.atecoCodeId}
-                                        onChange={(e) => setNewTransaction({ ...newTransaction, atecoCodeId: e.target.value })}
+                                        value={newTransaction.category}
+                                        onChange={(e) => setNewTransaction({ ...newTransaction, category: e.target.value as any })}
                                         className={inputBaseClass}
                                     >
-                                        {atecoCodes.map(code => (
-                                            <option key={code.id} value={code.id}>
-                                                {code.code} - {code.description} ({(code.coefficient * 100).toFixed(0)}%)
-                                            </option>
-                                        ))}
+                                        <option value="business">Fatturato Business</option>
+                                        <option value="extra">Altra Entrata (Regali, Affitti, Extra)</option>
                                     </select>
                                 </div>
+                                {newTransaction.category === 'business' ? (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+                                            <select value={newTransaction.client} onChange={(e) => setNewTransaction({ ...newTransaction, client: e.target.value })} className={inputBaseClass}>
+                                                <option value="">Seleziona</option>
+                                                {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Codice ATECO</label>
+                                            <select
+                                                value={newTransaction.atecoCodeId}
+                                                onChange={(e) => setNewTransaction({ ...newTransaction, atecoCodeId: e.target.value })}
+                                                className={inputBaseClass}
+                                            >
+                                                {atecoCodes.map(code => (
+                                                    <option key={code.id} value={code.id}>
+                                                        {code.code} - {code.description} ({(code.coefficient * 100).toFixed(0)}%)
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="md:col-span-2 p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex items-center gap-2">
+                                        <Info size={16} className="text-blue-500" />
+                                        <p className="text-xs text-blue-700">Questa entrata non verrà conteggiata ai fini del fatturato imponibile.</p>
+                                    </div>
+                                )}
                             </>
                         )}
 

@@ -149,10 +149,15 @@ const DashboardView: React.FC = () => {
                                     <span className="text-blue-100">Fatturato annuo ({currentYear})</span>
                                     <TrendingUp size={24} />
                                 </div>
-                                <div className="text-3xl font-bold">{formatCurrency(stats.income)}</div>
+                                <div className="text-3xl font-bold">{formatCurrency(stats.businessIncome)}</div>
                             </div>
-                            <div className="text-sm text-blue-100 mt-2">
-                                {stats.percentualeSoglia.toFixed(1)}% del limite
+                            <div className="text-sm text-blue-100 mt-2 flex justify-between items-center">
+                                <span>{stats.percentualeSoglia.toFixed(1)}% del limite</span>
+                                {stats.extraIncome > 0 && (
+                                    <span className="bg-blue-400/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                        + Extra: {formatCurrency(stats.extraIncome)}
+                                    </span>
+                                )}
                             </div>
                         </div>
 

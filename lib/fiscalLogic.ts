@@ -44,16 +44,24 @@ export const calculateFiscalStats = ({
         .reduce((sum, t) => sum + t.amount, 0);
 
     // 3. Gross Income Calculation (only active transactions)
-    let income = 0;
+    let totalIncome = 0;
+    let businessIncome = 0;
+    let extraIncome = 0;
     let grossTaxableIncome = 0;
 
     activeTransactions
         .filter(t => t.type === 'income')
         .forEach(t => {
-            income += t.amount;
-            const ateco = atecoCodes.find(c => c.id === t.atecoCodeId) || atecoCodes[0];
-            const coefficient = ateco ? ateco.coefficient : 0.78;
-            grossTaxableIncome += t.amount * coefficient;
+            totalIncome += t.amount;
+            if (t.category === 'extra') {
+                extraIncome += t.amount;
+            } else {
+                // Default to business if category is not 'extra' (business, or even if someone used personal/tax for income by mistake)
+                businessIncome += t.amount;
+                const ateco = atecoCodes.find(c => c.id === t.atecoCodeId) || atecoCodes[0];
+                const coefficient = ateco ? ateco.coefficient : 0.78;
+                grossTaxableIncome += t.amount * coefficient;
+            }
         });
 
     // 4. Calculate Expenses & Outflows (only active transactions)
@@ -95,10 +103,10 @@ export const calculateFiscalStats = ({
 
     // Liquidità di Cassa 
     const openingBalance = settings.openingHistory[currentYear] || 0;
-    const realNetIncome = income - allExpenses;
+    const realNetIncome = totalIncome - allExpenses;
     const currentLiquidity = openingBalance + realNetIncome;
 
-    const estimatedNetIncome = income - totalTaxEstimate;
+    const estimatedNetIncome = businessIncome - totalTaxEstimate;
     const netAvailableIncome = estimatedNetIncome - totalFixedDebtEstimate;
     const remainingTaxDue = totalTaxEstimate - taxesPaid;
 
@@ -117,7 +125,7 @@ export const calculateFiscalStats = ({
     const targetNetIncome = totalFixedDebtEstimate + projectedAnnualVariableExpenses;
 
     let breakEvenTurnover = 0;
-    const weightedCoeff = income > 0 ? (grossTaxableIncome / income) : 0.78;
+    const weightedCoeff = businessIncome > 0 ? (grossTaxableIncome / businessIncome) : 0.78;
 
     if (settings.inpsType === 'separata') {
         const inpsRate = 0.2623;
@@ -145,14 +153,14 @@ export const calculateFiscalStats = ({
     }
 
     const monthlyNetIncome = netAvailableIncome / 12;
-    const avgCoefficient = income > 0 ? (grossTaxableIncome / income) : 0.78;
+    const avgCoefficient = businessIncome > 0 ? (grossTaxableIncome / businessIncome) : 0.78;
     const marginalTaxable = 1000 * avgCoefficient;
 
     let marginalInps = 0;
     if (settings.inpsType === 'separata') {
         marginalInps = marginalTaxable * 0.2623;
     } else {
-        const projectedAnnualIncome = (income / monthsElapsed) * 12;
+        const projectedAnnualIncome = (businessIncome / monthsElapsed) * 12;
         const projectedTaxable = projectedAnnualIncome * avgCoefficient;
         const threshold = settings.artigianiFixedIncome || 18415;
 
@@ -188,11 +196,13 @@ export const calculateFiscalStats = ({
         }
     };
 
-    const goalPercentage = settings.annualGoal > 0 ? (income / settings.annualGoal) * 100 : 0;
-    const gapToGoal = Math.max(0, settings.annualGoal - income);
+    const goalPercentage = settings.annualGoal > 0 ? (businessIncome / settings.annualGoal) * 100 : 0;
+    const gapToGoal = Math.max(0, settings.annualGoal - businessIncome);
 
     return {
-        income,
+        income: totalIncome,
+        businessIncome,
+        extraIncome,
         realExpenses: allExpenses,
         taxesPaid,
         inpsPaid,
@@ -206,7 +216,7 @@ export const calculateFiscalStats = ({
         netAvailableIncome,
         remainingTaxDue,
         totalFixedDebtEstimate,
-        percentualeSoglia: (income / LIMITE_FORFETTARIO) * 100,
+        percentualeSoglia: (businessIncome / LIMITE_FORFETTARIO) * 100,
         taxRateApplied: taxRate,
         deadlines,
         breakEvenTurnover,

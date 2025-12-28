@@ -26,7 +26,7 @@ export interface Transaction {
     id: number;
     date: string;
     type: 'income' | 'expense';
-    category: 'business' | 'personal' | 'tax' | 'inps'; // Tax = Flat Tax, Inps = Contributions
+    category: 'business' | 'personal' | 'tax' | 'inps' | 'extra'; // extra = non-taxable income/other
     amount: number;
     description: string;
     client: string;
@@ -64,7 +64,9 @@ export interface FiscalDeadline {
 }
 
 export interface Stats {
-    income: number;
+    income: number; // Total income (Business + Extra)
+    businessIncome: number; // Taxable Turnover (Fatturato)
+    extraIncome: number;    // Non-taxable / Extra turnover
     realExpenses: number; // Includes Business, Personal, Tax, INPS
     taxesPaid: number;    // Tax + INPS
     inpsPaid: number;     // Specific tracking for deductibility
