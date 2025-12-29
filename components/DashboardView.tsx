@@ -176,12 +176,21 @@ const DashboardView: React.FC = () => {
                                 </div>
                                 <div className="text-3xl font-bold">{formatCurrency(stats.businessIncome)}</div>
                             </div>
-                            <div className="text-sm text-blue-100 mt-2 flex justify-between items-center">
-                                <span>{stats.percentualeSoglia.toFixed(1)}% del limite</span>
+                            <div className="text-sm text-blue-100 mt-2">
+                                <div className="flex justify-between items-center">
+                                    <span>{stats.percentualeSoglia.toFixed(1)}% del limite</span>
+                                    {stats.forecastedBusinessIncome > stats.businessIncome && (
+                                        <span className="font-bold text-white bg-blue-400/40 px-2 py-0.5 rounded text-[10px]" title="Incluso Pipeline Contratti">
+                                            Previsto: {formatCurrency(stats.forecastedBusinessIncome)}
+                                        </span>
+                                    )}
+                                </div>
                                 {stats.extraIncome > 0 && (
-                                    <span className="bg-blue-400/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                                        + Extra: {formatCurrency(stats.extraIncome)}
-                                    </span>
+                                    <div className="mt-1">
+                                        <span className="bg-blue-400/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                            + Extra: {formatCurrency(stats.extraIncome)}
+                                        </span>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -284,15 +293,21 @@ const DashboardView: React.FC = () => {
                         <div className="bg-violet-50 rounded-xl p-5 border border-violet-100 shadow-sm flex flex-col justify-between">
                             <div>
                                 <div className="flex items-center justify-between gap-2 text-violet-800 font-semibold mb-1">
-                                    <span className="flex items-center gap-2"><Trophy size={18} /> Raggiungimento Obiettivo</span>
-                                    <span className="text-xs font-bold">{stats.goalPercentage.toFixed(0)}%</span>
+                                    <span className="flex items-center gap-2"><Trophy size={18} /> Progresso Obiettivo</span>
+                                    <span className="text-xs font-bold">{stats.goalPercentage.toFixed(0)}% <span className="text-violet-400 font-normal">({((stats.forecastedBusinessIncome / settings.annualGoal) * 100 || 0).toFixed(0)}% prev.)</span></span>
                                 </div>
-                                {stats.goalPercentage > 0 ? (
+                                {settings.annualGoal > 0 ? (
                                     <div className="mt-2">
-                                        <div className="w-full bg-violet-200 rounded-full h-3">
-                                            <div className="bg-violet-600 h-3 rounded-full transition-all duration-1000" style={{ width: `${Math.min(stats.goalPercentage, 100)}%` }}></div>
+                                        <div className="w-full bg-violet-200 rounded-full h-3 overflow-hidden flex">
+                                            <div className="bg-violet-600 h-3 rounded-l-full transition-all duration-1000" style={{ width: `${Math.min(stats.goalPercentage, 100)}%` }}></div>
+                                            <div className="bg-violet-300 h-3 transition-all duration-1000 opacity-60" style={{ width: `${Math.max(0, Math.min(100 - stats.goalPercentage, ((stats.forecastedBusinessIncome / settings.annualGoal) * 100) - stats.goalPercentage))}%` }}></div>
                                         </div>
-                                        <div className="text-xs text-violet-700 mt-2">Mancano {formatCurrency(stats.gapToGoal)}</div>
+                                        <div className="text-[10px] text-violet-700 mt-2 flex justify-between">
+                                            <span>Mancano {formatCurrency(stats.gapToGoal)}</span>
+                                            {stats.forecastedBusinessIncome > stats.businessIncome && (
+                                                <span className="font-semibold italic">Pipeline: +{formatCurrency(stats.forecastedBusinessIncome - stats.businessIncome)}</span>
+                                            )}
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="text-sm text-violet-600 mt-1 cursor-pointer hover:underline" onClick={() => navigate('/goals')}>

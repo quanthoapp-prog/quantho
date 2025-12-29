@@ -7,6 +7,7 @@ interface CalculateFiscalStatsProps {
     settings: UserSettings;
     currentYear: number;
     atecoCodes: AtecoCode[];
+    contracts: import('../types').Contract[];
 }
 
 export const calculateFiscalStats = ({
@@ -14,7 +15,8 @@ export const calculateFiscalStats = ({
     fixedDebts,
     settings,
     currentYear,
-    atecoCodes
+    atecoCodes,
+    contracts
 }: CalculateFiscalStatsProps): Stats => {
     const today = new Date();
     const currentFullYear = today.getFullYear();
@@ -100,6 +102,36 @@ export const calculateFiscalStats = ({
     }
 
     const totalTaxEstimate = flatTax + inpsEstimate;
+
+    // --- PIPELINE FORECASTING ---
+    const activeContracts = contracts.filter(c => c.status !== 'completed' && new Date(c.expectedDate).getFullYear() === currentYear);
+    const contractsExpectedIncome = activeContracts.reduce((sum, c) => sum + c.amount, 0);
+
+    let contractsGrossTaxable = 0;
+    activeContracts.forEach(c => {
+        const ateco = atecoCodes.find(ac => ac.id === c.atecoCodeId) || atecoCodes[0];
+        contractsGrossTaxable += c.amount * (ateco?.coefficient || 0.78);
+    });
+
+    const forecastedBusinessIncome = businessIncome + contractsExpectedIncome;
+    const forecastedGrossTaxable = grossTaxableIncome + contractsGrossTaxable;
+    const forecastedRedditoImponibile = Math.max(0, forecastedGrossTaxable - inpsPaid); // Simplification: assuming inpsPaid is known or similar
+
+    const forecastedFlatTax = forecastedRedditoImponibile * taxRate;
+    let forecastedInps = 0;
+    if (settings.inpsType === 'separata') {
+        forecastedInps = forecastedRedditoImponibile * 0.2623;
+    } else {
+        const fixedCost = settings.artigianiFixedCost || 4515;
+        const threshold = settings.artigianiFixedIncome || 18415;
+        const exceedRate = settings.artigianiExceedRate || 0.24;
+        forecastedInps = fixedCost;
+        if (forecastedRedditoImponibile > threshold) {
+            forecastedInps += (forecastedRedditoImponibile - threshold) * exceedRate;
+        }
+    }
+    const forecastedTaxTotal = forecastedFlatTax + forecastedInps;
+    const forecastedNetIncome = forecastedBusinessIncome - forecastedTaxTotal - totalFixedDebtEstimate;
 
     // Liquidità di Cassa 
     const openingBalance = settings.openingHistory[currentYear] || 0;
@@ -224,6 +256,10 @@ export const calculateFiscalStats = ({
         taxEfficiencyPer1000,
         goalPercentage,
         gapToGoal,
-        scheduledExpenses
+        scheduledExpenses,
+        forecastedBusinessIncome,
+        forecastedNetIncome,
+        forecastedTaxTotal,
+        forecastedLiquidity: currentLiquidity + (forecastedBusinessIncome - businessIncome) - (forecastedTaxTotal - totalTaxEstimate)
     };
 };

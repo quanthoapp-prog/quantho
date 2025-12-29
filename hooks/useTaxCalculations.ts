@@ -8,6 +8,7 @@ interface UseTaxCalculationsProps {
     settings: UserSettings;
     currentYear: number;
     atecoCodes: AtecoCode[];
+    contracts: import('../types').Contract[];
 }
 
 export const useTaxCalculations = ({
@@ -15,7 +16,8 @@ export const useTaxCalculations = ({
     fixedDebts,
     settings,
     currentYear,
-    atecoCodes
+    atecoCodes,
+    contracts
 }: UseTaxCalculationsProps): Stats => {
     return useMemo(() => {
         return calculateFiscalStats({
@@ -23,7 +25,8 @@ export const useTaxCalculations = ({
             fixedDebts,
             settings,
             currentYear,
-            atecoCodes
+            atecoCodes,
+            contracts
         });
-    }, [transactions, fixedDebts, currentYear, settings, atecoCodes]);
+    }, [transactions, fixedDebts, currentYear, settings, atecoCodes, contracts]);
 };

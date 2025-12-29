@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats, UserProfile, Notification, Reminder } from '../types';
+import { Transaction, Client, FixedDebt, UserSettings, AtecoCode, Stats, UserProfile, Notification, Reminder, Contract } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import { transactionService } from '../services/transactions';
 import { clientService } from '../services/clients';
@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import { notificationService } from '../services/notifications';
 import { reminderService } from '../services/reminders';
+import { contractService } from '../services/contracts';
 
 interface FinanceContextType {
     // Data
@@ -20,6 +21,7 @@ interface FinanceContextType {
     fixedDebts: FixedDebt[];
     settings: UserSettings;
     atecoCodes: AtecoCode[];
+    contracts: Contract[];
     stats: Stats;
     currentYear: number;
     availableYears: number[];
@@ -52,6 +54,11 @@ interface FinanceContextType {
     deleteAccount: () => Promise<void>;
     updateProfile: (id: string, updates: Partial<UserProfile>) => Promise<void>;
     fetchAllProfiles: () => Promise<void>;
+
+    // Contract Actions
+    addContract: (c: Omit<Contract, 'id'>) => Promise<void>;
+    updateContract: (c: Contract) => Promise<void>;
+    deleteContract: (id: number) => Promise<void>;
 
     // Notification Actions
     markNotificationAsRead: (id: string) => Promise<void>;
@@ -92,6 +99,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
+    const [contracts, setContracts] = useState<Contract[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial Load
@@ -124,14 +132,15 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 }
 
                 // Load other data
-                const [txs, cls, dbs, sts, atc, rems, notifs] = await Promise.all([
+                const [txs, cls, dbs, sts, atc, rems, notifs, cntrcts] = await Promise.all([
                     transactionService.getAll().catch(e => { console.error("txs error", e); return []; }),
                     clientService.getAll().catch(e => { console.error("clients error", e); return []; }),
                     debtsService.getAll().catch(e => { console.error("debts error", e); return []; }),
                     settingsService.get(userId).catch(e => { console.error("settings error", e); return DEFAULT_SETTINGS; }),
                     atecoService.getAll().catch(e => { console.error("ateco error", e); return []; }),
                     reminderService.getAll(userId).catch(e => { console.error("reminders error", e); return []; }),
-                    notificationService.getAll().catch(e => { console.error("notifications error", e); return []; })
+                    notificationService.getAll().catch(e => { console.error("notifications error", e); return []; }),
+                    contractService.getAll(userId).catch(e => { console.error("contracts error", e); return []; })
                 ]);
 
                 setTransactions(txs || []);
@@ -141,6 +150,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setAtecoCodes(atc || []);
                 setReminders(rems || []);
                 setNotifications(notifs || []);
+                setContracts(cntrcts || []);
 
                 // Run automated checks after load
                 if (userId) {
@@ -181,7 +191,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         fixedDebts,
         settings,
         currentYear,
-        atecoCodes
+        atecoCodes,
+        contracts
     });
 
     // Actions
@@ -244,6 +255,44 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
             loading: 'Salvataggio...',
             success: 'Debito fisso salvato!',
             error: 'Errore durante il salvataggio'
+        });
+        await promise;
+    };
+
+    // Contract Actions
+    const addContract = async (c: Omit<Contract, 'id'>) => {
+        if (!userId) return;
+        const promise = contractService.add(c, userId)
+            .then(newC => setContracts(prev => [...prev, newC]));
+
+        toast.promise(promise, {
+            loading: 'Aggiunta contratto...',
+            success: 'Contratto aggiunto alla pipeline!',
+            error: 'Errore durante l\'aggiunta'
+        });
+        await promise;
+    };
+
+    const updateContract = async (c: Contract) => {
+        const promise = contractService.update(c)
+            .then(updated => setContracts(prev => prev.map(item => item.id === updated.id ? updated : item)));
+
+        toast.promise(promise, {
+            loading: 'Aggiornamento...',
+            success: 'Contratto aggiornato!',
+            error: 'Errore durante l\'aggiornamento'
+        });
+        await promise;
+    };
+
+    const deleteContract = async (id: number) => {
+        const promise = contractService.delete(id)
+            .then(() => setContracts(prev => prev.filter(item => item.id !== id)));
+
+        toast.promise(promise, {
+            loading: 'Eliminazione...',
+            success: 'Contratto rimosso.',
+            error: 'Errore durante l\'eliminazione'
         });
         await promise;
     };
@@ -488,6 +537,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         fixedDebts,
         settings,
         atecoCodes,
+        contracts,
         stats,
         currentYear,
         availableYears,
@@ -520,6 +570,9 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         updateProfile,
 
         // New Actions
+        addContract,
+        updateContract,
+        deleteContract,
         markNotificationAsRead,
         markAllNotificationsRead,
         deleteNotification,

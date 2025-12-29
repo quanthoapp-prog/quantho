@@ -96,6 +96,22 @@ export interface Stats {
     goalPercentage: number; // % raggiunta dell'obiettivo utente
     gapToGoal: number; // Quanto manca
     scheduledExpenses: number; // Total of future/scheduled expenses
+    // Forecast including contracts
+    forecastedBusinessIncome: number; // businessIncome + pending contracts
+    forecastedNetIncome: number;      // Net including contracts
+    forecastedTaxTotal: number;      // Estimated tax including contracts
+    forecastedLiquidity: number;     // final liquidity if all contracts are paid
+}
+
+export interface Contract {
+    id: number;
+    title: string;
+    clientName: string;
+    amount: number;
+    atecoCodeId: string;
+    status: 'pending' | 'signed' | 'completed';
+    expectedDate: string; // YYYY-MM-DD
+    notes?: string;
 }
 
 export interface UserProfile {
