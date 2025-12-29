@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy, Info, ChevronRight, Calculator, GripHorizontal } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileText, AlertCircle, Banknote, ShieldCheck, PieChart, Calendar, Target, PlusCircle, History, Trophy, Info, ChevronRight, Calculator, GripHorizontal, ArrowRightCircle } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, LIMITE_FORFETTARIO } from '../constants';
 import IncomeExpenseChart from './charts/IncomeExpenseChart';
@@ -52,9 +52,34 @@ const DraggableWidget: React.FC<DashboardWidgetProps> = ({ id, children, fullWid
 };
 
 const DashboardView: React.FC = () => {
-    const { stats, currentYear, transactions, settings, fixedDebts } = useFinance();
+    const { stats, currentYear, transactions, settings, fixedDebts, addFixedDebt } = useFinance();
     const navigate = useNavigate();
     const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
+    const [arrearModal, setArrearModal] = useState<{ isOpen: boolean; amount: number }>({ isOpen: false, amount: 0 });
+    const [arrearInstallments, setArrearInstallments] = useState(1);
+    const [arrearType, setArrearType] = useState<'tax' | 'inps'>('tax');
+
+    const handleCreateArrearDebt = async () => {
+        if (arrearModal.amount <= 0) return;
+
+        const installment = arrearModal.amount / arrearInstallments;
+        const nextYear = currentYear + 1;
+
+        await addFixedDebt({
+            name: `Rateizzazione ${arrearType === 'inps' ? 'INPS' : 'Tasse'} ${currentYear}`,
+            totalDue: arrearModal.amount,
+            installment: parseFloat(installment.toFixed(2)),
+            debitDay: 15,
+            isSuspended: false,
+            type: 'fiscal',
+            fiscalCategory: arrearType,
+            startMonth: 1,
+            startYear: nextYear,
+            paymentMode: 'manual'
+        });
+
+        setArrearModal({ isOpen: false, amount: 0 });
+    };
 
     // --- Widget Configuration ---
     // We define available widgets. Order is stored in state.
@@ -363,6 +388,15 @@ const DashboardView: React.FC = () => {
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-1 italic">Basato sul fatturato incassato finora</p>
+
+                            {stats.remainingTaxDue > 50 && (
+                                <button
+                                    onClick={() => setArrearModal({ isOpen: true, amount: stats.remainingTaxDue })}
+                                    className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-700 rounded-xl text-xs font-bold hover:bg-red-100 transition-all border border-red-200 shadow-sm"
+                                >
+                                    <ArrowRightCircle size={16} /> Sposta o Rateizza Arretrato
+                                </button>
+                            )}
                         </div>
                     </div>
                 );
@@ -564,6 +598,75 @@ const DashboardView: React.FC = () => {
                 stats={stats}
                 settings={settings}
             />
+            {/* Arrear Management Modal */}
+            {arrearModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+                        <div className="bg-red-600 p-6 text-white text-center">
+                            <Calculator size={48} className="mx-auto mb-4 opacity-50" />
+                            <h3 className="text-xl font-bold">Gestione Arretrato {currentYear}</h3>
+                            <p className="text-red-100 text-sm mt-1">Converti il debito fiscale in rate per il {currentYear + 1}</p>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="text-center">
+                                <span className="text-gray-500 text-sm block mb-1">Importo da rateizzare</span>
+                                <span className="text-3xl font-black text-gray-900">{formatCurrency(arrearModal.amount)}</span>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo di Imposta</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => setArrearType('tax')}
+                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'tax' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                                        >
+                                            Flat Tax
+                                        </button>
+                                        <button
+                                            onClick={() => setArrearType('inps')}
+                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'inps' ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                                        >
+                                            INPS (Deducibile)
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 mt-1 italic">
+                                        {arrearType === 'inps' ? 'I versamenti INPS effettuati nel nuovo anno abbasseranno le tasse del futuro.' : 'La Flat Tax non è deducibile, ma incide sulla tua liquidità.'}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Numero di Rate</label>
+                                    <input
+                                        type="range" min="1" max="24" value={arrearInstallments}
+                                        onChange={(e) => setArrearInstallments(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
+                                    />
+                                    <div className="flex justify-between text-xs font-bold text-gray-800 mt-2">
+                                        <span>{arrearInstallments} {arrearInstallments === 1 ? 'Rata' : 'Rate'}</span>
+                                        <span className="text-red-600">{formatCurrency(arrearModal.amount / arrearInstallments)} / mese</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4 border-t">
+                                <button
+                                    onClick={() => setArrearModal({ isOpen: false, amount: 0 })}
+                                    className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                >
+                                    Annulla
+                                </button>
+                                <button
+                                    onClick={handleCreateArrearDebt}
+                                    className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 transition-colors"
+                                >
+                                    Conferma
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

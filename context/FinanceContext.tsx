@@ -285,7 +285,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         const promise = transactionService.add({
             date: today.toISOString().split('T')[0],
             type: 'expense',
-            category: 'personal',
+            category: debt.type === 'fiscal' ? (debt.fiscalCategory || 'tax') : 'personal',
             amount: debt.installment,
             description: `Rata ${debt.name} - ${currentMonth}/${currentYearVal}`,
             client: '',

@@ -66,6 +66,7 @@ const FixedDebtsView: React.FC = () => {
             startYear: Number(debtToEdit.startYear),
             isSuspended: debtToEdit.isSuspended,
             type: debtToEdit.type,
+            fiscalCategory: debtToEdit.type === 'fiscal' ? (debtToEdit.fiscalCategory || 'tax') : undefined,
             paymentMode: debtToEdit.paymentMode || 'manual'
         };
 
@@ -161,6 +162,31 @@ const FixedDebtsView: React.FC = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">Rata Mensile (€)</label>
                             <input type="number" step="0.01" value={debtToEdit.installmentStr} onChange={(e) => setDebtToEdit({ ...debtToEdit, installmentStr: e.target.value })} className={inputBaseClass} placeholder="0.00" />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia</label>
+                            <select
+                                value={debtToEdit.type}
+                                onChange={(e) => setDebtToEdit({ ...debtToEdit, type: e.target.value as any })}
+                                className={inputBaseClass}
+                            >
+                                <option value="debt">Debito Generico</option>
+                                <option value="subscription">Abbonamento</option>
+                                <option value="fiscal">Fiscale (Arretrati)</option>
+                            </select>
+                        </div>
+                        {debtToEdit.type === 'fiscal' && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Fiscale</label>
+                                <select
+                                    value={debtToEdit.fiscalCategory || 'tax'}
+                                    onChange={(e) => setDebtToEdit({ ...debtToEdit, fiscalCategory: e.target.value as any })}
+                                    className={inputBaseClass}
+                                >
+                                    <option value="tax">Imposta Sostitutiva</option>
+                                    <option value="inps">Contributi INPS (Deducibili)</option>
+                                </select>
+                            </div>
+                        )}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Modalità Pagamento</label>
                             <div className="flex gap-4">
@@ -268,8 +294,13 @@ const FixedDebtsView: React.FC = () => {
                                                 {debt.paymentMode === 'auto' ? 'AUTO' : 'MANUALE'}
                                             </span>
                                             {debt.type === 'subscription' && (
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 uppercase">
                                                     ABBONAMENTO
+                                                </span>
+                                            )}
+                                            {debt.type === 'fiscal' && (
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100 uppercase">
+                                                    FISCALE ({debt.fiscalCategory === 'inps' ? 'INPS' : 'TASSE'})
                                                 </span>
                                             )}
                                         </div>

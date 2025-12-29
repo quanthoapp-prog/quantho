@@ -49,7 +49,8 @@ export interface FixedDebt {
     installment: number;
     debitDay: number;
     isSuspended: boolean;
-    type: 'debt' | 'subscription';
+    type: 'debt' | 'subscription' | 'fiscal';
+    fiscalCategory?: 'tax' | 'inps'; // Only for type 'fiscal'
     startMonth: number;
     startYear: number;
     paymentMode: 'auto' | 'manual'; // auto = automatic transaction creation, manual = user registers payment
