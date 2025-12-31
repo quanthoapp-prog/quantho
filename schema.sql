@@ -69,7 +69,11 @@ create table user_settings (
   expense_goals jsonb default '{}'::jsonb,
   manual_saldo numeric default 0,
   manual_acconti_paid numeric default 0,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  locked_years jsonb default '[]'::jsonb,
+  saved_tags jsonb default '[]'::jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 -- 6. Profiles Table (Extends auth.users)
 create table profiles (
   id uuid references auth.users on delete cascade primary key,

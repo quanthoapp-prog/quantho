@@ -104,7 +104,11 @@ export const calculateFiscalStats = ({
     const totalTaxEstimate = flatTax + inpsEstimate;
 
     // --- PIPELINE FORECASTING ---
-    const activeContracts = contracts.filter(c => c.status !== 'completed' && new Date(c.expectedDate).getFullYear() === currentYear);
+    // Include pending contracts from previous years (carry-over) + contracts for the current year
+    const activeContracts = contracts.filter(c =>
+        c.status !== 'completed' &&
+        new Date(c.expectedDate).getFullYear() <= currentYear
+    );
     const contractsExpectedIncome = activeContracts.reduce((sum, c) => sum + c.amount, 0);
 
     let contractsGrossTaxable = 0;

@@ -13,7 +13,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
     artigianiFixedCost: 4515,
     artigianiExceedRate: 0.24,
     annualGoal: 0,
-    expenseGoals: {}
+    expenseGoals: {},
+    lockedYears: []
 };
 
 export const INITIAL_ATECO_CODES: AtecoCode[] = [

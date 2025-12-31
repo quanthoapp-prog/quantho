@@ -7,6 +7,7 @@ import { formatCurrency } from '../constants';
 import { useFinance } from '../context/FinanceContext';
 import ConfirmDialog from './ConfirmDialog';
 import EmptyState from './EmptyState';
+import { toast } from 'react-hot-toast';
 
 const TransactionsView: React.FC = () => {
     const {
@@ -20,6 +21,8 @@ const TransactionsView: React.FC = () => {
         settings,
         updateSettings
     } = useFinance();
+
+    const isCurrentYearLocked = settings.lockedYears?.includes(currentYear);
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -133,6 +136,10 @@ const TransactionsView: React.FC = () => {
     };
 
     const handleEdit = (t: Transaction) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per modificare.");
+            return;
+        }
         setNewTransaction({
             date: t.date,
             type: t.type,
@@ -148,6 +155,10 @@ const TransactionsView: React.FC = () => {
     };
 
     const handleDeleteClick = (id: number) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per eliminare.");
+            return;
+        }
         setDeleteModal({ isOpen: true, id });
     };
 
@@ -318,8 +329,16 @@ const TransactionsView: React.FC = () => {
                     </div>
                     <button
                         id="open-add-transaction-button"
-                        onClick={() => { setEditingId(null); setShowAddTransaction(true); }}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors whitespace-nowrap"
+                        onClick={() => {
+                            if (isCurrentYearLocked) {
+                                toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per aggiungere.");
+                                return;
+                            }
+                            setEditingId(null);
+                            setShowAddTransaction(true);
+                        }}
+                        className={`${isCurrentYearLocked ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow transition-colors whitespace-nowrap`}
+                        disabled={isCurrentYearLocked}
                     >
                         <PlusCircle size={20} />
                         <span className="hidden md:inline">Nuova transazione</span>

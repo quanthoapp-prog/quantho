@@ -25,7 +25,10 @@ export const settingsService = {
             artigianiExceedRate: data.artigiani_exceed_rate || 0,
             annualGoal: data.annual_goal || 0,
             expenseGoals: data.expense_goals || {},
-            savedTags: data.saved_tags || []
+            savedTags: data.saved_tags || [],
+            manualSaldo: data.manual_saldo || 0,
+            manualAccontiPaid: data.manual_acconti_paid || 0,
+            lockedYears: data.locked_years || []
         } as UserSettings;
     },
 
@@ -40,10 +43,10 @@ export const settingsService = {
             artigiani_exceed_rate: settings.artigianiExceedRate,
             annual_goal: settings.annualGoal,
             expense_goals: settings.expenseGoals,
-            // saved_tags not yet persisted in DB based on current schema, skipping or adding if schema allows?
-            // User requested persistence, but schema might need update. For now we follow App.tsx logic which sends what's there.
-            // Wait, App.tsx upsert doesn't include saved_tags! The user requested to add it.
-            // I should stick to current App.tsx logic for now to ensure refactor parity, then add features later.
+            manual_saldo: settings.manualSaldo,
+            manual_acconti_paid: settings.manualAccontiPaid,
+            locked_years: settings.lockedYears,
+            saved_tags: settings.savedTags
         };
 
         const { error } = await supabase.from('user_settings').upsert(payload, { onConflict: 'user_id' });

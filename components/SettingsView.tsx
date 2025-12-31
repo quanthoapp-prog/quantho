@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AtecoCode } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star, LockOpen, Unlock } from 'lucide-react';
 import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
 const SettingsView: React.FC = () => {
-    const { userEmail, exportData, deleteAccount, settings, updateSettings, atecoCodes, addAtecoCode, deleteAtecoCode, profile, currentYear, transactions } = useFinance();
+    const { userEmail, exportData, deleteAccount, settings, updateSettings, atecoCodes, addAtecoCode, deleteAtecoCode, profile, currentYear, transactions, availableYears } = useFinance();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
     const [newAteco, setNewAteco] = useState<Partial<AtecoCode>>({
@@ -158,6 +158,27 @@ const SettingsView: React.FC = () => {
     const handleDeleteAccount = async () => {
         await deleteAccount();
         setIsDeleteAccountOpen(false);
+    };
+    const toggleYearLock = (year: number) => {
+        const currentlyLocked = settings.lockedYears || [];
+        let newLockedYears: number[];
+
+        if (currentlyLocked.includes(year)) {
+            newLockedYears = currentlyLocked.filter(y => y !== year);
+            toast.success(`Anno ${year} sbloccato`);
+        } else {
+            newLockedYears = [...currentlyLocked, year];
+            toast.success(`Anno ${year} bloccato con successo`);
+        }
+
+        updateSettings({
+            ...settings,
+            lockedYears: newLockedYears
+        });
+    };
+
+    const isYearLocked = (year: number) => {
+        return (settings.lockedYears || []).includes(year);
     };
 
     const renderAccountSection = () => (
@@ -437,6 +458,61 @@ const SettingsView: React.FC = () => {
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
+
+            {/* Blocco Anni Precedenti */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
+                    <Lock size={20} className="text-red-500" />
+                    Sicurezza e Blocco Dati Annuali
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                    Blocca gli anni precedenti per evitare modifiche accidentali che potrebbero sballare i tuoi bilanci consolidati.
+                    L'anno in corso ({new Date().getFullYear()}) non può essere bloccato.
+                </p>
+
+                <div className="space-y-3">
+                    {availableYears
+                        .filter(y => y < new Date().getFullYear())
+                        .map(year => {
+                            const locked = isYearLocked(year);
+                            return (
+                                <div key={year} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 group hover:border-blue-200 transition-all">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-2 rounded-lg ${locked ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                            {locked ? <Lock size={20} /> : <LockOpen size={20} />}
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-gray-900">Anno Iva {year}</div>
+                                            <div className="text-xs text-gray-500">
+                                                {locked ? 'Modifiche disabilitate' : 'Modifiche consentite'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => toggleYearLock(year)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${locked
+                                                ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50 shadow-sm'
+                                                : 'bg-white border border-green-200 text-green-600 hover:bg-green-50 shadow-sm'
+                                            }`}
+                                    >
+                                        {locked ? (
+                                            <><Unlock size={16} /> Sblocca Anno</>
+                                        ) : (
+                                            <><Lock size={16} /> Blocca Anno</>
+                                        )}
+                                    </button>
+                                </div>
+                            );
+                        })
+                    }
+                    {availableYears.filter(y => y < new Date().getFullYear()).length === 0 && (
+                        <div className="text-center py-6 text-gray-400 text-sm italic">
+                            Non ci sono ancora anni precedenti da gestire.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

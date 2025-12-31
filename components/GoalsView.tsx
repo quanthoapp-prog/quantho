@@ -3,9 +3,11 @@ import { Target, Trophy, AlertTriangle, PlusCircle, Trash2, Briefcase, Calendar,
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency } from '../constants';
 import { Contract } from '../types';
+import { toast } from 'react-hot-toast';
 
 const GoalsView: React.FC = () => {
     const { settings, updateSettings, stats, currentYear, transactions, contracts, addContract, updateContract, deleteContract, atecoCodes, clients } = useFinance();
+    const isCurrentYearLocked = settings.lockedYears?.includes(currentYear);
     const [tempGoal, setTempGoal] = useState(settings.annualGoal);
 
     // Form for contract
@@ -26,6 +28,10 @@ const GoalsView: React.FC = () => {
     }, [settings.annualGoal]);
 
     const handleSaveGoal = () => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per modificare il target.");
+            return;
+        }
         updateSettings({
             ...settings,
             annualGoal: tempGoal
@@ -33,6 +39,10 @@ const GoalsView: React.FC = () => {
     };
 
     const handleSaveExpenseGoal = (tag: string, limit: number) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per modificare il budget.");
+            return;
+        }
         const newExpenseGoals = { ...settings.expenseGoals, [tag]: limit };
         if (limit === 0) delete newExpenseGoals[tag]; // Remove if 0
 
@@ -43,6 +53,10 @@ const GoalsView: React.FC = () => {
     };
 
     const handleEditClick = (contract: Contract) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per modificare il progetto.");
+            return;
+        }
         setEditingContractId(contract.id);
         setContractForm({
             title: contract.title,
@@ -60,6 +74,11 @@ const GoalsView: React.FC = () => {
 
     const handleFormSubmit = async () => {
         if (!contractForm.title || contractForm.amount <= 0) return;
+
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni.");
+            return;
+        }
 
         if (editingContractId) {
             await updateContract({ ...contractForm, id: editingContractId });
@@ -239,6 +258,10 @@ const GoalsView: React.FC = () => {
                     {!showContractForm && (
                         <button
                             onClick={() => {
+                                if (isCurrentYearLocked) {
+                                    toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni.");
+                                    return;
+                                }
                                 setEditingContractId(null);
                                 setContractForm({
                                     title: '',
@@ -251,7 +274,8 @@ const GoalsView: React.FC = () => {
                                 });
                                 setShowContractForm(true);
                             }}
-                            className="flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors"
+                            className={`flex items-center gap-2 text-sm font-bold ${isCurrentYearLocked ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-700'} transition-colors`}
+                            disabled={isCurrentYearLocked}
                         >
                             <PlusCircle size={18} />
                             Aggiungi Progetto

@@ -5,6 +5,7 @@ import { FixedDebt } from '../types';
 import { formatCurrency, getMonthsElapsed } from '../constants';
 import ConfirmDialog from './ConfirmDialog';
 import EmptyState from './EmptyState';
+import { toast } from 'react-hot-toast';
 
 const initialDebtState: Omit<FixedDebt, 'id'> = {
     name: '', totalDue: 0, installment: 0, debitDay: 1, isSuspended: false, type: 'debt',
@@ -20,8 +21,11 @@ const FixedDebtsView: React.FC = () => {
         addFixedDebt,
         updateFixedDebt,
         deleteFixedDebt,
-        registerDebtPayment
+        registerDebtPayment,
+        settings
     } = useFinance();
+
+    const isCurrentYearLocked = settings.lockedYears?.includes(currentYear);
 
     // Form state handles strings for inputs to allow empty states during typing
     const [debtToEdit, setDebtToEdit] = useState<(Omit<FixedDebt, 'id'> & { id?: number, totalDueStr?: string, installmentStr?: string }) | null>(null);
@@ -32,6 +36,10 @@ const FixedDebtsView: React.FC = () => {
     const currentFullYear = today.getFullYear();
 
     const openNewDebt = () => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per aggiungere.");
+            return;
+        }
         setDebtToEdit({
             ...initialDebtState,
             startYear: currentYear, // Force start year to current view year
@@ -41,6 +49,10 @@ const FixedDebtsView: React.FC = () => {
     };
 
     const openEditDebt = (debt: FixedDebt) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per modificare.");
+            return;
+        }
         setDebtToEdit({
             ...debt,
             totalDueStr: debt.totalDue.toString(),
@@ -83,6 +95,10 @@ const FixedDebtsView: React.FC = () => {
     };
 
     const confirmDelete = (id: number) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per eliminare.");
+            return;
+        }
         setDeleteModal({ isOpen: true, id });
     };
 
@@ -105,6 +121,10 @@ const FixedDebtsView: React.FC = () => {
     };
 
     const handleRegisterPayment = async (id: number) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni per registrare pagamenti.");
+            return;
+        }
         try {
             await registerDebtPayment(id);
         } catch (error) {

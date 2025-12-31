@@ -20,6 +20,7 @@ export interface UserSettings {
     // Fiscal Manual Data
     manualSaldo?: number; // Saldo anno precedente inserito manualmente
     manualAccontiPaid?: number; // Acconti già versati per l'anno corrente
+    lockedYears?: number[]; // Years that are locked for editing
 }
 
 export interface Transaction {
