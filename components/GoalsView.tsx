@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Target, Trophy, AlertTriangle, PlusCircle, Trash2, Briefcase, Calendar, ArrowRight, Clock, Calculator, Info, Pencil, User } from 'lucide-react';
+import { Target, Trophy, AlertTriangle, PlusCircle, Trash2, Briefcase, Calendar, ArrowRight, Clock, Calculator, Info, Pencil, User, CheckCircle } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency } from '../constants';
 import { Contract } from '../types';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const GoalsView: React.FC = () => {
+    const navigate = useNavigate();
     const { settings, updateSettings, stats, currentYear, transactions, contracts, addContract, updateContract, deleteContract, atecoCodes, clients } = useFinance();
     const isCurrentYearLocked = settings.lockedYears?.includes(currentYear);
     const [tempGoal, setTempGoal] = useState(settings.annualGoal);
@@ -97,6 +99,55 @@ const GoalsView: React.FC = () => {
         });
         setEditingContractId(null);
         setShowContractForm(false);
+    };
+
+    const handleQuickComplete = async (contract: Contract) => {
+        if (isCurrentYearLocked) {
+            toast.error("Quest'anno è bloccato. Sbloccalo nelle impostazioni.");
+            return;
+        }
+
+        try {
+            await updateContract({ ...contract, status: 'completed' });
+
+            toast((t) => (
+                <div className="flex flex-col gap-2">
+                    <span className="font-bold text-green-700">✅ Progetto completato!</span>
+                    <span className="text-xs text-gray-600">Vuoi registrare subito l'incasso reale nelle transazioni?</span>
+                    <div className="flex gap-2 mt-1">
+                        <button
+                            className="bg-green-600 text-white px-3 py-1 rounded-md text-xs font-bold"
+                            onClick={() => {
+                                toast.dismiss(t.id);
+                                navigate('/transactions', {
+                                    state: {
+                                        startAdding: true,
+                                        prefill: {
+                                            description: `Incasso: ${contract.title}`,
+                                            amount: contract.amount.toString(),
+                                            client: contract.clientName,
+                                            type: 'income',
+                                            category: 'business',
+                                            atecoCodeId: contract.atecoCodeId
+                                        }
+                                    }
+                                });
+                            }}
+                        >
+                            Sì, registra incasso
+                        </button>
+                        <button
+                            className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-bold"
+                            onClick={() => toast.dismiss(t.id)}
+                        >
+                            No, più tardi
+                        </button>
+                    </div>
+                </div>
+            ), { duration: 6000 });
+        } catch (error) {
+            toast.error("Errore durante l'aggiornamento.");
+        }
     };
 
     // --- EXPENSE GOALS LOGIC ---
@@ -432,6 +483,15 @@ const GoalsView: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                        {contract.status !== 'completed' && (
+                                                            <button
+                                                                onClick={() => handleQuickComplete(contract)}
+                                                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                                title="Segna come completato"
+                                                            >
+                                                                <CheckCircle size={15} />
+                                                            </button>
+                                                        )}
                                                         <button
                                                             onClick={() => handleEditClick(contract)}
                                                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"

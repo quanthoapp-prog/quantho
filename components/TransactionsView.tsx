@@ -49,6 +49,14 @@ const TransactionsView: React.FC = () => {
         if (location.state?.startAdding) {
             setShowAddTransaction(true);
             setEditingId(null);
+
+            if (location.state.prefill) {
+                setNewTransaction(prev => ({
+                    ...prev,
+                    ...location.state.prefill
+                }));
+            }
+
             // Clear the state so it doesn't trigger again on refresh/re-nav
             navigate(location.pathname, { replace: true, state: {} });
         }
