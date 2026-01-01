@@ -152,6 +152,19 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
                 setNotifications(notifs || []);
                 setContracts(cntrcts || []);
 
+                // New Year Greeting
+                const sessionLastYear = localStorage.getItem('quantho_last_seen_year');
+                const actualYear = new Date().getFullYear();
+                if (sessionLastYear && parseInt(sessionLastYear) < actualYear) {
+                    setTimeout(() => {
+                        toast(`🎆 Benvenuto nel ${actualYear}! Quantho ha preparato i tuoi nuovi registri.`, {
+                            icon: '🥂',
+                            duration: 6000,
+                        });
+                    }, 2000);
+                }
+                localStorage.setItem('quantho_last_seen_year', actualYear.toString());
+
                 // Run automated checks after load
                 if (userId) {
                     const hasNewNotifs = await notificationService.sync(rems || [], dbs || [], userId);

@@ -71,6 +71,7 @@ create table user_settings (
   manual_acconti_paid numeric default 0,
   locked_years jsonb default '[]'::jsonb,
   saved_tags jsonb default '[]'::jsonb,
+  theme text default 'system',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -213,3 +214,27 @@ create table contracts (
 
 alter table contracts enable row level security;
 create policy "Users can manage own contracts" on contracts for all using (auth.uid() = user_id);
+
+-- 11. Broadcast Messages History Table
+create table broadcast_messages (
+  id uuid default uuid_generate_v4() primary key,
+  admin_id uuid references auth.users not null default auth.uid(),
+  title text not null,
+  message text not null,
+  type text not null check (type in ('info', 'warning', 'success', 'error')),
+  recipient_count integer default 0,
+  sent_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table broadcast_messages enable row level security;
+
+-- Only admins can see and manage broadcast history
+create policy "Admins can manage broadcast messages" on broadcast_messages
+  for all using (
+    exists (
+      select 1 from profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+create index idx_broadcast_messages_sent_at on broadcast_messages(sent_at desc);

@@ -28,7 +28,8 @@ export const settingsService = {
             savedTags: data.saved_tags || [],
             manualSaldo: data.manual_saldo || 0,
             manualAccontiPaid: data.manual_acconti_paid || 0,
-            lockedYears: data.locked_years || []
+            lockedYears: data.locked_years || [],
+            theme: data.theme || 'system'
         } as UserSettings;
     },
 
@@ -46,9 +47,9 @@ export const settingsService = {
             manual_saldo: settings.manualSaldo,
             manual_acconti_paid: settings.manualAccontiPaid,
             locked_years: settings.lockedYears,
-            saved_tags: settings.savedTags
+            saved_tags: settings.savedTags,
+            theme: settings.theme
         };
-
         const { error } = await supabase.from('user_settings').upsert(payload, { onConflict: 'user_id' });
         if (error) throw error;
         return settings;

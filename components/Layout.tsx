@@ -51,66 +51,44 @@ const Layout: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col font-sans transition-colors duration-300">
             {/* Navbar */}
-            <div className="bg-white shadow sticky top-0 z-20">
+            <div className="bg-white dark:bg-slate-800 shadow sticky top-0 z-20 border-b border-transparent dark:border-slate-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                             <div className="flex items-center gap-3">
-                                <div className="bg-blue-600 rounded-lg p-2 text-white shadow-lg shadow-blue-200">
+                                <div className="bg-blue-600 rounded-lg p-2 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/20">
                                     <Wallet size={24} strokeWidth={2.5} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xl font-extrabold text-slate-800 tracking-tight">Quant'ho</span>
-                                    <div className="text-[10px] font-semibold text-slate-400 -mt-1 tracking-wider uppercase">Finance Manager</div>
+                                    <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">Quant'ho</span>
+                                    <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 -mt-1 tracking-wider uppercase">Finance Manager</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Desktop: Year Selector & Logout */}
                         <div className="hidden md:flex items-center gap-4">
-                            <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1">
-                                <label className="text-sm font-medium text-gray-700">Anno:</label>
+                            <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-700 rounded-lg px-3 py-1">
+                                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Anno:</label>
                                 <select
                                     value={currentYear}
                                     onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                                    className="bg-transparent border-none font-bold text-gray-900 focus:ring-0 cursor-pointer"
+                                    className="bg-transparent border-none font-bold text-gray-900 dark:text-white focus:ring-0 cursor-pointer"
                                     style={{ outline: "none" }}
                                 >
-                                    {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
+                                    {availableYears.map(year => <option key={year} value={year} className="dark:bg-slate-800">{year}</option>)}
                                 </select>
                             </div>
-                            <div className="h-6 w-px bg-gray-300"></div>
+                            <div className="h-6 w-px bg-gray-300 dark:bg-slate-600"></div>
 
                             {/* Notification Panel */}
                             <NotificationPanel />
 
-                            {/* Desktop Navigation Links (Optional: Add here or keep mobile only style? 
-                               Original app implied tab switching. A top navbar is nice. 
-                               Let's add simple icons or text links here or keep it as "Mobile Menu style" for simplicity? 
-                               Actually, the original app ONLY showed navigation in the Mobile Menu? 
-                               Wait, looking at App.tsx lines 771+, that's the mobile menu.
-                               Where were the DESKTOP tabs? 
-                               Ah, step 77 doesn't show the full render method. 
-                               Let me guess/check lines 800+ in app.tsx again if I missed desktop nav.
-                               
-                               Checking App.tsx content from previous step...
-                               Line 785 is inside `mobileMenuOpen &&`.
-                               
-                               Wait, I missed the Desktop Sidebar or Tabs in App.tsx view.
-                               Line 12 view_file ended at 800.
-                               Let's assumed there was a Desktop sidebar or a tab list below the nav?
-                               
-                               Actually, standard Quantho screenshot usually shows a Sidebar?
-                               Or was it just the mobile menu?
-                               
-                               Let's View App.tsx line 800-929 to be sure how desktop nav was handled.
-                            */}
-
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
+                                className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                             >
                                 <LogOut size={18} />
                                 Esci
@@ -120,7 +98,7 @@ const Layout: React.FC = () => {
                         {/* Mobile: Notification & Hamburger */}
                         <div className="md:hidden flex items-center gap-2">
                             <NotificationPanel />
-                            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300">
                                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                             </button>
                         </div>
@@ -130,14 +108,14 @@ const Layout: React.FC = () => {
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="md:hidden bg-white border-b shadow-lg sticky top-16 z-10 animate-in slide-in-from-top-2">
+                <div className="md:hidden bg-white dark:bg-slate-800 border-b dark:border-slate-700 shadow-lg sticky top-16 z-10 animate-in slide-in-from-top-2">
                     <div className="px-4 py-3 space-y-3">
-                        <div className="flex items-center justify-between pb-3 border-b">
-                            <label className="text-sm font-medium text-gray-700">Anno Fiscale:</label>
+                        <div className="flex items-center justify-between pb-3 border-b dark:border-slate-700">
+                            <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Anno Fiscale:</label>
                             <select
                                 value={currentYear}
                                 onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                                className="border rounded-lg px-3 py-1.5 font-semibold bg-white text-gray-900"
+                                className="border dark:border-slate-600 rounded-lg px-3 py-1.5 font-semibold bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                             >
                                 {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
                             </select>
@@ -151,8 +129,8 @@ const Layout: React.FC = () => {
                                     setMobileMenuOpen(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(item.path)
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                                    : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 <item.icon size={20} />
@@ -160,10 +138,10 @@ const Layout: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <div className="px-4 py-3 border-t">
+                    <div className="px-4 py-3 border-t dark:border-slate-700">
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                             <LogOut size={20} />
                             Disconnetti Account
@@ -172,8 +150,8 @@ const Layout: React.FC = () => {
                 </div>
             )}
 
-            {/* Desktop Navigation Bar (Tabs) - Recreating assumed desktop nav */}
-            <div className="hidden md:block bg-white border-b">
+            {/* Desktop Navigation Bar (Tabs) */}
+            <div className="hidden md:block bg-white dark:bg-slate-800 border-b dark:border-slate-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex space-x-8">
                         {navItems.map(item => (
@@ -181,8 +159,8 @@ const Layout: React.FC = () => {
                                 key={item.path}
                                 onClick={() => navigate(item.path)}
                                 className={`flex items-center gap-2 py-4 border-b-2 text-sm font-medium transition-colors ${isActive(item.path)
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-600'
                                     }`}
                             >
                                 <item.icon size={18} />
@@ -197,7 +175,9 @@ const Layout: React.FC = () => {
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 fade-in">
                 <Outlet />
             </main>
-            <Toaster position="top-right" />
+            <Toaster position="top-right" toastOptions={{
+                className: 'dark:bg-slate-800 dark:text-white dark:border dark:border-slate-700'
+            }} />
         </div>
     );
 };

@@ -62,10 +62,43 @@ const App: React.FC = () => {
     return (
         <HashRouter>
             <FinanceProvider userId={userId} userEmail={user}>
+                <ThemeManager />
                 <SubscriptionRouteHandler />
             </FinanceProvider>
         </HashRouter>
     );
+};
+
+const ThemeManager: React.FC = () => {
+    const { settings } = useFinance();
+    const theme = settings.theme || 'system';
+
+    useEffect(() => {
+        const applyTheme = () => {
+            const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // Sync with local storage for index.html initial load
+            localStorage.setItem('quantho_theme', theme);
+        };
+
+        applyTheme();
+
+        // Listen for system theme changes if in system mode
+        if (theme === 'system') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const listener = () => applyTheme();
+            mediaQuery.addEventListener('change', listener);
+            return () => mediaQuery.removeEventListener('change', listener);
+        }
+    }, [theme]);
+
+    return null;
 };
 
 // Helper component to handle conditional routing based on profile context

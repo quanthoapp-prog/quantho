@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AtecoCode } from '../types';
-import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star, LockOpen, Unlock } from 'lucide-react';
+import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star, LockOpen, Unlock, Sun, Moon, Monitor } from 'lucide-react';
 import { formatCurrency } from '../constants';
 import { ATECO_SEED_DATA } from '../data/ateco_codes';
 import { useFinance } from '../context/FinanceContext';
@@ -244,14 +244,51 @@ const SettingsView: React.FC = () => {
                         >
                             <Download size={16} /> Scarica Backup Dati
                         </button>
+                    </div>
 
-                        <button
-                            id="logout-button"
-                            onClick={handleLogout}
-                            className="w-full bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
-                        >
-                            <LogOut size={16} /> Disconnetti Account
-                        </button>
+                    <div className="pt-6 border-t">
+                        <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <Zap className="text-yellow-500" size={18} />
+                            Personalizzazione e Tema
+                        </h4>
+                        <div className="grid grid-cols-3 gap-3">
+                            <button
+                                onClick={() => updateSettings({ ...settings, theme: 'light' })}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'light' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                            >
+                                <Sun size={20} className="mb-2" />
+                                <span className="text-[10px] font-bold uppercase">Chiaro</span>
+                                {settings.theme === 'light' && <div className="mt-1 w-1 h-1 bg-blue-600 rounded-full" />}
+                            </button>
+                            <button
+                                onClick={() => updateSettings({ ...settings, theme: 'dark' })}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'dark' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                            >
+                                <Moon size={20} className="mb-2" />
+                                <span className="text-[10px] font-bold uppercase">Scuro</span>
+                                {settings.theme === 'dark' && <div className="mt-1 w-1 h-1 bg-blue-600 rounded-full" />}
+                            </button>
+                            <button
+                                onClick={() => updateSettings({ ...settings, theme: 'system' })}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'system' || !settings.theme ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                            >
+                                <Monitor size={20} className="mb-2" />
+                                <span className="text-[10px] font-bold uppercase">Sistema</span>
+                                {(settings.theme === 'system' || !settings.theme) && <div className="mt-1 w-1 h-1 bg-blue-600 rounded-full" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="pt-6 border-t">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                id="logout-button"
+                                onClick={handleLogout}
+                                className="flex-1 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <LogOut size={16} /> Disconnetti Account
+                            </button>
+                        </div>
                     </div>
 
                     <div className="pt-4 border-t">
@@ -494,8 +531,8 @@ const SettingsView: React.FC = () => {
                                     <button
                                         onClick={() => toggleYearLock(year)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${locked
-                                                ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50 shadow-sm'
-                                                : 'bg-white border border-green-200 text-green-600 hover:bg-green-50 shadow-sm'
+                                            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50 shadow-sm'
+                                            : 'bg-white border border-green-200 text-green-600 hover:bg-green-50 shadow-sm'
                                             }`}
                                     >
                                         {locked ? (

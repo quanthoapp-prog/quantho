@@ -39,17 +39,44 @@ const AdminPanelView: React.FC = () => {
         }
     }, [profile]);
 
-    const loadMessageHistory = () => {
-        const stored = localStorage.getItem('broadcast_message_history');
-        if (stored) {
-            setMessageHistory(JSON.parse(stored));
+    const loadMessageHistory = async () => {
+        const { data, error } = await supabase
+            .from('broadcast_messages')
+            .select('*')
+            .order('sent_at', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            console.error('Error fetching broadcast history:', error);
+            return;
+        }
+
+        if (data) {
+            setMessageHistory(data.map(m => ({
+                id: m.id,
+                title: m.title,
+                message: m.message,
+                type: m.type as any,
+                sentAt: m.sent_at,
+                recipientCount: m.recipient_count
+            })));
         }
     };
 
-    const saveMessageToHistory = (msg: BroadcastMessage) => {
-        const updated = [msg, ...messageHistory].slice(0, 50); // Keep last 50
-        setMessageHistory(updated);
-        localStorage.setItem('broadcast_message_history', JSON.stringify(updated));
+    const saveMessageToHistory = async (msg: Omit<BroadcastMessage, 'id'>) => {
+        const { error } = await supabase.from('broadcast_messages').insert({
+            title: msg.title,
+            message: msg.message,
+            type: msg.type,
+            recipient_count: msg.recipientCount,
+            sent_at: msg.sentAt
+        });
+
+        if (error) {
+            console.error('Error saving broadcast to history:', error);
+        } else {
+            loadMessageHistory(); // Reload from DB
+        }
     };
 
     const handleSendBroadcast = async () => {
@@ -93,16 +120,14 @@ const AdminPanelView: React.FC = () => {
 
             await Promise.all(promises);
 
-            // Save to history
-            const historyEntry: BroadcastMessage = {
-                id: Date.now().toString(),
+            // Save to history (DB)
+            await saveMessageToHistory({
                 title: broadcastTitle,
                 message: broadcastMessage,
                 type: broadcastType,
                 sentAt: new Date().toISOString(),
                 recipientCount: userIds.length
-            };
-            saveMessageToHistory(historyEntry);
+            });
 
             toast.success(`Messaggio inviato a ${userIds.length} utenti!`);
 

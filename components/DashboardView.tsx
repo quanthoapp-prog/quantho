@@ -38,13 +38,13 @@ const DraggableWidget: React.FC<DashboardWidgetProps> = ({ id, children, fullWid
             <div
                 {...attributes}
                 {...listeners}
-                className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-gray-100/50 hover:bg-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-manipulation"
+                className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-gray-100/50 dark:bg-slate-700/50 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-manipulation"
                 title="Trascina per spostare"
             >
                 <GripHorizontal size={16} />
             </div>
 
-            <div className="h-full">
+            <div className="h-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
                 {children}
             </div>
         </div>
