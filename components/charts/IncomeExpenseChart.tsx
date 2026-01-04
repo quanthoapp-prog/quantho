@@ -9,6 +9,7 @@ interface IncomeExpenseChartProps {
 }
 
 const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({ transactions, year }) => {
+    const isDark = document.documentElement.classList.contains('dark');
 
     // Aggregate data by month
     const monthlyData = useMemo(() => {
@@ -35,6 +36,11 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({ transactions, y
 
     if (transactions.length === 0) return null;
 
+    const gridColor = isDark ? '#334155' : '#f1f5f9';
+    const axisColor = isDark ? '#cbd5e1' : '#64748b'; // Lighter slate for better contrast
+    const tooltipBg = isDark ? '#1e293b' : '#ffffff';
+    const tooltipText = isDark ? '#f8fafc' : '#374151';
+
     return (
         <div className="h-[350px] w-full p-2">
             <ResponsiveContainer width="100%" height="100%">
@@ -47,25 +53,31 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({ transactions, y
                         bottom: 5,
                     }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                     <XAxis
                         dataKey="name"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 12, fill: '#6b7280' }}
+                        tick={{ fontSize: 12, fill: axisColor }}
                         dy={10}
                     />
                     <YAxis
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
+                        tick={{ fontSize: 11, fill: axisColor }}
                         tickFormatter={(value) => `€${value}`}
                     />
                     <Tooltip
-                        cursor={{ fill: '#f3f4f6' }}
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        cursor={{ fill: isDark ? '#334155' : '#f3f4f6' }}
+                        contentStyle={{
+                            backgroundColor: tooltipBg,
+                            borderRadius: '12px',
+                            border: isDark ? '1px solid #475569' : 'none',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                        }}
                         formatter={(value: number) => [formatCurrency(value), '']}
-                        labelStyle={{ color: '#374151', fontWeight: 'bold' }}
+                        labelStyle={{ color: tooltipText, fontWeight: 'bold' }}
+                        itemStyle={{ color: tooltipText }}
                     />
                     <Legend
                         iconType="circle"

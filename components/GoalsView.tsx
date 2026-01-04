@@ -201,13 +201,13 @@ const GoalsView: React.FC = () => {
         <div className="space-y-8 pb-32">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Pianificazione Obiettivi</h1>
-                <p className="text-sm text-gray-500 mt-1">Gestisci la tua pipeline di progetti e monitora i tuoi traguardi.</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pianificazione Obiettivi</h1>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gestisci la tua pipeline di progetti e monitora i tuoi traguardi.</p>
             </div>
 
             {/* A. ANNUAL REVENUE GOAL + FORECAST */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-700 relative overflow-hidden transition-colors">
+                <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 dark:text-white">
                     <Trophy size={120} />
                 </div>
 
@@ -218,8 +218,8 @@ const GoalsView: React.FC = () => {
                                 <Trophy size={24} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Obiettivo Fatturato {currentYear}</h2>
-                                <p className="text-sm text-gray-500">Target economico basato su incassi e contratti.</p>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Obiettivo Fatturato {currentYear}</h2>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Target economico basato su incassi e contratti.</p>
                             </div>
                         </div>
 
@@ -233,7 +233,7 @@ const GoalsView: React.FC = () => {
                                         type="number"
                                         value={tempGoal}
                                         onChange={(e) => setTempGoal(parseFloat(e.target.value) || 0)}
-                                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 font-bold text-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-slate-600 font-bold text-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
                                         placeholder="0"
                                     />
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">EUR</div>
@@ -249,10 +249,10 @@ const GoalsView: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="md:w-72 bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                    <div className="md:w-72 bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-100 dark:border-slate-700 space-y-3">
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-500 italic">Incassato Reale:</span>
-                            <span className="font-bold text-gray-900">{formatCurrency(stats.businessIncome)}</span>
+                            <span className="text-gray-500 dark:text-slate-400 italic">Incassato Reale:</span>
+                            <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(stats.businessIncome)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500 italic">Lavoro in Pipeline:</span>
@@ -279,7 +279,7 @@ const GoalsView: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="h-5 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
+                    <div className="h-5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden flex shadow-inner">
                         {/* Real Progress */}
                         <div
                             className="h-full bg-gradient-to-r from-blue-500 to-blue-700 transition-all duration-1000 ease-out z-10"
@@ -295,15 +295,15 @@ const GoalsView: React.FC = () => {
             </div>
 
             {/* PIPELINE / CONTRATTI SECTION */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+                <div className="p-6 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-lg">
                             <Briefcase size={22} />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-gray-900">Pipeline Contratti e Progetti</h2>
-                            <p className="text-xs text-gray-500">Lavori firmati o in corso non ancora fatturati.</p>
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Pipeline Contratti e Progetti</h2>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Lavori firmati o in corso non ancora fatturati.</p>
                         </div>
                     </div>
                     {!showContractForm && (
@@ -335,39 +335,39 @@ const GoalsView: React.FC = () => {
                 </div>
 
                 {showContractForm && (
-                    <div className="p-6 bg-purple-50/30 border-b border-purple-100 animate-in fade-in slide-in-from-top-2">
-                        <h3 className="text-sm font-bold text-purple-800 mb-4 flex items-center gap-2">
+                    <div className="p-6 bg-purple-50/30 dark:bg-purple-900/10 border-b border-purple-100 dark:border-purple-900/20 animate-in fade-in slide-in-from-top-2">
+                        <h3 className="text-sm font-bold text-purple-800 dark:text-purple-300 mb-4 flex items-center gap-2">
                             {editingContractId ? <Pencil size={16} /> : <PlusCircle size={16} />}
                             {editingContractId ? 'Modifica Progetto' : 'Nuovo Progetto in Pipeline'}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div className="md:col-span-2">
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Titolo Progetto / Oggetto</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Titolo Progetto / Oggetto</label>
                                 <input
                                     type="text"
                                     value={contractForm.title}
                                     onChange={e => setContractForm({ ...contractForm, title: e.target.value })}
                                     placeholder="Es: Sviluppo Web App, Consulenza Marketing..."
-                                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Importo Previsto (€)</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Importo Previsto (€)</label>
                                 <input
                                     type="number"
                                     value={contractForm.amount || ''}
                                     onChange={e => setContractForm({ ...contractForm, amount: parseFloat(e.target.value) || 0 })}
                                     placeholder="0.00"
-                                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Cliente</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Cliente</label>
                                 <div className="relative">
                                     <select
                                         value={contractForm.clientName}
                                         onChange={e => setContractForm({ ...contractForm, clientName: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 appearance-none bg-white"
+                                        className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 appearance-none"
                                     >
                                         <option value="">Seleziona Cliente...</option>
                                         {clients.map(client => (
@@ -387,11 +387,11 @@ const GoalsView: React.FC = () => {
                                 )}
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Codice ATECO (per imposte)</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Codice ATECO (per imposte)</label>
                                 <select
                                     value={contractForm.atecoCodeId}
                                     onChange={e => setContractForm({ ...contractForm, atecoCodeId: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                                 >
                                     {atecoCodes.map(code => (
                                         <option key={code.id} value={code.id}>{code.code} - {code.description.substring(0, 30)}...</option>
@@ -399,12 +399,12 @@ const GoalsView: React.FC = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Data Presunta Incasso</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Data Presunta Incasso</label>
                                 <input
                                     type="date"
                                     value={contractForm.expectedDate}
                                     onChange={e => setContractForm({ ...contractForm, expectedDate: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
                         </div>
@@ -438,7 +438,7 @@ const GoalsView: React.FC = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50">
+                                    <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 dark:bg-slate-900/50">
                                         <th className="px-6 py-3">Progetto / Cliente</th>
                                         <th className="px-6 py-3">Data Prevista</th>
                                         <th className="px-6 py-3">Importo</th>
@@ -454,10 +454,10 @@ const GoalsView: React.FC = () => {
                                         const estimatedTax = taxable * (settings.taxRateType === '5%' ? 0.05 : 0.15) + (taxable * 0.26); // rough estimate
 
                                         return (
-                                            <tr key={contract.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+                                            <tr key={contract.id} className="border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50/50 dark:hover:bg-slate-700/50 transition-colors group">
                                                 <td className="px-6 py-4">
-                                                    <div className="font-bold text-gray-900">{contract.title}</div>
-                                                    <div className="text-xs text-gray-500">{contract.clientName || 'Cliente non specificato'}</div>
+                                                    <div className="font-bold text-gray-900 dark:text-white">{contract.title}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-slate-400">{contract.clientName || 'Cliente non specificato'}</div>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                                                     <div className="flex items-center gap-1">
@@ -466,7 +466,7 @@ const GoalsView: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="font-bold text-gray-900">{formatCurrency(contract.amount)}</div>
+                                                    <div className="font-bold text-gray-900 dark:text-white">{formatCurrency(contract.amount)}</div>
                                                     <div className="text-[10px] text-gray-400">ATECO: {ateco?.code}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -531,14 +531,14 @@ const GoalsView: React.FC = () => {
             </div>
 
             {/* B. EXPENSE GOALS */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-700 transition-colors">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg">
                         <Target size={24} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Budget Spese per Tag</h2>
-                        <p className="text-sm text-gray-500">Controlla i costi impostando dei limiti per categoria.</p>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Budget Spese per Tag</h2>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">Controlla i costi impostando dei limiti per categoria.</p>
                     </div>
                 </div>
 
@@ -559,13 +559,13 @@ const GoalsView: React.FC = () => {
                         const isOver = currentSpent > goal;
 
                         return (
-                            <div key={tag} className="border-b border-gray-50 pb-6 last:border-0 last:pb-0">
+                            <div key={tag} className="border-b border-gray-50 dark:border-slate-700 pb-6 last:border-0 last:pb-0 transition-colors">
                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-gray-800 text-lg capitalize">{tag}</span>
+                                            <span className="font-bold text-gray-800 dark:text-white text-lg capitalize">{tag}</span>
                                             {prevSpent > 0 && (
-                                                <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                                                <span className="text-xs text-gray-400 bg-gray-50 dark:bg-slate-700/50 px-2 py-0.5 rounded-full">
                                                     Prev Year: {formatCurrency(prevSpent)}
                                                 </span>
                                             )}
@@ -582,7 +582,7 @@ const GoalsView: React.FC = () => {
                                             placeholder="0"
                                             defaultValue={goal === 0 ? '' : goal}
                                             onBlur={(e) => handleSaveExpenseGoal(tag, parseFloat(e.target.value) || 0)}
-                                            className="w-32 px-3 py-2 border rounded-lg font-bold text-right focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                            className="w-32 px-3 py-2 border rounded-lg font-bold text-right focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -595,7 +595,7 @@ const GoalsView: React.FC = () => {
                                             </div>
                                             <div className="text-gray-400">Rimanente: {formatCurrency(Math.max(0, goal - currentSpent))}</div>
                                         </div>
-                                        <div className="overflow-hidden h-2.5 text-xs flex rounded bg-gray-100">
+                                        <div className="overflow-hidden h-2.5 text-xs flex rounded bg-gray-100 dark:bg-slate-700">
                                             <div
                                                 style={{ width: `${Math.min(100, percent)}%` }}
                                                 className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-700 ${isOver ? 'bg-red-500' : 'bg-orange-500'}`}
@@ -616,18 +616,20 @@ const GoalsView: React.FC = () => {
             </div>
 
             {/* Suggestions / Tips */}
-            {!settings.annualGoal && (
-                <div className="flex items-start gap-3 p-4 bg-yellow-50 text-yellow-800 rounded-xl border border-yellow-200">
-                    <AlertTriangle className="flex-shrink-0 mt-0.5" size={20} />
-                    <div>
-                        <h4 className="font-bold">Nessun obiettivo annuale impostato</h4>
-                        <p className="text-sm">
-                            Impostare un obiettivo ti aiuta a focalizzarti. Un buon obiettivo è solitamente il 20-30% superiore al tuo fatturato di pareggio ({formatCurrency(stats.breakEvenTurnover)}).
-                        </p>
+            {
+                !settings.annualGoal && (
+                    <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-xl border border-yellow-200 dark:border-yellow-900/30 transition-colors">
+                        <AlertTriangle className="flex-shrink-0 mt-0.5" size={20} />
+                        <div>
+                            <h4 className="font-bold">Nessun obiettivo annuale impostato</h4>
+                            <p className="text-sm">
+                                Impostare un obiettivo ti aiuta a focalizzarti. Un buon obiettivo è solitamente il 20-30% superiore al tuo fatturato di pareggio ({formatCurrency(stats.breakEvenTurnover)}).
+                            </p>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

@@ -26,7 +26,7 @@ const CalendarWidget: React.FC = () => {
                     time: r.time,
                     title: r.title,
                     id: `rem-${r.id}`,
-                    color: 'text-indigo-600 bg-indigo-50 border-indigo-100'
+                    color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-900/40'
                 });
             }
         });
@@ -47,7 +47,7 @@ const CalendarWidget: React.FC = () => {
                 date: targetDate,
                 title: `Rata: ${debt.name}`,
                 id: `debt-${debt.id}`,
-                color: 'text-red-600 bg-red-50 border-red-100'
+                color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/40'
             });
         });
 
@@ -62,7 +62,7 @@ const CalendarWidget: React.FC = () => {
                 date: juneDeadline,
                 title: 'Acconto Tasse (Giu)',
                 id: 'fiscal-june',
-                color: 'text-orange-600 bg-orange-50 border-orange-100'
+                color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/40'
             });
         }
         if (novDeadline >= today) {
@@ -71,7 +71,7 @@ const CalendarWidget: React.FC = () => {
                 date: novDeadline,
                 title: 'Acconto Tasse (Nov)',
                 id: 'fiscal-nov',
-                color: 'text-orange-600 bg-orange-50 border-orange-100'
+                color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/40'
             });
         }
 
@@ -91,17 +91,17 @@ const CalendarWidget: React.FC = () => {
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-full flex flex-col">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-5 h-full flex flex-col transition-colors">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                    <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                         <CalendarIcon size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-800">Prossime Scadenze</h3>
+                    <h3 className="font-bold text-gray-800 dark:text-white">Prossime Scadenze</h3>
                 </div>
                 <button
                     onClick={() => navigate('/calendar')}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full transition-colors"
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full transition-colors"
                 >
                     Vedi tutto <ArrowRight size={12} />
                 </button>
@@ -112,10 +112,10 @@ const CalendarWidget: React.FC = () => {
                     upcomingEvents.map(evt => (
                         <div
                             key={evt.id}
-                            className={`flex items-center justify-between p-3 rounded-xl border ${evt.color} transition-transform hover:scale-[1.02] cursor-default`}
+                            className={`flex items-center justify-between p-3 rounded-xl border ${evt.color} transition-all hover:scale-[1.02] cursor-default`}
                         >
                             <div className="flex items-center gap-3">
-                                <div className={`p-1.5 rounded-full bg-white/60 backdrop-blur-sm`}>
+                                <div className={`p-1.5 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm`}>
                                     <Clock size={14} className="opacity-70" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
@@ -123,7 +123,7 @@ const CalendarWidget: React.FC = () => {
                                     {evt.time && <span className="text-[10px] font-bold opacity-60">ore {evt.time}</span>}
                                 </div>
                             </div>
-                            <span className="text-xs font-bold opacity-80 whitespace-nowrap bg-white/50 px-2 py-0.5 rounded-md">
+                            <span className="text-xs font-bold opacity-80 whitespace-nowrap bg-white/50 dark:bg-slate-800/30 px-2 py-0.5 rounded-md">
                                 {formatDateFriendly(evt.date)}
                             </span>
                         </div>

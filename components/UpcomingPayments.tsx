@@ -43,8 +43,8 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ fixedDebts, transac
 
     return (
         <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                <Clock size={16} className="text-blue-600" />
+            <h4 className="text-sm font-semibold text-color-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <Clock size={16} className="text-blue-600 dark:text-blue-400" />
                 Scadenze Ricorrenti (Mese Corrente)
             </h4>
 
@@ -52,17 +52,21 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ fixedDebts, transac
                 {upcoming.map(item => (
                     <div
                         key={item.id}
-                        className={`p-3 rounded-lg border flex items-center justify-between gap-3 transition-colors ${item.isPaid ? 'bg-green-50 border-green-100 opacity-80' : 'bg-white border-gray-200 shadow-sm'
+                        className={`p-3 rounded-lg border flex items-center justify-between gap-3 transition-colors ${item.isPaid
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/40 opacity-80'
+                            : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 shadow-sm'
                             }`}
                     >
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${item.isPaid ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${item.isPaid
+                                ? 'bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400'
+                                : 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
                                 }`}>
                                 <Repeat size={16} />
                             </div>
                             <div className="overflow-hidden">
-                                <div className="font-bold text-gray-900 text-sm truncate">{item.name}</div>
-                                <div className="text-[10px] text-gray-500 flex items-center gap-1">
+                                <div className="font-bold text-gray-900 dark:text-white text-sm truncate">{item.name}</div>
+                                <div className="text-[10px] text-gray-500 dark:text-slate-400 flex items-center gap-1">
                                     <Calendar size={10} />
                                     {item.dueDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
                                     <span className="mx-1">•</span>
@@ -72,13 +76,13 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ fixedDebts, transac
                         </div>
 
                         <div className="text-right flex-shrink-0">
-                            <div className={`font-bold text-sm ${item.isPaid ? 'text-green-600' : 'text-gray-900'}`}>
+                            <div className={`font-bold text-sm ${item.isPaid ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
                                 {formatCurrency(item.installment)}
                             </div>
                             {item.isPaid ? (
-                                <span className="text-[9px] font-bold text-green-700 uppercase">Pagato</span>
+                                <span className="text-[9px] font-bold text-green-700 dark:text-green-400 uppercase">Pagato</span>
                             ) : (
-                                <span className={`text-[9px] font-bold uppercase ${item.dueDate < today ? 'text-red-600' : 'text-blue-600'
+                                <span className={`text-[9px] font-bold uppercase ${item.dueDate < today ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'
                                     }`}>
                                     {item.dueDate < today ? 'In ritardo' : 'In sospeso'}
                                 </span>

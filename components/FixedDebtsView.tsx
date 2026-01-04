@@ -135,7 +135,7 @@ const FixedDebtsView: React.FC = () => {
     // Safety Checks
     const isHistorical = (debtStartYear: number) => debtStartYear < currentYear;
 
-    const inputBaseClass = "w-full border rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white disabled:bg-gray-100 disabled:text-gray-500";
+    const inputBaseClass = "w-full border rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-slate-900 dark:border-slate-600 disabled:bg-gray-100 dark:disabled:bg-slate-800 disabled:text-gray-500 dark:disabled:text-slate-500 transition-colors";
 
     return (
         <div className="space-y-6">
@@ -147,19 +147,19 @@ const FixedDebtsView: React.FC = () => {
                 message="Sei sicuro di voler eliminare questo debito? L'operazione non è reversibile."
             />
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">Debiti e Abbonamenti Fissi</h2>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Debiti e Abbonamenti Fissi</h2>
                 <button onClick={openNewDebt} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold shadow hover:bg-blue-700 transition-colors">
                     <PlusCircle size={20} />Nuovo Debito {currentYear}
                 </button>
             </div>
 
             {debtToEdit !== null && (
-                <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-200 animate-in fade-in slide-in-from-top-4">
-                    <h3 className="text-lg font-bold mb-4 text-blue-700">{debtToEdit.id ? 'Modifica Debito' : 'Nuovo Debito'}</h3>
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border-2 border-blue-200 dark:border-blue-900/50 animate-in fade-in slide-in-from-top-4 transition-colors">
+                    <h3 className="text-lg font-bold mb-4 text-blue-700 dark:text-blue-400">{debtToEdit.id ? 'Modifica Debito' : 'Nuovo Debito'}</h3>
 
                     {/* Warning for editing historical data */}
                     {debtToEdit.id && isHistorical(debtToEdit.startYear) && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 flex gap-3 text-sm text-yellow-800">
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-3 mb-4 flex gap-3 text-sm text-yellow-800 dark:text-yellow-200">
                             <AlertTriangle className="flex-shrink-0" size={20} />
                             <div>
                                 <strong>Attenzione: Modifica Storico</strong>
@@ -171,19 +171,19 @@ const FixedDebtsView: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nome</label>
                             <input type="text" value={debtToEdit.name} onChange={(e) => setDebtToEdit({ ...debtToEdit, name: e.target.value })} className={inputBaseClass} placeholder="Mutuo, Netflix" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Totale (€)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Totale (€)</label>
                             <input type="number" step="0.01" value={debtToEdit.totalDueStr} onChange={(e) => setDebtToEdit({ ...debtToEdit, totalDueStr: e.target.value })} className={inputBaseClass} placeholder="0.00" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Rata Mensile (€)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Rata Mensile (€)</label>
                             <input type="number" step="0.01" value={debtToEdit.installmentStr} onChange={(e) => setDebtToEdit({ ...debtToEdit, installmentStr: e.target.value })} className={inputBaseClass} placeholder="0.00" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipologia</label>
                             <select
                                 value={debtToEdit.type}
                                 onChange={(e) => setDebtToEdit({ ...debtToEdit, type: e.target.value as any })}
@@ -196,7 +196,7 @@ const FixedDebtsView: React.FC = () => {
                         </div>
                         {debtToEdit.type === 'fiscal' && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Fiscale</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipo Fiscale</label>
                                 <select
                                     value={debtToEdit.fiscalCategory || 'tax'}
                                     onChange={(e) => setDebtToEdit({ ...debtToEdit, fiscalCategory: e.target.value as any })}
@@ -208,7 +208,7 @@ const FixedDebtsView: React.FC = () => {
                             </div>
                         )}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Modalità Pagamento</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Modalità Pagamento</label>
                             <div className="flex gap-4">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -219,7 +219,7 @@ const FixedDebtsView: React.FC = () => {
                                         onChange={(e) => setDebtToEdit({ ...debtToEdit, paymentMode: e.target.value as 'auto' | 'manual' })}
                                         className="w-4 h-4 text-blue-600"
                                     />
-                                    <span className="text-sm text-gray-700">Manuale</span>
+                                    <span className="text-sm text-gray-700 dark:text-slate-300">Manuale</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -230,16 +230,16 @@ const FixedDebtsView: React.FC = () => {
                                         onChange={(e) => setDebtToEdit({ ...debtToEdit, paymentMode: e.target.value as 'auto' | 'manual' })}
                                         className="w-4 h-4 text-blue-600"
                                     />
-                                    <span className="text-sm text-gray-700">Automatico</span>
+                                    <span className="text-sm text-gray-700 dark:text-slate-300">Automatico</span>
                                 </label>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Giorno Addebito</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Giorno Addebito</label>
                             <input type="number" min="1" max="28" value={debtToEdit.debitDay} onChange={(e) => setDebtToEdit({ ...debtToEdit, debitDay: parseInt(e.target.value) || 1 })} className={inputBaseClass} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Mese Inizio</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mese Inizio</label>
                             <select
                                 value={debtToEdit.startMonth}
                                 onChange={(e) => setDebtToEdit({ ...debtToEdit, startMonth: parseInt(e.target.value) })}
@@ -252,7 +252,7 @@ const FixedDebtsView: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Anno Inizio</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Anno Inizio</label>
                             <input
                                 type="number"
                                 min={debtToEdit.id ? 2000 : currentYear} // New debts cannot start in past relative to view
@@ -269,7 +269,7 @@ const FixedDebtsView: React.FC = () => {
                         <button onClick={saveDebt} disabled={!debtToEdit.name || !debtToEdit.totalDueStr || !debtToEdit.installmentStr} className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors">
                             <Save size={20} />{debtToEdit.id ? 'Aggiorna' : 'Salva'}
                         </button>
-                        <button onClick={() => setDebtToEdit(null)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Annulla</button>
+                        <button onClick={() => setDebtToEdit(null)} className="bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-slate-200 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors">Annulla</button>
                     </div>
                 </div>
             )}
@@ -291,10 +291,10 @@ const FixedDebtsView: React.FC = () => {
                         const isHistoricalDebt = isHistorical(debt.startYear);
 
                         return (
-                            <div key={debt.id} className={`bg-white rounded-xl shadow-lg p-6 border ${debt.isSuspended ? 'border-yellow-300 opacity-70' : 'border-gray-100 hover:border-blue-400'} transition-all`}>
+                            <div key={debt.id} className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border transition-all ${debt.isSuspended ? 'border-yellow-300 dark:border-yellow-700 opacity-70' : 'border-gray-100 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500'}`}>
                                 <div className="flex justify-between items-start gap-3">
                                     <div className="overflow-hidden flex-1">
-                                        <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2 mb-1">
+                                        <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2 mb-1">
                                             <span className="truncate">{debt.name}</span>
                                             {debt.isSuspended && (
                                                 <PauseCircle className="text-yellow-500 flex-shrink-0" size={18} />
@@ -303,23 +303,23 @@ const FixedDebtsView: React.FC = () => {
                                                 <Calendar className="text-gray-400 flex-shrink-0" size={16} title={`Debito storico (iniziato nel ${debt.startYear})`} />
                                             )}
                                         </h3>
-                                        <div className="text-sm text-gray-600 flex items-center gap-1">
+                                        <div className="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-1">
                                             <Repeat size={14} className="text-blue-500 flex-shrink-0" />
                                             <span className="font-semibold">{formatCurrency(debt.installment)}</span>
                                             <span>/ Mese</span>
                                         </div>
                                         <div className="flex gap-1 mt-1">
-                                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${debt.paymentMode === 'auto' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-50 text-gray-600 border-gray-100'
+                                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${debt.paymentMode === 'auto' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border-blue-100 dark:border-blue-900' : 'bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-slate-400 border-gray-100 dark:border-slate-700'
                                                 }`}>
                                                 {debt.paymentMode === 'auto' ? 'AUTO' : 'MANUALE'}
                                             </span>
                                             {debt.type === 'subscription' && (
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 uppercase">
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 border border-purple-100 dark:border-purple-900 uppercase">
                                                     ABBONAMENTO
                                                 </span>
                                             )}
                                             {debt.type === 'fiscal' && (
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100 uppercase">
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 border border-orange-100 dark:border-orange-900 uppercase">
                                                     FISCALE ({debt.fiscalCategory === 'inps' ? 'INPS' : 'TASSE'})
                                                 </span>
                                             )}
@@ -349,20 +349,20 @@ const FixedDebtsView: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-4 border-t pt-4">
+                                <div className="mt-4 border-t dark:border-slate-700 pt-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <div className="text-sm text-gray-500">Totale Dovuto</div>
-                                            <div className="font-medium text-gray-900">{formatCurrency(debt.totalDue)}</div>
+                                            <div className="text-sm text-gray-500 dark:text-slate-400">Totale Dovuto</div>
+                                            <div className="font-medium text-gray-900 dark:text-white">{formatCurrency(debt.totalDue)}</div>
                                         </div>
                                         <div>
-                                            <div className="text-sm text-gray-500">Residuo</div>
-                                            <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            <div className="text-sm text-gray-500 dark:text-slate-400">Residuo</div>
+                                            <div className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                                                 {formatCurrency(remainingBalance)}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-xs text-gray-500 mt-3 truncate">
+                                    <div className="text-xs text-gray-500 dark:text-slate-500 mt-3 truncate">
                                         <Calendar size={12} className="inline text-gray-400 mr-1" />
                                         Giorno {debt.debitDay}
                                         {remainingBalance > 0 && debt.totalDue > 0 && ` • ${Math.ceil(remainingBalance / debt.installment)} rate`}
@@ -375,7 +375,7 @@ const FixedDebtsView: React.FC = () => {
                                         disabled={debt.paymentMode === 'auto'}
                                         className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.paymentMode === 'auto'
                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                                             }`}
                                         title={debt.paymentMode === 'auto' ? 'Pagamento automatico attivo' : 'Registra pagamento manualmente'}
                                     >
@@ -384,7 +384,7 @@ const FixedDebtsView: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={() => toggleSuspension(debt.id)}
-                                        className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                        className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${debt.isSuspended ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/30'
                                             }`}
                                     >
                                         {debt.isSuspended ? <><CheckCircle size={16} className="flex-shrink-0" />Riattiva</> : <><PauseCircle size={16} className="flex-shrink-0" />Sospendi</>}
@@ -401,12 +401,12 @@ const FixedDebtsView: React.FC = () => {
             }
 
             {/* Informative Legend */}
-            <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/30 rounded-lg transition-colors">
+                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2 flex items-center gap-2">
                     <AlertTriangle size={16} />
                     ℹ️ Modalità Pagamento
                 </h3>
-                <div className="text-xs text-blue-800 space-y-1">
+                <div className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
                     <p><strong>• Automatico:</strong> Il sistema crea automaticamente una transazione il giorno dell'addebito impostato.</p>
                     <p><strong>• Manuale:</strong> Usa il pulsante "Registra Pagamento" quando effettui il pagamento per creare la transazione.</p>
                 </div>

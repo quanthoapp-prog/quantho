@@ -234,9 +234,9 @@ const DashboardView: React.FC = () => {
 
             case 'monthly-chart':
                 return (
-                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-full">
-                        <h3 className="text-lg font-semibold mb-2 text-gray-800 flex items-center gap-2">
-                            <TrendingUp size={20} className="text-blue-600" /> Andamento Mensile
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 h-full transition-colors">
+                        <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white flex items-center gap-2">
+                            <TrendingUp size={20} className="text-blue-600 dark:text-blue-400" /> Andamento Mensile
                         </h3>
                         <IncomeExpenseChart transactions={transactions} year={currentYear} />
                     </div>
@@ -244,9 +244,9 @@ const DashboardView: React.FC = () => {
 
             case 'expense-chart':
                 return (
-                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-full">
-                        <h3 className="text-lg font-semibold mb-2 text-gray-800 flex items-center gap-2">
-                            <PieChart size={20} className="text-purple-600" /> Ripartizione Spese
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 h-full transition-colors">
+                        <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white flex items-center gap-2">
+                            <PieChart size={20} className="text-purple-600 dark:text-purple-400" /> Ripartizione Spese
                         </h3>
                         <CategoryPieChart transactions={transactions} year={currentYear} />
                     </div>
@@ -418,9 +418,9 @@ const DashboardView: React.FC = () => {
 
             case 'expense-report-list':
                 return (
-                    <div className="bg-white rounded-xl shadow-lg p-6 h-full">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-800">
-                            <PieChart size={20} className="text-blue-600" />
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 h-full border border-gray-100 dark:border-slate-700 transition-colors">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-800 dark:text-blue-400">
+                            <PieChart size={20} className="text-blue-600 dark:text-blue-400" />
                             Report Spese ({currentYear})
                         </h3>
                         {expenseDistribution.length > 0 ? (
@@ -436,27 +436,27 @@ const DashboardView: React.FC = () => {
                                         <div key={index}>
                                             <div className="flex justify-between items-end mb-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-medium text-gray-700">{item.tag}</span>
+                                                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">{item.tag}</span>
                                                     {hasGoal && (
-                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium border ${isOver ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium border ${isOver ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/50' : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/50'}`}>
                                                             Budget: {formatCurrency(goal)}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-900">{formatCurrency(item.amount)}</span>
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{formatCurrency(item.amount)}</span>
                                             </div>
                                             <div className="relative">
                                                 {/* Main Distribution Bar (Blue) */}
-                                                <div className="w-full bg-gray-100 rounded-full h-2.5 mb-1 overflow-hidden">
+                                                <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5 mb-1 overflow-hidden">
                                                     <div
-                                                        className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
+                                                        className="bg-blue-500 dark:bg-blue-600 h-2.5 rounded-full transition-all duration-500"
                                                         style={{ width: `${item.percentage}%` }}
                                                     ></div>
                                                 </div>
 
                                                 {/* Goal Progress Bar (Thin line below) */}
                                                 {hasGoal && (
-                                                    <div className="w-full bg-gray-100 rounded-full h-1 mt-0.5 overflow-hidden flex">
+                                                    <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1 mt-0.5 overflow-hidden flex">
                                                         <div
                                                             className={`h-1 rounded-full transition-all duration-500 ${isOver ? 'bg-red-500' : 'bg-green-500'}`}
                                                             style={{ width: `${Math.min(goalPercent, 100)}%` }}
@@ -465,16 +465,16 @@ const DashboardView: React.FC = () => {
                                                 )}
                                             </div>
                                             <div className="flex justify-between items-start mt-0.5">
-                                                <div className="text-[10px] text-gray-400">
+                                                <div className="text-[10px] text-gray-400 dark:text-slate-500">
                                                     {hasGoal ? (
-                                                        <span className={isOver ? 'text-red-500 font-semibold' : 'text-green-600'}>
+                                                        <span className={isOver ? 'text-red-500 font-semibold' : 'text-green-600 dark:text-green-400'}>
                                                             {goalPercent.toFixed(0)}% del budget
                                                         </span>
                                                     ) : (
                                                         <span>No budget</span>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-gray-400">{item.percentage.toFixed(1)}% tot</div>
+                                                <div className="text-xs text-gray-400 dark:text-slate-500">{item.percentage.toFixed(1)}% tot</div>
                                             </div>
                                         </div>
                                     )
@@ -533,24 +533,31 @@ const DashboardView: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
-            {/* TOP ACTIONS */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header Content */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
-                    <p className="text-sm text-gray-500 hidden md:block">Tieni premuto sui widget per riordinarli.</p>
+                    <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-3">
+                        <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/30">
+                            <PieChart size={28} />
+                        </div>
+                        Dashboard
+                    </h1>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 ml-14">
+                        Tieni premuto sui widget per riordinarli.
+                    </p>
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/goals')}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm border hover:bg-gray-50 transition-colors text-sm"
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-white rounded-xl font-bold text-sm shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                     >
-                        <Target size={18} />
+                        <Target size={18} className="text-blue-500" />
                         Obiettivi
                     </button>
                     <button
                         onClick={() => navigate('/transactions', { state: { startAdding: true } })}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow hover:bg-blue-700 transition-colors text-sm"
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-blue-900/20 hover:bg-blue-700 transition-all transform active:scale-95"
                     >
                         <PlusCircle size={18} />
                         Nuova
@@ -615,65 +622,68 @@ const DashboardView: React.FC = () => {
             />
             {/* Arrear Management Modal */}
             {arrearModal.isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
-                        <div className="bg-red-600 p-6 text-white text-center">
-                            <Calculator size={48} className="mx-auto mb-4 opacity-50" />
-                            <h3 className="text-xl font-bold">Gestione Arretrato {currentYear}</h3>
-                            <p className="text-red-100 text-sm mt-1">Converti il debito fiscale in rate per il {currentYear + 1}</p>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 dark:border-slate-700">
+                        <div className="p-6 bg-red-600 text-white">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <AlertCircle size={24} />
+                                Gestione Arretrato
+                            </h3>
+                            <p className="text-red-100 text-sm mt-1">Sposta l'importo arretrato nel nuovo anno fiscale.</p>
                         </div>
+
                         <div className="p-6 space-y-6">
-                            <div className="text-center">
-                                <span className="text-gray-500 text-sm block mb-1">Importo da rateizzare</span>
-                                <span className="text-3xl font-black text-gray-900">{formatCurrency(arrearModal.amount)}</span>
+                            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/50">
+                                <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Ammontare da posticipare:</span>
+                                <div className="text-3xl font-black text-red-700 dark:text-red-400 mt-1">{formatCurrency(arrearModal.amount)}</div>
                             </div>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo di Imposta</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipo di Imposta</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
                                             onClick={() => setArrearType('tax')}
-                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'tax' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'tax' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-600'}`}
                                         >
                                             Flat Tax
                                         </button>
                                         <button
                                             onClick={() => setArrearType('inps')}
-                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'inps' ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                                            className={`py-2 px-3 rounded-lg text-sm font-semibold border transition-all ${arrearType === 'inps' ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-600'}`}
                                         >
                                             INPS (Deducibile)
                                         </button>
                                     </div>
-                                    <p className="text-[10px] text-gray-500 mt-1 italic">
+                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1 italic">
                                         {arrearType === 'inps' ? 'I versamenti INPS effettuati nel nuovo anno abbasseranno le tasse del futuro.' : 'La Flat Tax non è deducibile, ma incide sulla tua liquidità.'}
                                     </p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Numero di Rate</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Numero di Rate</label>
                                     <input
                                         type="range" min="1" max="24" value={arrearInstallments}
                                         onChange={(e) => setArrearInstallments(parseInt(e.target.value))}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
+                                        className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                                     />
-                                    <div className="flex justify-between text-xs font-bold text-gray-800 mt-2">
+                                    <div className="flex justify-between text-xs font-bold text-gray-800 dark:text-slate-200 mt-2">
                                         <span>{arrearInstallments} {arrearInstallments === 1 ? 'Rata' : 'Rate'}</span>
-                                        <span className="text-red-600">{formatCurrency(arrearModal.amount / arrearInstallments)} / mese</span>
+                                        <span className="text-red-600 dark:text-red-400">{formatCurrency(arrearModal.amount / arrearInstallments)} / mese</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-4 border-t">
+                            <div className="flex gap-3 pt-4 border-t dark:border-slate-700">
                                 <button
                                     onClick={() => setArrearModal({ isOpen: false, amount: 0 })}
-                                    className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                    className="flex-1 py-3 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-white rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                                 >
                                     Annulla
                                 </button>
                                 <button
                                     onClick={handleCreateArrearDebt}
-                                    className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 transition-colors"
+                                    className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-red-900/20 transition-colors"
                                 >
                                     Conferma
                                 </button>

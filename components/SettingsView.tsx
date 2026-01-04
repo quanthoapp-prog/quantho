@@ -183,23 +183,23 @@ const SettingsView: React.FC = () => {
 
     const renderAccountSection = () => (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                    <User className="text-blue-600" size={20} />
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
+                <h3 className="font-semibold text-lg mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+                    <User className="text-blue-600 dark:text-blue-400" size={20} />
                     Profilo Utente
                 </h3>
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Email</label>
-                            <div className="font-semibold text-gray-900">{userEmail}</div>
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg transition-colors">
+                            <label className="block text-xs text-gray-500 dark:text-slate-400 font-medium uppercase mb-1">Email</label>
+                            <div className="font-semibold text-gray-900 dark:text-white">{userEmail}</div>
                         </div>
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                            <label className="block text-xs text-gray-500 font-medium uppercase mb-1">Stato Licenza</label>
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg transition-colors">
+                            <label className="block text-xs text-gray-500 dark:text-slate-400 font-medium uppercase mb-1">Stato Licenza</label>
                             <div className="font-semibold flex items-center gap-1">
-                                <span className={`flex items-center gap-1 ${profile?.subscriptionStatus === 'active' ? 'text-green-600' :
-                                    profile?.subscriptionStatus === 'trial' ? 'text-blue-600' :
-                                        'text-red-600'
+                                <span className={`flex items-center gap-1 ${profile?.subscriptionStatus === 'active' ? 'text-green-600 dark:text-green-400' :
+                                    profile?.subscriptionStatus === 'trial' ? 'text-blue-600 dark:text-blue-400' :
+                                        'text-red-600 dark:text-red-400'
                                     }`}>
                                     {profile?.subscriptionStatus === 'trial' ? 'Periodo di Prova' :
                                         profile?.subscriptionStatus === 'active' ? 'Abbonamento Attivo' :
@@ -207,7 +207,7 @@ const SettingsView: React.FC = () => {
                                                 profile?.subscriptionStatus === 'canceled' ? 'Abbonamento Annullato' : 'Sconosciuto'}
                                 </span>
                                 {profile?.subscriptionEndDate && (
-                                    <span className="text-[10px] text-gray-400 ml-1 font-normal">
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 ml-1 font-normal">
                                         (fino al {new Date(profile.subscriptionEndDate).toLocaleDateString('it-IT')})
                                     </span>
                                 )}
@@ -215,21 +215,21 @@ const SettingsView: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mb-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-2">
-                        <Shield size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                    <div className="mb-4 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/30 flex items-start gap-2">
+                        <Shield size={16} className="text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-blue-800 dark:text-blue-200 leading-relaxed font-medium">
                             <strong>Nota sulla Privacy:</strong> Tutti i tuoi dati finanziari sono gestiti in modo privato e sicuro. Quantho <strong>non richiede né effettua alcuna connessione diretta</strong> ai tuoi conti correnti bancari.
                         </p>
                     </div>
 
-                    <div className="pt-4 border-t flex flex-col sm:flex-row gap-3">
+                    <div className="pt-4 border-t dark:border-slate-700 flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={handleResetPasswordRequest}
-                            className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                            className="flex-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                         >
                             Reset Password
                         </button>
-                        <button className="flex-1 border border-blue-200 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                        <button className="flex-1 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors">
                             <a href="mailto:quanthoapp@gmail.com" className="flex items-center justify-center gap-2">
                                 <Mail size={16} /> Assistenza e Miglioramenti
                             </a>
@@ -240,21 +240,21 @@ const SettingsView: React.FC = () => {
                         <button
                             id="export-data-button"
                             onClick={exportData}
-                            className="w-full bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                            className="w-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/40 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-2"
                         >
                             <Download size={16} /> Scarica Backup Dati
                         </button>
                     </div>
 
-                    <div className="pt-6 border-t">
-                        <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <div className="pt-6 border-t dark:border-slate-700">
+                        <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                             <Zap className="text-yellow-500" size={18} />
                             Personalizzazione e Tema
                         </h4>
                         <div className="grid grid-cols-3 gap-3">
                             <button
                                 onClick={() => updateSettings({ ...settings, theme: 'light' })}
-                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'light' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'light' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-slate-500 hover:border-gray-200 dark:hover:border-slate-600'}`}
                             >
                                 <Sun size={20} className="mb-2" />
                                 <span className="text-[10px] font-bold uppercase">Chiaro</span>
@@ -262,7 +262,7 @@ const SettingsView: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => updateSettings({ ...settings, theme: 'dark' })}
-                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'dark' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'dark' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-slate-500 hover:border-gray-200 dark:hover:border-slate-600'}`}
                             >
                                 <Moon size={20} className="mb-2" />
                                 <span className="text-[10px] font-bold uppercase">Scuro</span>
@@ -270,7 +270,7 @@ const SettingsView: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => updateSettings({ ...settings, theme: 'system' })}
-                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'system' || !settings.theme ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${settings.theme === 'system' || !settings.theme ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-slate-500 hover:border-gray-200 dark:hover:border-slate-600'}`}
                             >
                                 <Monitor size={20} className="mb-2" />
                                 <span className="text-[10px] font-bold uppercase">Sistema</span>
@@ -279,23 +279,23 @@ const SettingsView: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="pt-6 border-t">
+                    <div className="pt-6 border-t dark:border-slate-700">
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 id="logout-button"
                                 onClick={handleLogout}
-                                className="flex-1 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                                className="flex-1 bg-gray-50 dark:bg-slate-900 text-gray-700 dark:text-slate-400 border border-gray-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
                             >
                                 <LogOut size={16} /> Disconnetti Account
                             </button>
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t dark:border-slate-700">
                         <button
                             id="delete-account-button"
                             onClick={() => setIsDeleteAccountOpen(true)}
-                            className="w-full bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                            className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center justify-center gap-2"
                         >
                             <Trash2 size={16} /> Elimina Account e Dati Correlati
                         </button>
@@ -319,43 +319,43 @@ const SettingsView: React.FC = () => {
     const renderFiscalSection = () => (
         <div className="space-y-6">
             {/* Saldo Iniziale / Liquidità */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h3 className="font-semibold text-lg mb-4 text-green-700 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
+                <h3 className="font-semibold text-lg mb-4 text-green-700 dark:text-green-400 flex items-center gap-2">
                     <Wallet size={20} />
                     Saldo Iniziale Anno {currentYear}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <label className="block text-gray-700 font-medium mb-1">Saldo al 1° Gennaio {currentYear} (€)</label>
-                        <p className="text-xs text-gray-500 mb-2">Inserisci manualmente la liquidità disponibile all'inizio dell'anno.</p>
+                        <label className="block text-gray-700 dark:text-slate-300 font-medium mb-1">Saldo al 1° Gennaio {currentYear} (€)</label>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">Inserisci manualmente la liquidità disponibile all'inizio dell'anno.</p>
                         <input
                             type="number"
                             step="0.01"
                             value={currentOpeningBalance || ''}
                             onChange={(e) => handleOpeningBalanceChange(parseFloat(e.target.value) || 0)}
                             placeholder="0.00"
-                            className="w-full border rounded-lg px-3 py-2 text-lg font-semibold text-gray-900 focus:ring-2 focus:ring-green-500 focus:outline-none bg-white"
+                            className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-lg font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none bg-white dark:bg-slate-900 transition-colors"
                         />
                     </div>
 
                     {/* Import Box */}
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-center">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Riporto Automatico da {previousYear}</h4>
+                    <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-lg border border-gray-200 dark:border-slate-700 flex flex-col justify-center transition-colors">
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Riporto Automatico da {previousYear}</h4>
                         {previousYearStats.hasData ? (
                             <div>
-                                <p className="text-xs text-gray-600 mb-3">
-                                    Saldo calcolato al 31/12/{previousYear}: <span className="font-bold text-green-700">{formatCurrency(previousYearStats.balance)}</span>
+                                <p className="text-xs text-gray-600 dark:text-slate-400 mb-3">
+                                    Saldo calcolato al 31/12/{previousYear}: <span className="font-bold text-green-700 dark:text-green-400">{formatCurrency(previousYearStats.balance)}</span>
                                 </p>
                                 <button
                                     onClick={handleImportPreviousBalance}
-                                    className="w-full flex items-center justify-center gap-2 bg-white border border-green-600 text-green-700 hover:bg-green-50 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-green-600 dark:border-green-500 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
                                 >
                                     <Download size={16} /> Importa Saldo {previousYear}
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex items-start gap-2 text-xs text-gray-500">
+                            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-slate-400">
                                 <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                                 Nessun dato o saldo trovato per l'anno {previousYear}.
                             </div>
@@ -366,10 +366,10 @@ const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Regime Fiscale */}
-                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h3 className="font-semibold text-lg mb-4 text-blue-800">Regime Sostitutivo (Flat Tax)</h3>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
+                    <h3 className="font-semibold text-lg mb-4 text-blue-800 dark:text-blue-400">Regime Sostitutivo (Flat Tax)</h3>
                     <div className="space-y-4">
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className="flex items-center p-3 border dark:border-slate-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                             <input
                                 type="radio"
                                 name="taxRate"
@@ -378,12 +378,12 @@ const SettingsView: React.FC = () => {
                                 className="h-5 w-5 text-blue-600 focus:ring-blue-500"
                             />
                             <div className="ml-3">
-                                <span className="block font-medium text-gray-900">Start-up (5%)</span>
-                                <span className="block text-sm text-gray-500">Per i primi 5 anni di attività</span>
+                                <span className="block font-medium text-gray-900 dark:text-white">Start-up (5%)</span>
+                                <span className="block text-sm text-gray-500 dark:text-slate-400">Per i primi 5 anni di attività</span>
                             </div>
                         </label>
 
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className="flex items-center p-3 border dark:border-slate-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                             <input
                                 type="radio"
                                 name="taxRate"
@@ -392,49 +392,49 @@ const SettingsView: React.FC = () => {
                                 className="h-5 w-5 text-blue-600 focus:ring-blue-500"
                             />
                             <div className="ml-3">
-                                <span className="block font-medium text-gray-900">Standard (15%)</span>
-                                <span className="block text-sm text-gray-500">Aliquota ordinaria forfettaria</span>
+                                <span className="block font-medium text-gray-900 dark:text-white">Standard (15%)</span>
+                                <span className="block text-sm text-gray-500 dark:text-slate-400">Aliquota ordinaria forfettaria</span>
                             </div>
                         </label>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t space-y-4">
-                        <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                            <Calculator size={16} className="text-blue-600" />
+                    <div className="mt-8 pt-6 border-t dark:border-slate-700 space-y-4">
+                        <h4 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <Calculator size={16} className="text-blue-600 dark:text-blue-400" />
                             Rettifiche Fiscali Manuali
                         </h4>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Saldo Anno Precedente (€)</label>
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1">Saldo Anno Precedente (€)</label>
                             <input
                                 type="number"
                                 step="0.01"
                                 value={settings.manualSaldo || ''}
                                 onChange={(e) => updateSettings({ ...settings, manualSaldo: parseFloat(e.target.value) || 0 })}
                                 placeholder="0.00"
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                                className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 dark:text-white"
                             />
-                            <p className="text-[10px] text-gray-400 mt-1">Verrà aggiunto alla scadenza di Giugno.</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Verrà aggiunto alla scadenza di Giugno.</p>
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Acconti già versati (€)</label>
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1">Acconti già versati (€)</label>
                             <input
                                 type="number"
                                 step="0.01"
                                 value={settings.manualAccontiPaid || ''}
                                 onChange={(e) => updateSettings({ ...settings, manualAccontiPaid: parseFloat(e.target.value) || 0 })}
                                 placeholder="0.00"
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                                className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 dark:text-white"
                             />
-                            <p className="text-[10px] text-gray-400 mt-1">Utilizza per scalare pagamenti già effettuati fuori dall'app.</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Utilizza per scalare pagamenti già effettuati fuori dall'app.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Gestione INPS */}
-                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h3 className="font-semibold text-lg mb-4 text-purple-800">Cassa Previdenziale (INPS)</h3>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
+                    <h3 className="font-semibold text-lg mb-4 text-purple-800 dark:text-purple-400">Cassa Previdenziale (INPS)</h3>
                     <div className="space-y-4">
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className="flex items-center p-3 border dark:border-slate-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                             <input
                                 type="radio"
                                 name="inpsType"
@@ -443,12 +443,12 @@ const SettingsView: React.FC = () => {
                                 className="h-5 w-5 text-purple-600 focus:ring-purple-500"
                             />
                             <div className="ml-3">
-                                <span className="block font-medium text-gray-900">Gestione Separata</span>
-                                <span className="block text-sm text-gray-500">Liberi professionisti senza cassa (26,07% / 26,23%)</span>
+                                <span className="block font-medium text-gray-900 dark:text-white">Gestione Separata</span>
+                                <span className="block text-sm text-gray-500 dark:text-slate-400">Liberi professionisti senza cassa (26,07% / 26,23%)</span>
                             </div>
                         </label>
 
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className="flex items-center p-3 border dark:border-slate-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                             <input
                                 type="radio"
                                 name="inpsType"
@@ -457,39 +457,39 @@ const SettingsView: React.FC = () => {
                                 className="h-5 w-5 text-purple-600 focus:ring-purple-500"
                             />
                             <div className="ml-3">
-                                <span className="block font-medium text-gray-900">Artigiani e Commercianti</span>
-                                <span className="block text-sm text-gray-500">Quota fissa + eccedenza sul minimale</span>
+                                <span className="block font-medium text-gray-900 dark:text-white">Artigiani e Commercianti</span>
+                                <span className="block text-sm text-gray-500 dark:text-slate-400">Quota fissa + eccedenza sul minimale</span>
                             </div>
                         </label>
 
                         {settings.inpsType === 'artigiani' && (
-                            <div className="mt-4 p-4 bg-purple-50 rounded-lg text-sm space-y-3 border border-purple-100 animate-in fade-in slide-in-from-top-2">
+                            <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-sm space-y-3 border border-purple-100 dark:border-purple-900/30 animate-in fade-in slide-in-from-top-2">
                                 <div>
-                                    <label className="block text-gray-700 font-medium mb-1">Reddito Minimale (€)</label>
+                                    <label className="block text-gray-700 dark:text-slate-300 font-medium mb-1">Reddito Minimale (€)</label>
                                     <input
                                         type="number"
                                         value={settings.artigianiFixedIncome}
                                         onChange={(e) => updateSettings({ ...settings, artigianiFixedIncome: parseFloat(e.target.value) || 0 })}
-                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                        className="w-full border dark:border-slate-600 rounded px-2 py-1 text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-gray-700 font-medium mb-1">Contributo Fisso Annuo (€)</label>
+                                    <label className="block text-gray-700 dark:text-slate-300 font-medium mb-1">Contributo Fisso Annuo (€)</label>
                                     <input
                                         type="number"
                                         value={settings.artigianiFixedCost}
                                         onChange={(e) => updateSettings({ ...settings, artigianiFixedCost: parseFloat(e.target.value) || 0 })}
-                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                        className="w-full border dark:border-slate-600 rounded px-2 py-1 text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-gray-700 font-medium mb-1">Aliquota Eccedenza (%)</label>
+                                    <label className="block text-gray-700 dark:text-slate-300 font-medium mb-1">Aliquota Eccedenza (%)</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         value={settings.artigianiExceedRate * 100}
                                         onChange={(e) => updateSettings({ ...settings, artigianiExceedRate: (parseFloat(e.target.value) || 0) / 100 })}
-                                        className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                                        className="w-full border dark:border-slate-600 rounded px-2 py-1 text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                     />
                                 </div>
                             </div>
@@ -499,12 +499,12 @@ const SettingsView: React.FC = () => {
             </div>
 
             {/* Blocco Anni Precedenti */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
-                    <Lock size={20} className="text-red-500" />
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
+                <h3 className="font-semibold text-lg mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+                    <Lock size={20} className="text-red-500 dark:text-red-400" />
                     Sicurezza e Blocco Dati Annuali
                 </h3>
-                <p className="text-sm text-gray-500 mb-6">
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">
                     Blocca gli anni precedenti per evitare modifiche accidentali che potrebbero sballare i tuoi bilanci consolidati.
                     L'anno in corso ({new Date().getFullYear()}) non può essere bloccato.
                 </p>
@@ -515,14 +515,14 @@ const SettingsView: React.FC = () => {
                         .map(year => {
                             const locked = isYearLocked(year);
                             return (
-                                <div key={year} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 group hover:border-blue-200 transition-all">
+                                <div key={year} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-700 group hover:border-blue-200 dark:hover:border-blue-900/50 transition-all">
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-lg ${locked ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                        <div className={`p-2 rounded-lg ${locked ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'}`}>
                                             {locked ? <Lock size={20} /> : <LockOpen size={20} />}
                                         </div>
                                         <div>
-                                            <div className="font-bold text-gray-900">Anno Iva {year}</div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="font-bold text-gray-900 dark:text-white">Anno Iva {year}</div>
+                                            <div className="text-xs text-gray-500 dark:text-slate-400">
                                                 {locked ? 'Modifiche disabilitate' : 'Modifiche consentite'}
                                             </div>
                                         </div>
@@ -531,8 +531,8 @@ const SettingsView: React.FC = () => {
                                     <button
                                         onClick={() => toggleYearLock(year)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${locked
-                                            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50 shadow-sm'
-                                            : 'bg-white border border-green-200 text-green-600 hover:bg-green-50 shadow-sm'
+                                            ? 'bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm'
+                                            : 'bg-white dark:bg-slate-800 border border-green-200 dark:border-green-900/40 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 shadow-sm'
                                             }`}
                                     >
                                         {locked ? (
@@ -546,7 +546,7 @@ const SettingsView: React.FC = () => {
                         })
                     }
                     {availableYears.filter(y => y < new Date().getFullYear()).length === 0 && (
-                        <div className="text-center py-6 text-gray-400 text-sm italic">
+                        <div className="text-center py-6 text-gray-400 dark:text-slate-500 text-sm italic">
                             Non ci sono ancora anni precedenti da gestire.
                         </div>
                     )}
@@ -557,32 +557,32 @@ const SettingsView: React.FC = () => {
 
     const renderAtecoSection = () => (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 transition-colors">
                 <div className="mb-6">
-                    <h3 className="font-semibold text-lg text-gray-800">Codici ATECO e Coefficienti</h3>
-                    <p className="text-sm text-gray-500 mt-1">Gestisci i tuoi codici attività. Quando inserisci una nuova entrata, potrai scegliere quale codice applicare.</p>
+                    <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Codici ATECO e Coefficienti</h3>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gestisci i tuoi codici attività. Quando inserisci una nuova entrata, potrai scegliere quale codice applicare.</p>
                 </div>
 
-                <div className="overflow-x-auto mb-6 border rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                <div className="overflow-x-auto mb-6 border dark:border-slate-700 rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                        <thead className="bg-gray-50 dark:bg-slate-900/50">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Codice</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrizione</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Coeff. (%)</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Azioni</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Codice</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Descrizione</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Coeff. (%)</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Azioni</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                             {atecoCodes.map(ateco => (
-                                <tr key={ateco.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 font-medium text-gray-900">{ateco.code}</td>
-                                    <td className="px-4 py-3 text-gray-600">{ateco.description}</td>
-                                    <td className="px-4 py-3 text-blue-600 font-bold">{(ateco.coefficient * 100).toFixed(0)}%</td>
+                                <tr key={ateco.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{ateco.code}</td>
+                                    <td className="px-4 py-3 text-gray-600 dark:text-slate-300">{ateco.description}</td>
+                                    <td className="px-4 py-3 text-blue-600 dark:text-blue-400 font-bold">{(ateco.coefficient * 100).toFixed(0)}%</td>
                                     <td className="px-4 py-3 text-right">
                                         <button
                                             onClick={() => handleDeleteAteco(ateco.id)}
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-full transition-colors"
+                                            className="text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-full transition-colors"
                                             title="Elimina"
                                         >
                                             <Trash2 size={16} />
@@ -594,59 +594,59 @@ const SettingsView: React.FC = () => {
                     </table>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Aggiungi nuovo codice</h4>
+                <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-lg border border-gray-200 dark:border-slate-700 transition-colors">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-3">Aggiungi nuovo codice</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Codice ATECO</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Codice ATECO</label>
                             <input
                                 type="text"
                                 placeholder="Es. 62.02.00"
-                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+                                className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
                                 value={newAteco.code}
                                 onChange={(e) => setNewAteco({ ...newAteco, code: e.target.value })}
                             />
                         </div>
                         <div className="md:col-span-2 relative">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Descrizione (Cerca...)</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Descrizione (Cerca...)</label>
                             <div className="relative">
                                 <input
                                     type="text"
                                     placeholder="Es. Consulenza o 62.02"
-                                    className="w-full border rounded-lg px-3 py-2 pl-9 text-sm text-gray-900 bg-white"
+                                    className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 pl-9 text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
                                     value={newAteco.description}
                                     onChange={(e) => handleSearchAteco(e.target.value)}
                                     onFocus={() => { if (newAteco.description && newAteco.description.length > 2) setShowSuggestions(true) }}
                                 />
-                                <Search className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                                <Search className="absolute left-3 top-2.5 text-gray-400 dark:text-slate-500" size={14} />
                             </div>
 
                             {showSuggestions && suggestions.length > 0 && (
-                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                                     {suggestions.map((suggestion) => (
                                         <button
                                             key={suggestion.code}
-                                            className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex flex-col border-b border-gray-50 last:border-0"
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 flex flex-col border-b border-gray-50 dark:border-slate-700 last:border-0"
                                             onClick={() => selectVariation(suggestion)}
                                         >
-                                            <span className="font-medium text-gray-900">{suggestion.code}</span>
-                                            <span className="text-gray-600 text-xs truncate">{suggestion.description}</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{suggestion.code}</span>
+                                            <span className="text-gray-600 dark:text-slate-400 text-xs truncate">{suggestion.description}</span>
                                         </button>
                                     ))}
                                 </div>
                             )}
                             {showSuggestions && suggestions.length === 0 && newAteco.description && newAteco.description.length > 2 && (
-                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-3 text-sm text-gray-500 text-center">
+                                <div className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl p-3 text-sm text-gray-500 dark:text-slate-400 text-center">
                                     Nessun codice trovato
                                 </div>
                             )}
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Coefficiente (%)</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Coefficiente (%)</label>
                             <input
                                 type="number"
                                 placeholder="Es. 78"
-                                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+                                className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
                                 value={newAteco.coefficient}
                                 onChange={(e) => setNewAteco({ ...newAteco, coefficient: e.target.value })}
                             />
@@ -655,7 +655,7 @@ const SettingsView: React.FC = () => {
                     <button
                         onClick={handleAddAteco}
                         disabled={!newAteco.code || !newAteco.coefficient}
-                        className="mt-4 flex items-center justify-center gap-2 w-full md:w-auto bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="mt-4 flex items-center justify-center gap-2 w-full md:w-auto bg-gray-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-900 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <PlusCircle size={16} /> Aggiungi Codice
                     </button>
@@ -667,13 +667,13 @@ const SettingsView: React.FC = () => {
     const renderGuideSection = () => (
         <div className="space-y-10 pb-10">
             {/* INTRO */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-2xl shadow-xl text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 p-8 rounded-2xl shadow-xl text-white relative overflow-hidden transition-colors">
                 <div className="relative z-10">
                     <h3 className="text-3xl font-extrabold mb-4 flex items-center gap-3">
                         <BookOpen size={32} />
                         Guida Completa Quantho
                     </h3>
-                    <p className="text-blue-100 text-lg max-w-2xl leading-relaxed">
+                    <p className="text-blue-100 dark:text-blue-200 text-lg max-w-2xl leading-relaxed">
                         Questa guida ti aiuterà a sfruttare al massimo tutte le potenzialità di Quantho per gestire il tuo Regime Forfettario con precisione chirurgica e zero stress.
                     </p>
                 </div>
@@ -684,18 +684,18 @@ const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-8">
                 {/* 1. DASHBOARD */}
-                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                <section className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="bg-blue-100 p-3 rounded-xl text-blue-600">
+                        <div className="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-xl text-blue-600 dark:text-blue-400">
                             <TrendingUp size={28} />
                         </div>
-                        <h4 className="text-2xl font-bold text-gray-900 text-center md:text-left">Dashboard: Il tuo Centro di Controllo</h4>
+                        <h4 className="text-2xl font-bold text-gray-900 dark:text-white text-center md:text-left">Dashboard: Il tuo Centro di Controllo</h4>
                     </div>
-                    <div className="prose prose-slate max-w-none text-gray-600">
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-slate-300">
                         <p>La Dashboard è il cuore pulsante di Quantho, ora completamente personalizzabile per adattarsi al tuo modo di lavorare.</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                     KPI e Liquidità
                                 </h5>
@@ -705,8 +705,8 @@ const SettingsView: React.FC = () => {
                                     <li><strong>Liquidità Totale:</strong> Il saldo reale del tuo portafoglio, includendo Fatturato, Extra e detraendo tutte le spese e tasse.</li>
                                 </ul>
                             </div>
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                                     Personalizzazione & Widget
                                 </h5>
@@ -721,40 +721,40 @@ const SettingsView: React.FC = () => {
                 </section>
 
                 {/* 2. TRANSAZIONI */}
-                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                <section className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="bg-green-100 p-3 rounded-xl text-green-600">
+                        <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-xl text-green-600 dark:text-green-400">
                             <Receipt size={28} />
                         </div>
-                        <h4 className="text-2xl font-bold text-gray-900 border-none">Transazioni: Entrate e Uscite</h4>
+                        <h4 className="text-2xl font-bold text-gray-900 dark:text-white border-none">Transazioni: Entrate e Uscite</h4>
                     </div>
-                    <div className="prose prose-slate max-w-none text-gray-600">
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-slate-300">
                         <p>Gestire i movimenti non è mai stato così potente. Usa i filtri avanzati per analizzare specifici periodi o categorie.</p>
                         <div className="space-y-4 mt-4">
-                            <div className="flex gap-4 items-start">
+                            <div className="flex gap-4 items-start border-none">
                                 <div className="mt-1 bg-green-500 text-white rounded-full p-1"><PlusCircle size={14} /></div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 mb-1">Entrate: Business vs Extra</h5>
+                                    <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-1">Entrate: Business vs Extra</h5>
                                     <p className="text-sm">
                                         Scegli <strong>"Fatturato Business"</strong> per i tuoi incassi professionali: verranno calcolate tasse e INPS.
                                         Scegli <strong>"Altra Entrata (Extra)"</strong> per regali o affitti: questi aumenteranno la tua liquidità senza pesare sul fatturato fiscale.
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex gap-4 items-start">
+                            <div className="flex gap-4 items-start border-none">
                                 <div className="mt-1 bg-blue-500 text-white rounded-full p-1"><Filter size={14} /></div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 mb-1">Filtri Avanzati & Ricerca</h5>
+                                    <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-1">Filtri Avanzati & Ricerca</h5>
                                     <p className="text-sm">
                                         Usa il pannello filtri per isolare i movimenti dell'ultimo mese, di un cliente specifico o di una categoria (es. solo INPS).
                                         La Dashboard e le statistiche si aggiorneranno in tempo reale mostrandoti il saldo parziale dei risultati filtrati.
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex gap-4 items-start">
+                            <div className="flex gap-4 items-start border-none">
                                 <div className="mt-1 bg-red-400 text-white rounded-full p-1"><Zap size={14} /></div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 mb-1">Transazioni Programmate</h5>
+                                    <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-1">Transazioni Programmate</h5>
                                     <p className="text-sm">
                                         Inserisci spese o entrate con data futura. Verranno segnate come "Programmate" e appariranno automaticamente tra i movimenti attivi al raggiungimento della data, permettendoti di prevedere il flusso di cassa futuro.
                                     </p>
@@ -765,22 +765,22 @@ const SettingsView: React.FC = () => {
                 </section>
 
                 {/* 3. OBIETTIVI & BUDGET */}
-                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                <section className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="bg-yellow-100 p-3 rounded-xl text-yellow-600">
+                        <div className="bg-yellow-100 dark:bg-yellow-900/40 p-3 rounded-xl text-yellow-600 dark:text-yellow-400">
                             <Trophy size={28} />
                         </div>
-                        <h4 className="text-2xl font-bold text-gray-900 border-none text-center md:text-left">Obiettivi: Trasforma i numeri in traguardi</h4>
+                        <h4 className="text-2xl font-bold text-gray-900 dark:text-white border-none text-center md:text-left">Obiettivi: Trasforma i numeri in traguardi</h4>
                     </div>
-                    <div className="prose prose-slate max-w-none text-gray-600">
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-slate-300">
                         <p>La sezione Obiettivi è il cuore motivazionale di Quantho. Ti permette di passare dall'amministrazione alla gestione strategica.</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <h5 className="font-bold text-gray-800 mb-2">Traguardo Fatturato</h5>
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2">Traguardo Fatturato</h5>
                                 <p className="text-sm">Imposta quanto desideri incassare entro fine anno. Quantho calcolerà in tempo reale la percentuale di completamento, aiutandoti a capire se sei in linea con le tue aspettative.</p>
                             </div>
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <h5 className="font-bold text-gray-800 mb-2">Budgeting per Tag</h5>
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2">Budgeting per Tag</h5>
                                 <p className="text-sm">Qui sta il vero valore: puoi assegnare un <strong>limite di spesa</strong> a ogni tag (es: max 500€ per "Software"). Il sistema ti avviserà non appena superi il budget, permettendoti di ottimizzare i costi.</p>
                             </div>
                         </div>
@@ -788,14 +788,14 @@ const SettingsView: React.FC = () => {
                 </section>
 
                 {/* 4. DEBITI FISSI */}
-                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-gray-100">
+                <section className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="bg-purple-100 p-3 rounded-xl text-purple-600">
+                        <div className="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-xl text-purple-600 dark:text-purple-400">
                             <Wallet size={28} />
                         </div>
-                        <h4 className="text-2xl font-bold text-gray-900">Debiti Fissi e Automazioni</h4>
+                        <h4 className="text-2xl font-bold text-gray-900 dark:text-white border-none">Debiti Fissi e Automazioni</h4>
                     </div>
-                    <div className="prose prose-slate max-w-none text-gray-600">
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-slate-300">
                         <p>Gestisci prestiti, affitti, rate o abbonamenti professionali.</p>
                         <ul className="text-sm space-y-3 mt-4">
                             <li className="flex gap-3">
