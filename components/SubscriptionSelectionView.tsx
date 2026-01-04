@@ -151,7 +151,7 @@ const SubscriptionSelectionView: React.FC<SubscriptionSelectionViewProps> = ({ i
                         <div>
                             <div className="flex items-center gap-3 mb-8">
                                 <div className="bg-white p-1 rounded-xl shadow-lg overflow-hidden">
-                                    <img src="/pwa-192x192.png" alt="Logo" className="w-10 h-10 object-contain" />
+                                    <img src="/pwa-192x192-v2.png" alt="Logo" className="w-10 h-10 object-contain" />
                                 </div>
                                 <span className="font-bold text-xl tracking-tight">Quantho Pro</span>
                             </div>
