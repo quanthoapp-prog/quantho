@@ -130,7 +130,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
                 {/* LOGO */}
                 <div className="flex justify-center items-center gap-3 mb-6">
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1">
-                        <img src="/pwa-192x192-v2.png" alt="Quantho Logo" className="w-16 h-16 object-contain" />
+                        <img src="/pwa-192x192-v3.png" alt="Quantho Logo" className="w-16 h-16 object-contain" />
                     </div>
                 </div>
 

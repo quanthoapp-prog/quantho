@@ -58,7 +58,7 @@ const Layout: React.FC = () => {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                             <div className="flex items-center gap-2 bg-white dark:bg-slate-700 p-1 rounded-xl shadow-sm border border-gray-100 dark:border-slate-600 overflow-hidden">
-                                <img src="/pwa-192x192-v2.png" alt="Logo" className="w-10 h-10 object-contain" />
+                                <img src="/pwa-192x192-v3.png" alt="Logo" className="w-10 h-10 object-contain" />
                                 <div className="pr-3 flex flex-col hidden sm:flex">
                                     <span className="text-lg font-black text-slate-800 dark:text-white leading-none tracking-tight">Quant'Ho</span>
                                     <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Premium</span>

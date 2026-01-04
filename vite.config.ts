@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon-v2.png', 'mask-icon.svg'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon-v3.png', 'mask-icon.svg'],
         manifest: {
           name: "Quant'ho",
           short_name: 'Quantho',
@@ -25,12 +25,12 @@ export default defineConfig(({ mode }) => {
           orientation: 'portrait',
           icons: [
             {
-              src: 'pwa-192x192-v2.png',
+              src: 'pwa-192x192-v3.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512-v2.png',
+              src: 'pwa-512x512-v3.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
