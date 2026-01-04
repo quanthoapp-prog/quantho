@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { Check, CreditCard, Shield, Star, Calendar, Zap, Lock, Users, Clock } from 'lucide-react';
+import { Check, CreditCard, Shield, Star, Calendar, Zap, Lock, Users, Clock, AlertCircle } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 
-const SubscriptionSelectionView: React.FC = () => {
+interface SubscriptionSelectionViewProps {
+    isExpired?: boolean;
+}
+
+const SubscriptionSelectionView: React.FC<SubscriptionSelectionViewProps> = ({ isExpired }) => {
     const { profile, updateProfile } = useFinance();
     const [selectedPlan, setSelectedPlan] = useState<'trial' | 'monthly' | 'annual' | null>(null);
     const [step, setStep] = useState<'selection' | 'payment'>('selection');
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Hide trial if it was already used (status is no longer 'pending')
+    const showTrial = profile?.subscriptionStatus === 'pending';
 
     // Pricing Data - Updated for Early Bird 1000
     const PLANS = {
@@ -228,7 +235,13 @@ const SubscriptionSelectionView: React.FC = () => {
         <div className="min-h-screen bg-gray-50 py-16 px-4">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest animate-pulse">
+                    {isExpired && (
+                        <div className="max-w-md mx-auto mb-8 bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-700 font-bold shadow-sm animate-pulse">
+                            <AlertCircle size={24} />
+                            <span>Il tuo periodo di prova o abbonamento è scaduto. Scegli un piano per continuare.</span>
+                        </div>
+                    )}
+                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest">
                         🚀 Offerta Lancio
                     </div>
                     <h1 className="text-5xl font-black text-gray-900 tracking-tight">
@@ -251,13 +264,15 @@ const SubscriptionSelectionView: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                    {Object.values(PLANS).map((plan) => (
-                        <PlanCard
-                            key={plan.id}
-                            plan={plan}
-                            onSelect={() => handleSelectPlan(plan.id as any)}
-                        />
-                    ))}
+                    {Object.values(PLANS)
+                        .filter(plan => plan.id !== 'trial' || showTrial)
+                        .map((plan) => (
+                            <PlanCard
+                                key={plan.id}
+                                plan={plan}
+                                onSelect={() => handleSelectPlan(plan.id as any)}
+                            />
+                        ))}
                 </div>
 
                 <div className="mt-16 text-center space-y-6">

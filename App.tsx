@@ -109,10 +109,12 @@ const SubscriptionRouteHandler: React.FC = () => {
         return <LoadingSpinner fullScreen text="Caricamento profilo..." />;
     }
 
-    // Force redirection to subscription page if status is pending
-    // We allow admin to bypass or we might handle it differently for admin, but basically new users are pending
-    if (profile?.subscriptionStatus === 'pending') {
-        return <SubscriptionSelectionView />;
+    // Check if subscription/trial has expired
+    const isExpired = profile?.subscriptionEndDate && new Date(profile.subscriptionEndDate) < new Date();
+
+    // Force redirection to subscription page if status is pending or expired
+    if (profile?.subscriptionStatus === 'pending' || isExpired) {
+        return <SubscriptionSelectionView isExpired={isExpired || false} />;
     }
 
     return (
