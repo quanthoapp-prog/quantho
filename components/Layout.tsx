@@ -57,13 +57,11 @@ const Layout: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-                            <div className="flex items-center gap-3">
-                                <div className="bg-blue-600 rounded-lg p-2 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/20">
-                                    <Wallet size={24} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">Quant'ho</span>
-                                    <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 -mt-1 tracking-wider uppercase">Finance Manager</div>
+                            <div className="flex items-center gap-2 bg-white dark:bg-slate-700 p-1 rounded-xl shadow-sm border border-gray-100 dark:border-slate-600 overflow-hidden">
+                                <img src="/pwa-192x192.png" alt="Logo" className="w-10 h-10 object-contain" />
+                                <div className="pr-3 flex flex-col hidden sm:flex">
+                                    <span className="text-lg font-black text-slate-800 dark:text-white leading-none tracking-tight">Quant'Ho</span>
+                                    <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Premium</span>
                                 </div>
                             </div>
                         </div>

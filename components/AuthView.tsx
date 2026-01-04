@@ -129,12 +129,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, recoveryMode, onPasswordRe
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                 {/* LOGO */}
                 <div className="flex justify-center items-center gap-3 mb-6">
-                    <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg shadow-blue-200">
-                        <Wallet size={36} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex flex-col text-left">
-                        <span className="text-3xl font-extrabold text-slate-800 tracking-tight leading-none">Quant'ho</span>
-                        <div className="text-[10px] font-semibold text-slate-400 mt-0.5 tracking-wider uppercase">Finance Manager</div>
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1">
+                        <img src="/pwa-192x192.png" alt="Quantho Logo" className="w-16 h-16 object-contain" />
                     </div>
                 </div>
 

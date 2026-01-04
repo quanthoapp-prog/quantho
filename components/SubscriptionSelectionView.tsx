@@ -149,9 +149,9 @@ const SubscriptionSelectionView: React.FC<SubscriptionSelectionViewProps> = ({ i
                     {/* Summary Side */}
                     <div className="bg-slate-900 text-white p-10 md:w-1/3 flex flex-col justify-between">
                         <div>
-                            <div className="flex items-center gap-2 mb-8">
-                                <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-                                    <Zap className="text-white" size={24} fill="currentColor" />
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="bg-white p-1 rounded-xl shadow-lg overflow-hidden">
+                                    <img src="/pwa-192x192.png" alt="Logo" className="w-10 h-10 object-contain" />
                                 </div>
                                 <span className="font-bold text-xl tracking-tight">Quantho Pro</span>
                             </div>
