@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AtecoCode } from '../types';
 import { Settings, PlusCircle, Trash2, Info, Wallet, Download, AlertCircle, User, LogOut, HelpCircle, FileText, ChevronRight, Mail, BookOpen, Shield, Lock, TrendingUp, Banknote, Search, Calculator, Receipt, Trophy, Filter, Zap, Bell, Check, Star, LockOpen, Unlock, Sun, Moon, Monitor } from 'lucide-react';
 import { formatCurrency } from '../constants';
@@ -12,6 +13,7 @@ type SettingsTab = 'account' | 'fiscal' | 'ateco' | 'guide';
 
 const SettingsView: React.FC = () => {
     const { userEmail, exportData, deleteAccount, settings, updateSettings, atecoCodes, addAtecoCode, deleteAtecoCode, profile, currentYear, transactions, availableYears } = useFinance();
+    const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
     const [newAteco, setNewAteco] = useState<Partial<AtecoCode>>({
@@ -196,7 +198,7 @@ const SettingsView: React.FC = () => {
                         </div>
                         <div className="bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg transition-colors">
                             <label className="block text-xs text-gray-500 dark:text-slate-400 font-medium uppercase mb-1">Stato Licenza</label>
-                            <div className="font-semibold flex items-center gap-1">
+                            <div className="font-semibold flex items-center justify-between gap-1">
                                 <span className={`flex items-center gap-1 ${profile?.subscriptionStatus === 'active' ? 'text-green-600 dark:text-green-400' :
                                     profile?.subscriptionStatus === 'trial' ? 'text-blue-600 dark:text-blue-400' :
                                         'text-red-600 dark:text-red-400'
@@ -206,12 +208,18 @@ const SettingsView: React.FC = () => {
                                             profile?.subscriptionStatus === 'expired' ? 'Abbonamento Scaduto' :
                                                 profile?.subscriptionStatus === 'canceled' ? 'Abbonamento Annullato' : 'Sconosciuto'}
                                 </span>
-                                {profile?.subscriptionEndDate && (
-                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 ml-1 font-normal">
-                                        (fino al {new Date(profile.subscriptionEndDate).toLocaleDateString('it-IT')})
-                                    </span>
-                                )}
+                                <button
+                                    onClick={() => navigate('/subscription')}
+                                    className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold hover:bg-blue-700 transition-colors uppercase tracking-wider"
+                                >
+                                    Cambia Piano
+                                </button>
                             </div>
+                            {profile?.subscriptionEndDate && (
+                                <div className="text-[10px] text-gray-400 dark:text-slate-500 mt-1 font-normal">
+                                    Scadenza: {new Date(profile.subscriptionEndDate).toLocaleDateString('it-IT')}
+                                </div>
+                            )}
                         </div>
                     </div>
 

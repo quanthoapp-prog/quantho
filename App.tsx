@@ -126,6 +126,7 @@ const SubscriptionRouteHandler: React.FC = () => {
                 <Route path="/goals" element={<GoalsView />} />
                 <Route path="/settings" element={<SettingsView />} />
                 <Route path="/admin" element={<AdminPanelView />} />
+                <Route path="/subscription" element={<SubscriptionSelectionView />} />
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

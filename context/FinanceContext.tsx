@@ -430,30 +430,25 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children, user
         if (!userId) return;
 
         const promise = (async () => {
-            // 1. Delete all transactions
-            const { error: txError } = await supabase.from('transactions').delete().eq('user_id', userId);
-            if (txError) throw txError;
+            // Call the Edge Function to delete everything securely
+            const { data, error } = await supabase.functions.invoke('delete-user-account');
 
-            // 2. Delete all clients
-            const { error: clError } = await supabase.from('clients').delete().eq('user_id', userId);
-            if (clError) throw clError;
+            if (error) throw error;
 
-            // 3. Delete all fixed debts
-            const { error: dbError } = await supabase.from('fixed_debts').delete().eq('user_id', userId);
-            if (dbError) throw dbError;
+            // Sign out locally
+            await supabase.auth.signOut();
 
-            // 4. Delete user settings
-            const { error: stError } = await supabase.from('user_settings').delete().eq('user_id', userId);
-            if (stError) throw stError;
-
-            // 5. Sign out
-            const { error: authError } = await supabase.auth.signOut();
-            if (authError) throw authError;
+            // Clear local storage and reload
+            localStorage.clear();
+            setTimeout(() => {
+                window.location.href = '#/';
+                window.location.reload();
+            }, 500);
         })();
 
         toast.promise(promise, {
             loading: 'Eliminazione account in corso...',
-            success: 'Account eliminato correttamente',
+            success: 'Account e tutti i dati eliminati correttamente',
             error: 'Errore durante l\'eliminazione'
         });
         await promise;
