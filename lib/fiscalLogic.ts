@@ -300,6 +300,7 @@ export const calculateFiscalStats = ({
         forecastedBusinessIncome,
         forecastedNetIncome,
         forecastedTaxTotal,
-        forecastedLiquidity: currentLiquidity + (forecastedBusinessIncome - businessIncome) - (forecastedTaxTotal - totalTaxEstimate)
+        forecastedLiquidity: currentLiquidity + (forecastedBusinessIncome - businessIncome) - (forecastedTaxTotal - totalTaxEstimate),
+        monthlyForecastedNetIncome: forecastedNetIncome / 12
     };
 };

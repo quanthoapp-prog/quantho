@@ -100,6 +100,7 @@ export interface Stats {
     forecastedNetIncome: number;      // Net including contracts
     forecastedTaxTotal: number;      // Estimated tax including contracts
     forecastedLiquidity: number;     // final liquidity if all contracts are paid
+    monthlyForecastedNetIncome: number; // Forecasted monthly salary including contracts
 }
 
 export interface Contract {

@@ -279,37 +279,43 @@ const DashboardView: React.FC = () => {
             case 'goals-analysis':
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
-                        <div className="bg-indigo-50 rounded-xl p-5 border border-indigo-100 shadow-sm flex flex-col justify-between">
+                        <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-xl p-5 border border-indigo-100 dark:border-indigo-900/30 shadow-sm flex flex-col justify-between transition-colors">
                             <div>
-                                <div className="flex items-center gap-2 text-indigo-800 font-semibold mb-1">
+                                <div className="flex items-center gap-2 text-indigo-800 dark:text-indigo-300 font-semibold mb-1">
                                     <Target size={18} />
                                     Fatturato di Pareggio
                                 </div>
-                                <div className="text-2xl font-bold text-indigo-900">{formatCurrency(stats.breakEvenTurnover)}</div>
+                                <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{formatCurrency(stats.breakEvenTurnover)}</div>
                             </div>
-                            <div className="text-xs text-indigo-600 mt-2">
+                            <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
                                 Per coprire spese stimate, debiti fissi e tasse.
                             </div>
                         </div>
 
-                        <div className="bg-teal-50 rounded-xl p-5 border border-teal-100 shadow-sm flex flex-col justify-between">
+                        <div className="bg-teal-50 dark:bg-teal-900/10 rounded-xl p-5 border border-teal-100 dark:border-teal-900/30 shadow-sm flex flex-col justify-between transition-colors">
                             <div>
-                                <div className="flex items-center gap-2 text-teal-800 font-semibold mb-1">
+                                <div className="flex items-center gap-2 text-teal-800 dark:text-teal-300 font-semibold mb-1">
                                     <Calendar size={18} />
                                     Stipendio Mensile Netto
                                 </div>
-                                <div className="text-2xl font-bold text-teal-900">{formatCurrency(stats.monthlyNetIncome)}</div>
+                                <div className="text-2xl font-bold text-teal-900 dark:text-teal-100">{formatCurrency(stats.monthlyNetIncome)}</div>
                             </div>
-                            <div className="text-xs text-teal-600 mt-2">
-                                Reddito Disponibile / 12 mesi
+                            <div className="text-xs text-teal-600 dark:text-teal-400 mt-2 flex justify-between items-end">
+                                <span>Reddito Disponibile / 12 mesi</span>
+                                {stats.monthlyForecastedNetIncome > stats.monthlyNetIncome + 0.01 && (
+                                    <div className="text-right bg-teal-100/50 dark:bg-teal-900/40 p-1.5 rounded-lg border border-teal-200/50 dark:border-teal-800/30">
+                                        <div className="text-[9px] uppercase font-black text-teal-600 dark:text-teal-500 leading-none mb-1">Stipendio previsto</div>
+                                        <div className="font-bold text-teal-800 dark:text-teal-200 leading-none">{formatCurrency(stats.monthlyForecastedNetIncome)}</div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className="bg-violet-50 rounded-xl p-5 border border-violet-100 shadow-sm flex flex-col justify-between">
+                        <div className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-5 border border-violet-100 dark:border-violet-900/30 shadow-sm flex flex-col justify-between transition-colors">
                             <div>
-                                <div className="flex items-center justify-between gap-2 text-violet-800 font-semibold mb-1">
+                                <div className="flex items-center justify-between gap-2 text-violet-800 dark:text-violet-300 font-semibold mb-1">
                                     <span className="flex items-center gap-2"><Trophy size={18} /> Progresso Obiettivo</span>
-                                    <span className="text-xs font-bold">{stats.goalPercentage.toFixed(0)}% <span className="text-violet-400 font-normal">({((stats.forecastedBusinessIncome / settings.annualGoal) * 100 || 0).toFixed(0)}% prev.)</span></span>
+                                    <span className="text-xs font-bold text-violet-900 dark:text-violet-100">{stats.goalPercentage.toFixed(0)}% <span className="text-violet-400 dark:text-violet-500 font-normal">({((stats.forecastedBusinessIncome / settings.annualGoal) * 100 || 0).toFixed(0)}% prev.)</span></span>
                                 </div>
                                 {settings.annualGoal > 0 ? (
                                     <div className="mt-2">
