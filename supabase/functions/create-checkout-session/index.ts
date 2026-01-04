@@ -30,7 +30,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `http://localhost:3000/#/?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `http://localhost:3000/#/?payment=success`,
       cancel_url: `http://localhost:3000/#/settings`,
       metadata: {
         userId: userId,

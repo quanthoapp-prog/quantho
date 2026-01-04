@@ -59,6 +59,21 @@ const DashboardView: React.FC = () => {
     const [arrearInstallments, setArrearInstallments] = useState(1);
     const [arrearType, setArrearType] = useState<'tax' | 'inps'>('tax');
 
+    // Detect payment success redirect from Stripe
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search || window.location.hash.split('?')[1]);
+        if (params.get('payment') === 'success') {
+            import('react-hot-toast').then(({ toast }) => {
+                toast.success('Abbonamento attivato! Benvenuto in Quantho Prime.', {
+                    duration: 5000,
+                    icon: '🚀'
+                });
+            });
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.hash.split('?')[0]);
+        }
+    }, []);
+
     const handleCreateArrearDebt = async () => {
         if (arrearModal.amount <= 0) return;
 
