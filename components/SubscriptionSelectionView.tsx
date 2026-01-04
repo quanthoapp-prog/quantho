@@ -91,6 +91,12 @@ const SubscriptionSelectionView: React.FC = () => {
                 });
 
                 toast.success('Prova gratuita attivata! Divertiti.');
+
+                // Forza il ricaricamento dell'app per aggiornare lo stato del profilo e accedere alla dashboard
+                setTimeout(() => {
+                    window.location.href = '#/';
+                    window.location.reload();
+                }, 1500);
                 return;
             }
 

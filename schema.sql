@@ -238,3 +238,17 @@ create policy "Admins can manage broadcast messages" on broadcast_messages
   );
 
 create index idx_broadcast_messages_sent_at on broadcast_messages(sent_at desc);
+
+-- 12. Function to activate trial subscription
+create or replace function public.activate_subscription(plan_type text)
+returns void as $$
+begin
+  if plan_type = 'trial' then
+    update public.profiles
+    set 
+      subscription_status = 'trial',
+      subscription_end_date = now() + interval '15 days'
+    where id = auth.uid();
+  end if;
+end;
+$$ language plpgsql security definer;
