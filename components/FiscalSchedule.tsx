@@ -4,22 +4,23 @@ import { FiscalDeadline } from '../types';
 import { formatCurrency } from '../constants';
 
 interface FiscalScheduleProps {
-    deadlines: {
-        june: FiscalDeadline;
-        november: FiscalDeadline;
-    };
+    deadlines: FiscalDeadline[];
     taxesPaid: number;
 }
 
 const FiscalSchedule: React.FC<FiscalScheduleProps> = ({ deadlines, taxesPaid }) => {
 
-    const renderDeadlineCard = (deadline: FiscalDeadline, isJune: boolean) => {
+    const renderDeadlineCard = (deadline: FiscalDeadline, index: number) => {
         const isPast = new Date(deadline.date) < new Date();
-        const isPaid = isJune ? (taxesPaid >= deadline.total) : (taxesPaid >= (deadlines.june.total + deadline.total));
+
+        // Cumulative check: is the sum of all deadlines up to this one covered by taxesPaid?
+        const totalDueUntilNow = deadlines.slice(0, index + 1).reduce((sum, d) => sum + d.total, 0);
+        const isPaid = taxesPaid >= (totalDueUntilNow - 5); // 5 euro tolerance for rounding
+
         const status = isPaid ? 'paid' : (isPast ? 'overdue' : 'pending');
 
         return (
-            <div className={`p-4 rounded-xl border transition-all ${status === 'paid' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/40' :
+            <div key={index} className={`p-4 rounded-xl border transition-all ${status === 'paid' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/40' :
                 status === 'overdue' ? 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/40' : 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-700'
                 }`}>
                 <div className="flex justify-between items-start mb-3">
@@ -68,9 +69,8 @@ const FiscalSchedule: React.FC<FiscalScheduleProps> = ({ deadlines, taxesPaid })
             <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 Scadenzario Fiscale
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderDeadlineCard(deadlines.june, true)}
-                {renderDeadlineCard(deadlines.november, false)}
+            <div className={`grid grid-cols-1 gap-4 ${deadlines.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+                {deadlines.map((d, i) => renderDeadlineCard(d, i))}
             </div>
             <p className="text-[10px] text-gray-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-100 dark:border-blue-900/40">
                 <strong>Nota:</strong> Gli acconti sono calcolati sulla base della stima del fatturato attuale (Metodo Previsionale).

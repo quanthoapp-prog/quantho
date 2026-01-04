@@ -1,4 +1,4 @@
-import { Transaction, FixedDebt, UserSettings, AtecoCode, Stats } from '../types';
+import { Transaction, FixedDebt, UserSettings, AtecoCode, Stats, FiscalDeadline } from '../types';
 import { isTransactionActive, LIMITE_FORFETTARIO } from '../constants';
 
 interface CalculateFiscalStatsProps {
@@ -211,26 +211,62 @@ export const calculateFiscalStats = ({
     const marginalTax = marginalTaxBase * taxRate;
     const taxEfficiencyPer1000 = 1000 - marginalInps - marginalTax;
 
-    const saldoAnteriore = settings.manualSaldo || 0;
-    const taxAccontoTotal = flatTax;
-    const inpsAccontoTotal = inpsEstimate;
+    const deadlines: FiscalDeadline[] = [];
 
-    const deadlines = {
-        june: {
+    if (settings.inpsType === 'separata') {
+        const taxAccontoTotal = flatTax;
+        const inpsAccontoTotal = inpsEstimate;
+        const saldoAnteriore = settings.manualSaldo || 0;
+
+        deadlines.push({
             tax: (taxAccontoTotal * 0.4) + (saldoAnteriore * 0.5),
             inps: (inpsAccontoTotal * 0.4) + (saldoAnteriore * 0.5),
             total: (taxAccontoTotal * 0.4) + (inpsAccontoTotal * 0.4) + saldoAnteriore,
             label: 'Saldo + 1° Acconto',
             date: `${currentYear}-06-30`
-        },
-        november: {
+        });
+
+        deadlines.push({
             tax: taxAccontoTotal * 0.6,
             inps: inpsAccontoTotal * 0.6,
             total: (taxAccontoTotal * 0.6) + (inpsAccontoTotal * 0.6),
             label: '2° Acconto',
             date: `${currentYear}-11-30`
-        }
-    };
+        });
+    } else {
+        // Artigiani / Commercianti logic
+        const fixedInpsUnit = (settings.artigianiFixedCost || 4515) / 4;
+        const variableInps = Math.max(0, inpsEstimate - (settings.artigianiFixedCost || 4515));
+        const taxAccontoTotal = flatTax;
+        const saldoAnteriore = settings.manualSaldo || 0;
+
+        // 1. Periodo Maggio/Giugno (Minimali + Saldo/Acconto)
+        deadlines.push({
+            tax: (taxAccontoTotal * 0.4) + (saldoAnteriore * 0.5),
+            inps: fixedInpsUnit + (variableInps * 0.4) + (saldoAnteriore * 0.5),
+            total: fixedInpsUnit + (taxAccontoTotal * 0.4) + (variableInps * 0.4) + saldoAnteriore,
+            label: 'Minimali + Saldo e 1° Acc.',
+            date: `${currentYear}-06-16`
+        });
+
+        // 2. Periodo Agosto (Minimali)
+        deadlines.push({
+            tax: 0,
+            inps: fixedInpsUnit,
+            total: fixedInpsUnit,
+            label: '2° Rata Minimali',
+            date: `${currentYear}-08-20`
+        });
+
+        // 3. Periodo Novembre (Minimali + II Acconto)
+        deadlines.push({
+            tax: taxAccontoTotal * 0.6,
+            inps: fixedInpsUnit + (variableInps * 0.6),
+            total: fixedInpsUnit + (taxAccontoTotal * 0.6) + (variableInps * 0.6),
+            label: 'Min. + 2° Acconto',
+            date: `${currentYear}-11-30`
+        });
+    }
 
     const goalPercentage = settings.annualGoal > 0 ? (businessIncome / settings.annualGoal) * 100 : 0;
     const gapToGoal = Math.max(0, settings.annualGoal - businessIncome);

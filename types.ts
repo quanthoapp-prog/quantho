@@ -86,10 +86,7 @@ export interface Stats {
     percentualeSoglia: number;
     taxRateApplied: number; // 0.05 or 0.15
     // Deadlines
-    deadlines: {
-        june: FiscalDeadline;
-        november: FiscalDeadline;
-    };
+    deadlines: FiscalDeadline[];
     // Forecasting
     breakEvenTurnover: number; // Fatturato di pareggio (Gross Up di Spese + Debiti)
     monthlyNetIncome: number; // Stipendio mensile equivalente (Netto Disponibile / 12)

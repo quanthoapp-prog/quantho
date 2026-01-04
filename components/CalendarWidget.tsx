@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 
 const CalendarWidget: React.FC = () => {
-    const { reminders, fixedDebts } = useFinance();
+    const { reminders, fixedDebts, stats } = useFinance();
     const navigate = useNavigate();
 
     // Logic similar to CalendarView to gather upcoming events
@@ -51,29 +51,19 @@ const CalendarWidget: React.FC = () => {
             });
         });
 
-        // 3. Fiscal (next occurrence)
-        const year = today.getFullYear();
-        const juneDeadline = new Date(year, 5, 30);
-        const novDeadline = new Date(year, 10, 30);
-
-        if (juneDeadline >= today) {
-            allEvents.push({
-                type: 'fiscal',
-                date: juneDeadline,
-                title: 'Acconto Tasse (Giu)',
-                id: 'fiscal-june',
-                color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/40'
-            });
-        }
-        if (novDeadline >= today) {
-            allEvents.push({
-                type: 'fiscal',
-                date: novDeadline,
-                title: 'Acconto Tasse (Nov)',
-                id: 'fiscal-nov',
-                color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/40'
-            });
-        }
+        // 3. Fiscal (from stats)
+        stats.deadlines.forEach((deadline, index) => {
+            const dDate = new Date(deadline.date);
+            if (dDate >= today) {
+                allEvents.push({
+                    type: 'fiscal',
+                    date: dDate,
+                    title: deadline.label,
+                    id: `fiscal-${index}`,
+                    color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/40'
+                });
+            }
+        });
 
         // Sort by date and take first 4
         return allEvents

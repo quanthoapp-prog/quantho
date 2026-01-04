@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Wallet, Arro
 import { Reminder } from '../types';
 
 const CalendarView: React.FC = () => {
-    const { reminders, fixedDebts, addReminder, deleteReminder, updateReminder, currentYear } = useFinance();
+    const { reminders, fixedDebts, stats, addReminder, deleteReminder, updateReminder, currentYear } = useFinance();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,24 +52,19 @@ const CalendarView: React.FC = () => {
             });
         });
 
-        // 3. Fiscal Deadlines
-        const year = currentDate.getFullYear();
-        if (currentDate.getMonth() === 5) { // June
-            allEvents.push({
-                type: 'fiscal',
-                date: new Date(year, 5, 30),
-                title: 'Saldo + 1° Acconto',
-                id: 'fiscal-june'
-            });
-        }
-        if (currentDate.getMonth() === 10) { // Nov
-            allEvents.push({
-                type: 'fiscal',
-                date: new Date(year, 10, 30),
-                title: '2° Acconto Tasse',
-                id: 'fiscal-nov'
-            });
-        }
+        // 3. Fiscal Deadlines (from stats)
+        stats.deadlines.forEach((deadline, index) => {
+            const dDate = new Date(deadline.date);
+            // Check if deadline date is within the visible month
+            if (dDate.getMonth() === currentDate.getMonth() && dDate.getFullYear() === currentDate.getFullYear()) {
+                allEvents.push({
+                    type: 'fiscal',
+                    date: dDate,
+                    title: deadline.label,
+                    id: `fiscal-${index}`
+                });
+            }
+        });
 
         return allEvents.sort((a, b) => {
             if (a.time && b.time) return a.time.localeCompare(b.time);
