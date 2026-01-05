@@ -682,7 +682,7 @@ const SettingsView: React.FC = () => {
                         Guida Completa Quantho
                     </h3>
                     <p className="text-blue-100 dark:text-blue-200 text-lg max-w-2xl leading-relaxed">
-                        Questa guida ti aiuterà a sfruttare al massimo tutte le potenzialità di Quantho per gestire il tuo Regime Forfettario con precisione chirurgica e zero stress.
+                        Questa guida ti aiuterà a sfruttare al massimo tutte le potenzialità di Quantho per gestire il tuo Regime Forfettario con precisione chirurgica, su ogni dispositivo e con proiezioni future intelligenti.
                     </p>
                 </div>
                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10">
@@ -709,7 +709,7 @@ const SettingsView: React.FC = () => {
                                 </h5>
                                 <ul className="text-sm space-y-2">
                                     <li><strong>Fatturato Business:</strong> Solo le entrate soggette a tassazione. La barra indica la distanza dal limite di 85.000€.</li>
-                                    <li><strong>Extra Fatturato:</strong> Regali, affitti o extra che non pesano sul limite fiscale ma aumentano la tua cassa.</li>
+                                    <li><strong>Stipendio Previsto:</strong> Un calcolo smart che proietta il tuo netto mensile a fine anno, includendo i lavori che hai caricato come "Progetti" nella Pipeline.</li>
                                     <li><strong>Liquidità Totale:</strong> Il saldo reale del tuo portafoglio, includendo Fatturato, Extra e detraendo tutte le spese e tasse.</li>
                                 </ul>
                             </div>
@@ -719,10 +719,33 @@ const SettingsView: React.FC = () => {
                                     Personalizzazione & Widget
                                 </h5>
                                 <ul className="text-sm space-y-2">
-                                    <li><strong>Drag & Drop:</strong> Trascina i widget (grafici, scadenze, transazioni) tramite la maniglia in alto a destra per riordinare la dashboard come preferisci.</li>
+                                    <li><strong>Drag & Drop:</strong> Trascina i widget tramite la maniglia in alto a destra per riordinare la dashboard come preferisci.</li>
                                     <li><strong>Widget Calendario:</strong> Una vista rapida dei prossimi 4 eventi cruciali, dai pagamenti alle scadenze fiscali.</li>
-                                    <li><strong>Analisi Goal:</strong> Monitora quanto manca al tuo obiettivo annuo di guadagno netto.</li>
+                                    <li><strong>Analisi Goal:</strong> Monitora quanto manca al tuo obiettivo annuo di guadagno netto, sia reale che previsto.</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 1.5. MOBILE APPS & PWA */}
+                <section className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 transition-colors">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-xl text-indigo-600 dark:text-indigo-400">
+                            <Monitor size={28} />
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 dark:text-white">Mobile: Quantho sempre con te</h4>
+                    </div>
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-slate-300">
+                        <p>Quantho è progettato per essere utilizzato ovunque, con la stessa fluidità del desktop.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">📱 App Android e iOS</h5>
+                                <p className="text-sm">Presto disponibile sugli store ufficiali. Puoi già installarla come applicazione nativa per avere accesso rapido e una sensazione di utilizzo premium.</p>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">💻 Web App (PWA)</h5>
+                                <p className="text-sm">Dal browser (Safari su iPhone o Chrome su Android/Desktop), usa l'opzione "Aggiungi a schermata Home" per installare Quantho senza passare dallo store. È istantaneo e leggerissimo.</p>
                             </div>
                         </div>
                     </div>
@@ -784,12 +807,12 @@ const SettingsView: React.FC = () => {
                         <p>La sezione Obiettivi è il cuore motivazionale di Quantho. Ti permette di passare dall'amministrazione alla gestione strategica.</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                             <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
-                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2">Traguardo Fatturato</h5>
-                                <p className="text-sm">Imposta quanto desideri incassare entro fine anno. Quantho calcolerà in tempo reale la percentuale di completamento, aiutandoti a capire se sei in linea con le tue aspettative.</p>
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">🎯 Pipeline Progetti</h5>
+                                <p className="text-sm">Non aspettare la fattura per vedere il tuo futuro. Inserisci i lavori in corso o firmati: Quantho calcolerà tasse e netto futuro, mostrandoti lo "Stipendio Previsto" nella dashboard.</p>
                             </div>
                             <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 transition-colors">
-                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2">Budgeting per Tag</h5>
-                                <p className="text-sm">Qui sta il vero valore: puoi assegnare un <strong>limite di spesa</strong> a ogni tag (es: max 500€ per "Software"). Il sistema ti avviserà non appena superi il budget, permettendoti di ottimizzare i costi.</p>
+                                <h5 className="font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">📉 Budgeting per Tag</h5>
+                                <p className="text-sm">Assegna un limite di spesa a ogni tag (es: max 500€ per "Software"). Il sistema ti avviserà non appena superi il budget, permettendoti di ottimizzare i costi annuali.</p>
                             </div>
                         </div>
                     </div>
