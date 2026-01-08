@@ -11,12 +11,12 @@ export const contractService = {
 
         if (error) throw error;
 
-        // Map DB snake_case to CamelCase
         return (data || []).map(d => ({
             id: d.id,
             title: d.title,
             clientName: d.client_name,
             amount: d.amount,
+            category: d.category || 'business',
             atecoCodeId: d.ateco_code_id,
             status: d.status,
             expectedDate: d.expected_date,
@@ -32,6 +32,7 @@ export const contractService = {
                 title: contract.title,
                 client_name: contract.clientName,
                 amount: contract.amount,
+                category: contract.category,
                 ateco_code_id: contract.atecoCodeId,
                 status: contract.status,
                 expected_date: contract.expectedDate,
@@ -47,6 +48,7 @@ export const contractService = {
             title: data.title,
             clientName: data.client_name,
             amount: data.amount,
+            category: data.category || 'business',
             atecoCodeId: data.ateco_code_id,
             status: data.status,
             expectedDate: data.expected_date,
@@ -61,6 +63,7 @@ export const contractService = {
                 title: contract.title,
                 client_name: contract.clientName,
                 amount: contract.amount,
+                category: contract.category,
                 ateco_code_id: contract.atecoCodeId,
                 status: contract.status,
                 expected_date: contract.expectedDate,
@@ -77,6 +80,7 @@ export const contractService = {
             title: data.title,
             clientName: data.client_name,
             amount: data.amount,
+            category: data.category || 'business',
             atecoCodeId: data.ateco_code_id,
             status: data.status,
             expectedDate: data.expected_date,

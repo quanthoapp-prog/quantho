@@ -109,17 +109,26 @@ export const calculateFiscalStats = ({
         c.status !== 'completed' &&
         new Date(c.expectedDate).getFullYear() <= currentYear
     );
-    const contractsExpectedIncome = activeContracts.reduce((sum, c) => sum + c.amount, 0);
+    
+    const contractsBusinessExpected = activeContracts
+        .filter(c => c.category === 'business' || !c.category) // fallback to business for old data
+        .reduce((sum, c) => sum + c.amount, 0);
+        
+    const contractsExtraExpected = activeContracts
+        .filter(c => c.category === 'extra')
+        .reduce((sum, c) => sum + c.amount, 0);
 
     let contractsGrossTaxable = 0;
     activeContracts.forEach(c => {
+        if (c.category === 'extra') return;
         const ateco = atecoCodes.find(ac => ac.id === c.atecoCodeId) || atecoCodes[0];
         contractsGrossTaxable += c.amount * (ateco?.coefficient || 0.78);
     });
 
-    const forecastedBusinessIncome = businessIncome + contractsExpectedIncome;
+    const forecastedBusinessIncome = businessIncome + contractsBusinessExpected;
+    const forecastedExtraIncome = extraIncome + contractsExtraExpected;
     const forecastedGrossTaxable = grossTaxableIncome + contractsGrossTaxable;
-    const forecastedRedditoImponibile = Math.max(0, forecastedGrossTaxable - inpsPaid); // Simplification: assuming inpsPaid is known or similar
+    const forecastedRedditoImponibile = Math.max(0, forecastedGrossTaxable - inpsPaid); 
 
     const forecastedFlatTax = forecastedRedditoImponibile * taxRate;
     let forecastedInps = 0;
@@ -135,7 +144,9 @@ export const calculateFiscalStats = ({
         }
     }
     const forecastedTaxTotal = forecastedFlatTax + forecastedInps;
-    const forecastedNetIncome = forecastedBusinessIncome - forecastedTaxTotal - totalFixedDebtEstimate;
+    
+    // The forecasted Net Salary includes all income sources (Business + Extra) minus predicted taxes and fixed debts
+    const forecastedNetIncome = forecastedBusinessIncome + forecastedExtraIncome - forecastedTaxTotal - totalFixedDebtEstimate;
 
     // Liquidità di Cassa 
     const openingBalance = settings.openingHistory[currentYear] || 0;

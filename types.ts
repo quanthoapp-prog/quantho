@@ -108,7 +108,8 @@ export interface Contract {
     title: string;
     clientName: string;
     amount: number;
-    atecoCodeId: string;
+    category: 'business' | 'extra';
+    atecoCodeId?: string; // Optional for extra income
     status: 'pending' | 'signed' | 'completed';
     expectedDate: string; // YYYY-MM-DD
     notes?: string;

@@ -302,10 +302,10 @@ const DashboardView: React.FC = () => {
                             </div>
                             <div className="text-xs text-teal-600 dark:text-teal-400 mt-2 flex justify-between items-end">
                                 <span>Reddito Disponibile / 12 mesi</span>
-                                {stats.monthlyForecastedNetIncome > stats.monthlyNetIncome + 0.01 && (
-                                    <div className="text-right bg-teal-100/50 dark:bg-teal-900/40 p-1.5 rounded-lg border border-teal-200/50 dark:border-teal-800/30">
-                                        <div className="text-[9px] uppercase font-black text-teal-600 dark:text-teal-500 leading-none mb-1">Stipendio previsto</div>
-                                        <div className="font-bold text-teal-800 dark:text-teal-200 leading-none">{formatCurrency(stats.monthlyForecastedNetIncome)}</div>
+                                {Math.abs(stats.monthlyForecastedNetIncome - stats.monthlyNetIncome) > 0.1 && (
+                                    <div className="text-right bg-teal-100/50 dark:bg-emerald-900/40 p-1.5 rounded-xl border border-teal-200/50 dark:border-emerald-800/30 animate-in fade-in zoom-in duration-500">
+                                        <div className="text-[9px] uppercase font-black text-teal-600 dark:text-emerald-400 leading-none mb-1">Con Pipeline Progetti</div>
+                                        <div className="font-bold text-teal-800 dark:text-emerald-200 leading-none">{formatCurrency(stats.monthlyForecastedNetIncome)}</div>
                                     </div>
                                 )}
                             </div>

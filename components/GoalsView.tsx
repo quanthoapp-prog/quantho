@@ -19,6 +19,7 @@ const GoalsView: React.FC = () => {
         title: '',
         clientName: '',
         amount: 0,
+        category: 'business',
         atecoCodeId: atecoCodes[0]?.id || '',
         status: 'pending',
         expectedDate: new Date().toISOString().split('T')[0],
@@ -64,7 +65,8 @@ const GoalsView: React.FC = () => {
             title: contract.title,
             clientName: contract.clientName,
             amount: contract.amount,
-            atecoCodeId: contract.atecoCodeId,
+            category: contract.category || 'business',
+            atecoCodeId: contract.atecoCodeId || atecoCodes[0]?.id || '',
             status: contract.status,
             expectedDate: contract.expectedDate,
             notes: contract.notes || ''
@@ -92,6 +94,7 @@ const GoalsView: React.FC = () => {
             title: '',
             clientName: '',
             amount: 0,
+            category: 'business',
             atecoCodeId: atecoCodes[0]?.id || '',
             status: 'pending',
             expectedDate: new Date().toISOString().split('T')[0],
@@ -127,7 +130,7 @@ const GoalsView: React.FC = () => {
                                             amount: contract.amount.toString(),
                                             client: contract.clientName,
                                             type: 'income',
-                                            category: 'business',
+                                            category: contract.category || 'business',
                                             atecoCodeId: contract.atecoCodeId
                                         }
                                     }
@@ -318,6 +321,7 @@ const GoalsView: React.FC = () => {
                                     title: '',
                                     clientName: '',
                                     amount: 0,
+                                    category: 'business',
                                     atecoCodeId: atecoCodes[0]?.id || '',
                                     status: 'pending',
                                     expectedDate: new Date().toISOString().split('T')[0],
@@ -387,17 +391,30 @@ const GoalsView: React.FC = () => {
                                 )}
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Codice ATECO (per imposte)</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Tipo Entrata</label>
                                 <select
-                                    value={contractForm.atecoCodeId}
-                                    onChange={e => setContractForm({ ...contractForm, atecoCodeId: e.target.value })}
+                                    value={contractForm.category}
+                                    onChange={e => setContractForm({ ...contractForm, category: e.target.value as 'business' | 'extra' })}
                                     className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
                                 >
-                                    {atecoCodes.map(code => (
-                                        <option key={code.id} value={code.id}>{code.code} - {code.description.substring(0, 30)}...</option>
-                                    ))}
+                                    <option value="business">Business (Tassata)</option>
+                                    <option value="extra">Extra (Non Tassata)</option>
                                 </select>
                             </div>
+                            {contractForm.category === 'business' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Codice ATECO (per imposte)</label>
+                                    <select
+                                        value={contractForm.atecoCodeId}
+                                        onChange={e => setContractForm({ ...contractForm, atecoCodeId: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        {atecoCodes.map(code => (
+                                            <option key={code.id} value={code.id}>{code.code} - {code.description.substring(0, 30)}...</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Data Presunta Incasso</label>
                                 <input
@@ -467,11 +484,17 @@ const GoalsView: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="font-bold text-gray-900 dark:text-white">{formatCurrency(contract.amount)}</div>
-                                                    <div className="text-[10px] text-gray-400">ATECO: {ateco?.code}</div>
+                                                    <div className="text-[10px] text-gray-400 uppercase">{contract.category === 'extra' ? 'Extra (No Tasse)' : `ATECO: ${ateco?.code}`}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-sm font-medium text-red-500">-{formatCurrency(estimatedTax)}</div>
-                                                    <div className="text-[10px] text-gray-400">Netto stimato: {formatCurrency(contract.amount - estimatedTax)}</div>
+                                                    {contract.category === 'extra' ? (
+                                                        <div className="text-sm font-medium text-green-500">Nessuna tassa prevista</div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-sm font-medium text-red-500">-{formatCurrency(estimatedTax)}</div>
+                                                            <div className="text-[10px] text-gray-400">Netto stimato: {formatCurrency(contract.amount - estimatedTax)}</div>
+                                                        </>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full border ${contract.status === 'signed' ? 'bg-green-50 text-green-700 border-green-100' :
