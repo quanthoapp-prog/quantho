@@ -112,13 +112,31 @@ const DashboardView: React.FC = () => {
     ];
 
     const [widgets, setWidgets] = useState<string[]>(() => {
-        const saved = localStorage.getItem('dashboard_layout_v2'); // New version key
-        return saved ? JSON.parse(saved) : initialWidgets;
+        try {
+            const saved = localStorage.getItem('dashboard_layout_v3'); // Updated version to force reliable start
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    // Merge with initialWidgets to ensure we don't lose new widgets if we add them later
+                    // But preserve the user's order for existing ones.
+                    const uniqueSaved = [...new Set(parsed)];
+
+                    // Check if there are any new widgets in initialWidgets that are missing from saved
+                    const missing = initialWidgets.filter(w => !uniqueSaved.includes(w));
+                    return [...uniqueSaved, ...missing];
+                }
+            }
+        } catch (e) {
+            console.error('Error loading dashboard layout:', e);
+        }
+        return initialWidgets;
     });
 
     // Save layout on change
     useEffect(() => {
-        localStorage.setItem('dashboard_layout_v2', JSON.stringify(widgets));
+        if (widgets && widgets.length > 0) {
+            localStorage.setItem('dashboard_layout_v3', JSON.stringify(widgets));
+        }
     }, [widgets]);
 
     // DnD Sensors

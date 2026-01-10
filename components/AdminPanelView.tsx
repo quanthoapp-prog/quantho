@@ -35,9 +35,14 @@ const AdminPanelView: React.FC = () => {
     useEffect(() => {
         if (profile?.role === 'admin') {
             fetchAllProfiles();
-            loadMessageHistory();
         }
     }, [profile]);
+
+    useEffect(() => {
+        if (profile?.role === 'admin' && activeTab === 'messages') {
+            loadMessageHistory();
+        }
+    }, [profile, activeTab]);
 
     const loadMessageHistory = async () => {
         const { data, error } = await supabase
@@ -48,6 +53,7 @@ const AdminPanelView: React.FC = () => {
 
         if (error) {
             console.error('Error fetching broadcast history:', error);
+            toast.error('Errore caricamento storico messaggi');
             return;
         }
 
@@ -58,7 +64,7 @@ const AdminPanelView: React.FC = () => {
                 message: m.message,
                 type: m.type as any,
                 sentAt: m.sent_at,
-                recipientCount: m.recipient_count
+                recipientCount: m.recipient_count || 0
             })));
         }
     };
