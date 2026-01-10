@@ -115,7 +115,7 @@ begin
   values (new.id, new.email);
   return new;
 end;
-$$ language plpgsql security modeller;
+$$ language plpgsql security definer;
 
 create trigger on_auth_user_created
   after insert on auth.users
@@ -205,7 +205,8 @@ create table contracts (
   title text not null,
   client_name text,
   amount numeric not null color default 0,
-  ateco_code_id text references ateco_codes(id),
+  category text default 'business' check (category in ('business', 'extra')),
+  ateco_code_id text references ateco_codes(id), -- Removed not null constraint for extra income
   status text not null check (status in ('pending', 'signed', 'completed')),
   expected_date date,
   notes text,

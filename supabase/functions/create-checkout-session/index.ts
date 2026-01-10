@@ -17,7 +17,28 @@ serve(async (req) => {
   }
 
   try {
-    const { plan, userId, userEmail, priceId } = await req.json()
+    // 1. Verify Authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.39.7')
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+
+    if (userError || !user) {
+      throw new Error('Invalid token or user not found')
+    }
+
+    const { plan, priceId } = await req.json()
+    const userId = user.id
+    const userEmail = user.email
     const origin = req.headers.get('origin') || req.headers.get('referer') || 'https://quanthoapp.vercel.app'
     // Ensure we don't have a trailing slash in origin for URL construction
     const cleanOrigin = origin.split('#')[0].replace(/\/$/, '')

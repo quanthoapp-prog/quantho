@@ -1,0 +1,59 @@
+name: Quantho Daily Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Every day at 03:00 UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install @supabase/supabase-js dotenv
+
+      - name: Run Backup Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node .agent/security/backup_tools/backup.js
+
+      - name: Zip Backup
+        run: |
+          timestamp=$(date +%Y-%m-%d-%H-%M)
+          zip -r "quantho-backup-$timestamp.zip" backups/
+
+      - name: Upload Artifact (Temporary)
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantho-data-backup
+          path: quantho-backup-*.zip
+          retention-days: 7
+
+      - name: Send Email Notification
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: quanthoapp@gmail.com
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "✅ Quantho Backup: Successo ${{ github.run_id }}"
+          to: quanthoapp@gmail.com
+          from: "Quantho Security Bot <quanthoapp@gmail.com>"
+          body: |
+            Il backup giornaliero di Quantho è stato completato correttamente.
+            
+            - Timestamp: $(date +'%Y-%m-%d %H:%M:%S')
+            - Esecuzione: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - File: quantho-data-backup (disponibile negli Artifacts di GitHub)
+            
+            Tutti i dati (transazioni, profili, contratti) sono stati estratti e messi al sicuro.
