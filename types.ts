@@ -34,6 +34,7 @@ export interface Transaction {
     client: string;
     tags: string;
     atecoCodeId?: string;
+    isSharedBusinessExpense?: boolean; // For Overhead/Shared business expenses
     status?: 'active' | 'scheduled'; // 'scheduled' for future transactions
 }
 
@@ -101,6 +102,19 @@ export interface Stats {
     forecastedTaxTotal: number;      // Estimated tax including contracts
     forecastedLiquidity: number;     // final liquidity if all contracts are paid
     monthlyForecastedNetIncome: number; // Forecasted monthly salary including contracts
+    // ATECO Breakdown
+    atecoBreakdown: {
+        [atecoId: string]: {
+            revenue: number;
+            dedicatedExpenses: number;
+            allocatedOverhead: number;
+            netProfit: number;
+            efficiency: number; // 0-100%
+            forecastedRevenue: number;
+            forecastedNetProfit: number;
+            forecastedEfficiency: number;
+        }
+    };
 }
 
 export interface Contract {
@@ -124,7 +138,7 @@ export interface UserProfile {
     createdAt: string;
 }
 
-export type TabId = 'dashboard' | 'transactions' | 'fixedDebts' | 'clients' | 'settings' | 'goals' | 'admin';
+export type TabId = 'dashboard' | 'transactions' | 'businessAnalysis' | 'fixedDebts' | 'clients' | 'settings' | 'goals' | 'admin';
 
 export interface Reminder {
     id: number;

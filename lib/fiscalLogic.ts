@@ -20,6 +20,7 @@ export const calculateFiscalStats = ({
 }: CalculateFiscalStatsProps): Stats => {
     const today = new Date();
     const currentFullYear = today.getFullYear();
+    const taxRate = settings.taxRateType === '5%' ? 0.05 : 0.15;
 
     // 1. Calculate Fixed Debts Estimate
     let totalFixedDebtEstimate = 0;
@@ -45,6 +46,21 @@ export const calculateFiscalStats = ({
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
 
+    // --- ATECO BREAKDOWN INITIALIZATION ---
+    const atecoBreakdown: Stats['atecoBreakdown'] = {};
+    atecoCodes.forEach(code => {
+        atecoBreakdown[code.id] = {
+            revenue: 0,
+            dedicatedExpenses: 0,
+            allocatedOverhead: 0,
+            netProfit: 0,
+            efficiency: 0,
+            forecastedRevenue: 0,
+            forecastedNetProfit: 0,
+            forecastedEfficiency: 0
+        };
+    });
+
     // 3. Gross Income Calculation (only active transactions)
     let totalIncome = 0;
     let businessIncome = 0;
@@ -58,15 +74,57 @@ export const calculateFiscalStats = ({
             if (t.category === 'extra') {
                 extraIncome += t.amount;
             } else {
-                // Default to business if category is not 'extra' (business, or even if someone used personal/tax for income by mistake)
                 businessIncome += t.amount;
-                const ateco = atecoCodes.find(c => c.id === t.atecoCodeId) || atecoCodes[0];
+                const atecoId = t.atecoCodeId || atecoCodes[0]?.id;
+                const ateco = atecoCodes.find(c => c.id === atecoId) || atecoCodes[0];
                 const coefficient = ateco ? ateco.coefficient : 0.78;
                 grossTaxableIncome += t.amount * coefficient;
+                
+                // Track revenue per ATECO
+                if (atecoId && atecoBreakdown[atecoId]) {
+                    atecoBreakdown[atecoId].revenue += t.amount;
+                }
             }
         });
 
     // 4. Calculate Expenses & Outflows (only active transactions)
+    let totalBusinessExpenses = 0;
+    let sharedBusinessExpenses = 0;
+
+    activeTransactions
+        .filter(t => t.type === 'expense')
+        .forEach(t => {
+            if (t.category === 'business') {
+                totalBusinessExpenses += t.amount;
+                if (t.isSharedBusinessExpense || !t.atecoCodeId) {
+                    sharedBusinessExpenses += t.amount;
+                } else if (t.atecoCodeId && atecoBreakdown[t.atecoCodeId]) {
+                    atecoBreakdown[t.atecoCodeId].dedicatedExpenses += t.amount;
+                }
+            }
+        });
+
+    // DISTRIBUTE SHARED EXPENSES (PRO-RATA)
+    if (sharedBusinessExpenses > 0 && businessIncome > 0) {
+        Object.keys(atecoBreakdown).forEach(id => {
+            const share = atecoBreakdown[id].revenue / businessIncome;
+            atecoBreakdown[id].allocatedOverhead = sharedBusinessExpenses * share;
+        });
+    }
+
+    // CALCULATE FINAL PER-ATECO STATS
+    Object.keys(atecoBreakdown).forEach(id => {
+        const item = atecoBreakdown[id];
+        const ateco = atecoCodes.find(c => c.id === id);
+        const coeff = ateco?.coefficient || 0.78;
+        
+        // Net profit per ATECO (approximate estimate)
+        // Profit = Revenue - DedicatedExpenses - AllocatedOverhead - Taxes(Revenue * Coeff * Rate)
+        const estimatedTaxForAteco = item.revenue * coeff * taxRate;
+        item.netProfit = item.revenue - item.dedicatedExpenses - item.allocatedOverhead - estimatedTaxForAteco;
+        item.efficiency = item.revenue > 0 ? (item.netProfit / item.revenue) * 100 : 0;
+    });
+
     const allExpenses = activeTransactions
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
@@ -83,7 +141,6 @@ export const calculateFiscalStats = ({
     const redditoImponibile = Math.max(0, grossTaxableIncome - inpsPaid);
 
     // 6. Calculate Flat Tax Estimate
-    const taxRate = settings.taxRateType === '5%' ? 0.05 : 0.15;
     const flatTax = redditoImponibile * taxRate;
 
     // 7. Calculate INPS Estimate
@@ -121,8 +178,14 @@ export const calculateFiscalStats = ({
     let contractsGrossTaxable = 0;
     activeContracts.forEach(c => {
         if (c.category === 'extra') return;
-        const ateco = atecoCodes.find(ac => ac.id === c.atecoCodeId) || atecoCodes[0];
+        const atecoId = c.atecoCodeId || atecoCodes[0]?.id;
+        const ateco = atecoCodes.find(ac => ac.id === atecoId) || atecoCodes[0];
         contractsGrossTaxable += c.amount * (ateco?.coefficient || 0.78);
+        
+        // Track forecasted revenue per ATECO
+        if (atecoId && atecoBreakdown[atecoId]) {
+            atecoBreakdown[atecoId].forecastedRevenue += c.amount;
+        }
     });
 
     const forecastedBusinessIncome = businessIncome + contractsBusinessExpected;
@@ -144,6 +207,25 @@ export const calculateFiscalStats = ({
         }
     }
     const forecastedTaxTotal = forecastedFlatTax + forecastedInps;
+
+    // CALCULATE FINAL PER-ATECO FORECASTED STATS
+    Object.keys(atecoBreakdown).forEach(id => {
+        const item = atecoBreakdown[id];
+        const ateco = atecoCodes.find(c => c.id === id);
+        const coeff = ateco?.coefficient || 0.78;
+        
+        // Finalize forecastedRevenue (Current Revenue + Pipeline Revenue)
+        item.forecastedRevenue = item.revenue + item.forecastedRevenue;
+        
+        // Forecasted Net profit per ATECO
+        // Logic: item.forecastedRevenue - expenses - (item.forecastedRevenue * coeff * taxRate)
+        // Note: Allocated overhead is based on CURRENT revenue share, keeping it simple for now
+        // but let's use the forecasted revenue share for more accuracy if possible.
+        // For simplicity we use the same tax rate logic as current.
+        const forecastedTaxForAteco = item.forecastedRevenue * coeff * taxRate;
+        item.forecastedNetProfit = item.forecastedRevenue - item.dedicatedExpenses - item.allocatedOverhead - forecastedTaxForAteco;
+        item.forecastedEfficiency = item.forecastedRevenue > 0 ? (item.forecastedNetProfit / item.forecastedRevenue) * 100 : 0;
+    });
     
     // The forecasted Net Salary includes all income sources (Business + Extra) minus predicted taxes and fixed debts
     const forecastedNetIncome = forecastedBusinessIncome + forecastedExtraIncome - forecastedTaxTotal - totalFixedDebtEstimate;
@@ -153,7 +235,7 @@ export const calculateFiscalStats = ({
     const realNetIncome = totalIncome - allExpenses;
     const currentLiquidity = openingBalance + realNetIncome;
 
-    const estimatedNetIncome = businessIncome - totalTaxEstimate;
+    const estimatedNetIncome = businessIncome - totalBusinessExpenses - totalTaxEstimate;
     const netAvailableIncome = estimatedNetIncome - totalFixedDebtEstimate;
     const remainingTaxDue = totalTaxEstimate - taxesPaid;
 
@@ -312,6 +394,7 @@ export const calculateFiscalStats = ({
         forecastedNetIncome,
         forecastedTaxTotal,
         forecastedLiquidity: currentLiquidity + (forecastedBusinessIncome - businessIncome) - (forecastedTaxTotal - totalTaxEstimate),
-        monthlyForecastedNetIncome: forecastedNetIncome / 12
+        monthlyForecastedNetIncome: forecastedNetIncome / 12,
+        atecoBreakdown
     };
 };

@@ -72,6 +72,7 @@ const TransactionsView: React.FC = () => {
         client: string;
         tags: string;
         atecoCodeId: string;
+        isSharedBusinessExpense: boolean;
     }>({
         date: new Date().toISOString().split('T')[0],
         type: 'income',
@@ -81,6 +82,7 @@ const TransactionsView: React.FC = () => {
         client: '',
         tags: '',
         atecoCodeId: '',
+        isSharedBusinessExpense: false,
     });
 
     // Default Ateco Code Effect
@@ -130,6 +132,7 @@ const TransactionsView: React.FC = () => {
                 client: newTransaction.client || undefined,
                 tags: newTransaction.tags || undefined,
                 atecoCodeId: newTransaction.atecoCodeId || undefined,
+                isSharedBusinessExpense: newTransaction.isSharedBusinessExpense,
                 status
             };
 
@@ -157,6 +160,7 @@ const TransactionsView: React.FC = () => {
             client: t.client || '',
             tags: t.tags || '',
             atecoCodeId: t.atecoCodeId || '',
+            isSharedBusinessExpense: t.isSharedBusinessExpense || false,
         });
         setEditingId(t.id);
         setShowAddTransaction(true);
@@ -182,7 +186,8 @@ const TransactionsView: React.FC = () => {
         setNewTransaction({
             date: new Date().toISOString().split('T')[0],
             type: 'income', category: 'business', amount: '', description: '', client: '', tags: '',
-            atecoCodeId: defaultCode
+            atecoCodeId: defaultCode,
+            isSharedBusinessExpense: false
         });
         setEditingId(null);
         setShowAddTransaction(false);
@@ -565,19 +570,53 @@ const TransactionsView: React.FC = () => {
 
                         {/* THIRD ROW: Context Specific */}
                         {newTransaction.type === 'expense' ? (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipologia Uscita</label>
-                                <select
-                                    value={newTransaction.category}
-                                    onChange={(e) => setNewTransaction({ ...newTransaction, category: e.target.value as any })}
-                                    className={inputBaseClass}
-                                >
-                                    <option value="business">Spesa Business</option>
-                                    <option value="personal">Spesa Personale</option>
-                                    <option value="tax">F24 - Tasse (Imp. Sostitutiva)</option>
-                                    <option value="inps">F24 - Contributi INPS</option>
-                                </select>
-                            </div>
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipologia Uscita</label>
+                                    <select
+                                        value={newTransaction.category}
+                                        onChange={(e) => setNewTransaction({ ...newTransaction, category: e.target.value as any })}
+                                        className={inputBaseClass}
+                                    >
+                                        <option value="business">Spesa Business</option>
+                                        <option value="personal">Spesa Personale</option>
+                                        <option value="tax">F24 - Tasse (Imp. Sostitutiva)</option>
+                                        <option value="inps">F24 - Contributi INPS</option>
+                                    </select>
+                                </div>
+                                {newTransaction.category === 'business' && (
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Codice ATECO dedicato</label>
+                                            <div className="group relative">
+                                                <Info size={14} className="text-gray-400 cursor-help" />
+                                                <div className="absolute bottom-full right-0 mb-2 w-64 p-3 bg-slate-800 dark:bg-slate-700 text-white text-[11px] rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-slate-600">
+                                                    <p className="font-bold mb-1">Spesa Condivisa vs Dedicata</p>
+                                                    Scegli un codice se la spesa è esclusiva per un'attività. Scegli "Condivisa" se riguarda tutta la tua P.IVA (es. affitto, software generale); verrà ripartita automaticamente in base al fatturato.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <select
+                                            value={newTransaction.isSharedBusinessExpense ? 'shared' : newTransaction.atecoCodeId}
+                                            onChange={(e) => {
+                                                if (e.target.value === 'shared') {
+                                                    setNewTransaction({ ...newTransaction, isSharedBusinessExpense: true, atecoCodeId: '' });
+                                                } else {
+                                                    setNewTransaction({ ...newTransaction, isSharedBusinessExpense: false, atecoCodeId: e.target.value });
+                                                }
+                                            }}
+                                            className={inputBaseClass}
+                                        >
+                                            <option value="shared">🏢 Spesa Condivisa (Pro-rata)</option>
+                                            {atecoCodes.map(code => (
+                                                <option key={code.id} value={code.id}>
+                                                    {code.code} - {code.description}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <>
                                 <div>

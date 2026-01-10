@@ -11,6 +11,7 @@ import GoalsView from './components/GoalsView';
 import SettingsView from './components/SettingsView';
 import CalendarView from './components/CalendarView';
 import AdminPanelView from './components/AdminPanelView';
+import BusinessAnalysisView from './components/BusinessAnalysisView';
 import SubscriptionSelectionView from './components/SubscriptionSelectionView';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -122,6 +123,7 @@ const SubscriptionRouteHandler: React.FC = () => {
             <Route element={<Layout />}>
                 <Route path="/" element={<DashboardView />} />
                 <Route path="/transactions" element={<TransactionsView />} />
+                <Route path="/analysis" element={<BusinessAnalysisView />} />
                 <Route path="/calendar" element={<CalendarView />} />
                 <Route path="/clients" element={<ClientsView />} />
                 <Route path="/fixed-debts" element={<FixedDebtsView />} />

@@ -35,6 +35,8 @@ create table transactions (
   client text, -- Storing name directly as per current App logic, can be FK later
   tags text,
   ateco_code_id text references ateco_codes(id),
+  is_shared_business_expense boolean default false,
+  status text default 'active' check (status in ('active', 'scheduled')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -204,7 +206,7 @@ create table contracts (
   user_id uuid references auth.users not null default auth.uid(),
   title text not null,
   client_name text,
-  amount numeric not null color default 0,
+  amount numeric not null default 0,
   category text default 'business' check (category in ('business', 'extra')),
   ateco_code_id text references ateco_codes(id), -- Removed not null constraint for extra income
   status text not null check (status in ('pending', 'signed', 'completed')),
